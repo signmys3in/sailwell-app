@@ -123,8 +123,7 @@ export default function MediAssistantPage() {
       } else {
         const newSuggestions = result.suggestions || [];
         if (newSuggestions.length > 0) {
-          const drugNames = newSuggestions.map(s => s.drugName);
-          addDrugsToStock(drugNames);
+          addDrugsToStock(newSuggestions.map(s => ({ name: s.drugName, isNarcotic: s.isNarcotic })));
         }
         setSuggestions(newSuggestions);
         setDiagnosis(result.diagnosis || "No diagnosis provided.");

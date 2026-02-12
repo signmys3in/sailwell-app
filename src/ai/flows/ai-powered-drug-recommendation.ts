@@ -29,11 +29,16 @@ const DrugSuggestionSchema = z.object({
   drugName: z.string().describe('The name of the suggested drug.'),
   reasoning: z
     .string()
-    .describe('The reasoning behind the drug suggestion, considering symptoms and chronic diseases.'),
+    .describe(
+      'The reasoning behind the drug suggestion, considering symptoms and chronic diseases.'
+    ),
   dosage: z
     .string()
     .optional()
     .describe('The suggested dosage for the drug, if applicable.'),
+  isNarcotic: z
+    .boolean()
+    .describe('Whether or not the drug is a narcotic substance.'),
 });
 
 const AIPoweredDrugRecommendationOutputSchema = z.object({
@@ -60,10 +65,10 @@ const prompt = ai.definePrompt({
   name: 'aiPoweredDrugRecommendationPrompt',
   input: {schema: AIPoweredDrugRecommendationInputSchema},
   output: {schema: AIPoweredDrugRecommendationOutputSchema},
-  prompt: `You are an AI medical assistant specialized in suggesting appropriate medications based on patient symptoms, vital signs, and chronic diseases.
+  prompt: `You are an AI medical assistant specialized in suggesting appropriate medications based on patient symptoms, vital signs, and chronic diseases. You are also a pharmacology expert.
 
 First, provide a concise medical diagnosis based on the patient's information.
-Then, based on the following information, suggest suitable drugs. For each suggestion, provide a brief reasoning why it is appropriate and a suggested dosage if applicable.
+Then, based on the following information, suggest suitable drugs. For each suggestion, provide a brief reasoning why it is appropriate, a suggested dosage if applicable, and determine if the drug is a narcotic.
 
 Patient Symptoms: {{{symptoms}}}
 
@@ -85,7 +90,7 @@ Patient's Chronic Diseases:
 None
 {{/if}}
 
-Provide the diagnosis and suggestions in a JSON format, as specified in the output schema.`,
+Provide the diagnosis and suggestions in a JSON format, as specified in the output schema. For each drug, set the \`isNarcotic\` field to true if it is a controlled substance and false otherwise.`,
 });
 
 const aiPoweredDrugRecommendationFlow = ai.defineFlow(

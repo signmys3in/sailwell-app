@@ -16,6 +16,7 @@ export type DrugSuggestion = {
   drugName: string;
   reasoning: string;
   dosage?: string;
+  isNarcotic: boolean;
 };
 
 export type DrugStock = {

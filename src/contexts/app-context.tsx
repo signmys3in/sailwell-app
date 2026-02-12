@@ -58,7 +58,7 @@ interface AppContextType {
   dispenseLog: DispenseLog[];
   dispenseDrug: (drugId: string, quantity: number, patientName: string, diagnosis: string, diseases: string[]) => void;
   refillStock: (drugId: string, quantity: number) => void;
-  addDrugsToStock: (drugNames: string[]) => void;
+  addDrugsToStock: (drugs: { name: string, isNarcotic: boolean }[]) => void;
   addNewDrug: (drug: { name: string, quantity: number, isNarcotic: boolean, expiryDate: Date }) => void;
   updateExpiryDate: (drugId: string, newDate: Date) => void;
 }
@@ -77,22 +77,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [drugStock, setDrugStock] = useState<DrugStock[]>(INITIAL_DRUG_STOCK);
   const [dispenseLog, setDispenseLog] = useState<DispenseLog[]>([]);
 
-  const addDrugsToStock = (drugNames: string[]) => {
+  const addDrugsToStock = (drugs: { name: string, isNarcotic: boolean }[]) => {
     setDrugStock((prevStock) => {
       const newDrugs: DrugStock[] = [];
       const lowercasedStockNames = prevStock.map(d => d.name.toLowerCase());
 
-      drugNames.forEach(drugName => {
-        if (!lowercasedStockNames.includes(drugName.toLowerCase())) {
-            const isNarcotic = ['morphine', 'codeine', 'fentanyl'].includes(drugName.toLowerCase());
+      drugs.forEach(drug => {
+        if (!lowercasedStockNames.includes(drug.name.toLowerCase())) {
             const expiryDate = new Date();
             expiryDate.setFullYear(expiryDate.getFullYear() + 1);
             newDrugs.push({
-                id: drugName,
-                name: drugName,
+                id: drug.name,
+                name: drug.name,
                 stock: 20,
                 maxStock: 20,
-                isNarcotic,
+                isNarcotic: drug.isNarcotic,
                 expiryDate,
             });
         }
