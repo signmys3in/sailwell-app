@@ -86,6 +86,7 @@ export default function MediAssistantPage() {
   const [step, setStep] = useState(1);
   const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null);
   const [suggestions, setSuggestions] = useState<DrugSuggestion[]>([]);
+  const [diagnosis, setDiagnosis] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const { addDrugsToStock } = useContext(AppContext);
@@ -95,6 +96,7 @@ export default function MediAssistantPage() {
     setPatientInfo(null);
     setSuggestions([]);
     setError(null);
+    setDiagnosis(null);
   };
 
   const onPatientInfoSubmit = (values: PatientInfo) => {
@@ -117,6 +119,7 @@ export default function MediAssistantPage() {
       const result = await getDrugSuggestions(input);
       if (result.error) {
         setError(result.error);
+        setDiagnosis(null);
       } else {
         const newSuggestions = result.suggestions || [];
         if (newSuggestions.length > 0) {
@@ -124,6 +127,7 @@ export default function MediAssistantPage() {
           addDrugsToStock(drugNames);
         }
         setSuggestions(newSuggestions);
+        setDiagnosis(result.diagnosis || "No diagnosis provided.");
       }
     });
   };
@@ -155,6 +159,7 @@ export default function MediAssistantPage() {
             error={error}
             onStartOver={startOver}
             patientInfo={patientInfo}
+            diagnosis={diagnosis}
           />
         )}
       </div>
@@ -411,8 +416,15 @@ function SymptomsStep({ onSubmit, onBack }: { onSubmit: (values: SymptomsInfo) =
 }
 
 // Step 3: Suggestions
-function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientInfo }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, patientInfo: PatientInfo }) {
+function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientInfo, diagnosis }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, patientInfo: PatientInfo, diagnosis: string | null }) {
   const { drugStock } = useContext(AppContext);
+  const [isDiagnosisModalOpen, setDiagnosisModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && diagnosis) {
+      setDiagnosisModalOpen(true);
+    }
+  }, [isLoading, diagnosis]);
 
   if (isLoading) {
     return (
@@ -453,7 +465,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientIn
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {suggestions.map((suggestion) => {
                 const stockInfo = drugStock.find(d => d.name.toLowerCase() === suggestion.drugName.toLowerCase());
-                return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} patientInfo={patientInfo} />;
+                return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} patientInfo={patientInfo} diagnosis={diagnosis} />;
               })}
             </div>
           ) : (
@@ -468,12 +480,13 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientIn
             </Button>
         </CardFooter>
       </Card>
+      {diagnosis && <DiagnosisDialog open={isDiagnosisModalOpen} onOpenChange={setDiagnosisModalOpen} diagnosis={diagnosis} />}
     </div>
   );
 }
 
 // Drug Card Component
-function DrugCard({ suggestion, stockInfo, patientInfo }: { suggestion: DrugSuggestion, stockInfo: DrugStockType | undefined, patientInfo: PatientInfo }) {
+function DrugCard({ suggestion, stockInfo, patientInfo, diagnosis }: { suggestion: DrugSuggestion, stockInfo: DrugStockType | undefined, patientInfo: PatientInfo, diagnosis: string | null }) {
   const { dispenseDrug } = useContext(AppContext);
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
@@ -504,14 +517,14 @@ function DrugCard({ suggestion, stockInfo, patientInfo }: { suggestion: DrugSugg
     if (stockInfo.isNarcotic) {
         setNarcoticModalOpen(true);
     } else {
-        dispenseDrug(stockInfo.id, quantity, patientInfo.name, patientInfo.chronicDiseases);
+        dispenseDrug(stockInfo.id, quantity, patientInfo.name, diagnosis || 'AI-assisted diagnosis', patientInfo.chronicDiseases);
         toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed.`, className: "bg-accent text-accent-foreground" });
     }
   };
 
   const onNarcoticApproved = () => {
       if (!stockInfo) return;
-      dispenseDrug(stockInfo.id, quantity, patientInfo.name, patientInfo.chronicDiseases);
+      dispenseDrug(stockInfo.id, quantity, patientInfo.name, diagnosis || 'AI-assisted diagnosis', patientInfo.chronicDiseases);
       toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed with approval.`, className: "bg-accent text-accent-foreground" });
       setNarcoticModalOpen(false);
   }
@@ -604,6 +617,28 @@ function NarcoticsDialog({ open, onOpenChange, onApproved, drugName }: { open: b
                 <DialogFooter>
                     <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
                     <Button onClick={handleVerify}>Verify & Dispense</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+// Diagnosis Dialog Component
+function DiagnosisDialog({ open, onOpenChange, diagnosis }: { open: boolean, onOpenChange: (open: boolean) => void, diagnosis: string }) {
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2"><Bot /> AI Diagnosis</DialogTitle>
+                    <DialogDescription>
+                        Based on the symptoms provided, here is a possible diagnosis. This is not a substitute for professional medical advice.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="py-4 text-center">
+                    <p className="font-semibold text-lg">{diagnosis}</p>
+                </div>
+                <DialogFooter>
+                    <Button onClick={() => onOpenChange(false)}>Close</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

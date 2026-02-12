@@ -37,6 +37,11 @@ const DrugSuggestionSchema = z.object({
 });
 
 const AIPoweredDrugRecommendationOutputSchema = z.object({
+  diagnosis: z
+    .string()
+    .describe(
+      'A concise medical diagnosis based on the provided symptoms and vitals.'
+    ),
   drugSuggestions: z
     .array(DrugSuggestionSchema)
     .describe('An array of AI-powered drug suggestions.'),
@@ -57,7 +62,8 @@ const prompt = ai.definePrompt({
   output: {schema: AIPoweredDrugRecommendationOutputSchema},
   prompt: `You are an AI medical assistant specialized in suggesting appropriate medications based on patient symptoms, vital signs, and chronic diseases.
 
-Based on the following information, suggest suitable drugs. For each suggestion, provide a brief reasoning why it is appropriate and a suggested dosage if applicable.
+First, provide a concise medical diagnosis based on the patient's information.
+Then, based on the following information, suggest suitable drugs. For each suggestion, provide a brief reasoning why it is appropriate and a suggested dosage if applicable.
 
 Patient Symptoms: {{{symptoms}}}
 
@@ -79,7 +85,7 @@ Patient's Chronic Diseases:
 None
 {{/if}}
 
-Provide the suggestions in a JSON array format, as specified in the output schema.`,
+Provide the diagnosis and suggestions in a JSON format, as specified in the output schema.`,
 });
 
 const aiPoweredDrugRecommendationFlow = ai.defineFlow(

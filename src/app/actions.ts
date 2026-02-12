@@ -6,7 +6,7 @@ import type { AIPoweredDrugRecommendationInput } from "@/ai/flows/ai-powered-dru
 export async function getDrugSuggestions(input: AIPoweredDrugRecommendationInput) {
   try {
     const result = await aiPoweredDrugRecommendation(input);
-    return { suggestions: result.drugSuggestions };
+    return { suggestions: result.drugSuggestions, diagnosis: result.diagnosis };
   } catch (e: any) {
     console.error(e);
     return { error: "Failed to get suggestions from AI. " + e.message };
