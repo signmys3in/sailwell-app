@@ -106,8 +106,11 @@ export default function MediAssistantPage() {
   const onSymptomsSubmit = (values: SymptomsInfo) => {
     if (!patientInfo) return;
     const input = {
-      symptoms: `${values.symptoms}. Vitals: Temp ${values.temperature}, BP ${values.bloodPressure}, HR ${values.heartRate}`,
+      symptoms: values.symptoms,
       chronicDiseases: patientInfo.chronicDiseases,
+      temperature: values.temperature,
+      bloodPressure: values.bloodPressure,
+      heartRate: values.heartRate,
     };
 
     setStep(3);
@@ -500,10 +503,12 @@ function DrugCard({ suggestion, stockInfo }: { suggestion: DrugSuggestion, stock
     <Card className="flex flex-col">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-            <Pill /> {suggestion.drugName}
-            {stockInfo?.isNarcotic && <ShieldCheck className="text-destructive"/>}
+          <Pill /> {suggestion.drugName}
+          {stockInfo?.isNarcotic && <ShieldCheck className="text-destructive"/>}
         </CardTitle>
-        {commercialName && <CardDescription>{selectedCountry} Brand: {commercialName}</CardDescription>}
+        {commercialName && selectedCountry !== 'Generic' && (
+          <CardDescription>{selectedCountry} Brand: {commercialName}</CardDescription>
+        )}
         <CardDescription>{suggestion.dosage || 'Dosage not specified'}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow space-y-4">

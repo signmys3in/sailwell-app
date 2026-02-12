@@ -17,6 +17,9 @@ const AIPoweredDrugRecommendationInputSchema = z.object({
   chronicDiseases: z
     .array(z.string())
     .describe('A list of chronic diseases the patient has.'),
+  temperature: z.string().optional().describe("Patient's body temperature."),
+  bloodPressure: z.string().optional().describe("Patient's blood pressure."),
+  heartRate: z.string().optional().describe("Patient's heart rate."),
 });
 export type AIPoweredDrugRecommendationInput = z.infer<
   typeof AIPoweredDrugRecommendationInputSchema
@@ -52,11 +55,21 @@ const prompt = ai.definePrompt({
   name: 'aiPoweredDrugRecommendationPrompt',
   input: {schema: AIPoweredDrugRecommendationInputSchema},
   output: {schema: AIPoweredDrugRecommendationOutputSchema},
-  prompt: `You are an AI medical assistant specialized in suggesting appropriate medications based on patient symptoms and chronic diseases.
+  prompt: `You are an AI medical assistant specialized in suggesting appropriate medications based on patient symptoms, vital signs, and chronic diseases.
 
 Based on the following information, suggest suitable drugs. For each suggestion, provide a brief reasoning why it is appropriate and a suggested dosage if applicable.
 
 Patient Symptoms: {{{symptoms}}}
+
+{{#if temperature}}
+Patient's Temperature: {{{temperature}}}
+{{/if}}
+{{#if bloodPressure}}
+Patient's Blood Pressure: {{{bloodPressure}}}
+{{/if}}
+{{#if heartRate}}
+Patient's Heart Rate: {{{heartRate}}}
+{{/if}}
 
 Patient's Chronic Diseases:
 {{#if chronicDiseases}}
