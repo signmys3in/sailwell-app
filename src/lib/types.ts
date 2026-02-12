@@ -24,6 +24,7 @@ export type DrugStock = {
   stock: number;
   maxStock: number;
   isNarcotic: boolean;
+  expiryDate: Date;
 };
 
 export type DispenseLog = {

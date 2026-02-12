@@ -27,9 +27,10 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { checkNarcoticStatus } from "@/app/actions";
+import { format, parseISO } from "date-fns";
 
 export default function StockPage() {
-  const { drugStock, refillStock, addNewDrug } = useContext(AppContext);
+  const { drugStock, refillStock, addNewDrug, updateExpiryDate } = useContext(AppContext);
   const [refillAmounts, setRefillAmounts] = useState<Record<string, number>>({});
   const { toast } = useToast();
   const [isAddDialogOpen, setAddDialogOpen] = useState(false);
@@ -52,7 +53,7 @@ export default function StockPage() {
     }
   };
 
-  const handleAddNewDrug = async (drugName: string, quantity: number) => {
+  const handleAddNewDrug = async (drugName: string, quantity: number, expiryDate: Date) => {
     if (drugStock.some(d => d.name.toLowerCase() === drugName.toLowerCase())) {
         toast({
             variant: "destructive",
@@ -77,6 +78,7 @@ export default function StockPage() {
         name: drugName,
         quantity: quantity,
         isNarcotic: isNarcotic,
+        expiryDate,
     });
 
     toast({
@@ -86,6 +88,18 @@ export default function StockPage() {
     });
 
     return true;
+  };
+
+  const handleExpiryDateChange = (drugId: string, newDateString: string) => {
+    const newDate = parseISO(newDateString);
+    if (!isNaN(newDate.getTime())) {
+        updateExpiryDate(drugId, newDate);
+        toast({
+            title: "Expiry Date Updated",
+            description: `Expiry date for ${drugId} updated.`,
+            className: "bg-accent text-accent-foreground",
+        });
+    }
   };
 
   return (
@@ -111,9 +125,10 @@ export default function StockPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[35%]">Drug Name</TableHead>
+              <TableHead className="w-[30%]">Drug Name</TableHead>
               <TableHead>Current Stock</TableHead>
               <TableHead>Max Stock</TableHead>
+              <TableHead>Expiry Date</TableHead>
               <TableHead className="w-[25%] text-right">Refill</TableHead>
             </TableRow>
           </TableHeader>
@@ -122,8 +137,8 @@ export default function StockPage() {
               <TableRow key={drug.id}>
                 <TableCell>
                   <div className="flex items-center gap-2 font-medium">
-                    {drug.name}
                     {drug.isNarcotic && <ShieldCheck className="h-4 w-4 text-destructive" />}
+                    {drug.name}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -134,6 +149,14 @@ export default function StockPage() {
                 </TableCell>
                 <TableCell>
                   <div>{drug.maxStock}</div>
+                </TableCell>
+                <TableCell>
+                  <Input
+                    type="date"
+                    value={format(drug.expiryDate, "yyyy-MM-dd")}
+                    onChange={(e) => handleExpiryDateChange(drug.id, e.target.value)}
+                    className="w-40"
+                  />
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-end gap-2">
@@ -162,14 +185,15 @@ export default function StockPage() {
 }
 
 
-function AddDrugDialog({ onAddNewDrug, onOpenChange }: { onAddNewDrug: (drugName: string, quantity: number) => Promise<boolean>, onOpenChange: (open: boolean) => void }) {
+function AddDrugDialog({ onAddNewDrug, onOpenChange }: { onAddNewDrug: (drugName: string, quantity: number, expiryDate: Date) => Promise<boolean>, onOpenChange: (open: boolean) => void }) {
     const [drugName, setDrugName] = useState("");
     const [quantity, setQuantity] = useState(1);
+    const [expiryDate, setExpiryDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [isSubmitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
 
     const handleSubmit = async () => {
-        if (!drugName || quantity <= 0) {
+        if (!drugName || quantity <= 0 || !expiryDate) {
             setError("Please fill in all fields.");
             return;
         }
@@ -177,7 +201,7 @@ function AddDrugDialog({ onAddNewDrug, onOpenChange }: { onAddNewDrug: (drugName
         setSubmitting(true);
         setError("");
         
-        const success = await onAddNewDrug(drugName, quantity);
+        const success = await onAddNewDrug(drugName, quantity, parseISO(expiryDate));
         
         setSubmitting(false);
 
@@ -190,6 +214,7 @@ function AddDrugDialog({ onAddNewDrug, onOpenChange }: { onAddNewDrug: (drugName
     const resetForm = () => {
         setDrugName("");
         setQuantity(1);
+        setExpiryDate(format(new Date(), 'yyyy-MM-dd'));
         setError("");
     }
 
@@ -213,9 +238,15 @@ function AddDrugDialog({ onAddNewDrug, onOpenChange }: { onAddNewDrug: (drugName
                     <Label htmlFor="drug-name">Drug Name</Label>
                     <Input id="drug-name" value={drugName} onChange={e => setDrugName(e.target.value)} placeholder="e.g., Ibuprofen 200mg" />
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="quantity">Initial Quantity</Label>
-                    <Input id="quantity" type="number" min="1" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="quantity">Initial Quantity</Label>
+                        <Input id="quantity" type="number" min="1" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="expiry-date">Expiry Date</Label>
+                        <Input id="expiry-date" type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} />
+                    </div>
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
             </div>
