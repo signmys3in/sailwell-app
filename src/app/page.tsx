@@ -60,7 +60,6 @@ import { AppContext } from "@/contexts/app-context";
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, ArrowLeft, ArrowRight, Bot, Loader2, Pill, Redo, ShieldCheck } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import InteractiveBodyDiagram, { BODY_PARTS, type BodyPart } from "@/components/interactive-body-diagram";
 
 
 // Schemas
@@ -340,85 +339,47 @@ function SymptomsStep({ onSubmit, onBack }: { onSubmit: (values: SymptomsInfo) =
     },
   });
 
-  const [selectedBodyParts, setSelectedBodyParts] = useState<BodyPart[]>([]);
-
-  const handlePartSelect = (part: BodyPart) => {
-    const partName = BODY_PARTS[part];
-    if (!partName) return;
-
-    const newSelectedParts = selectedBodyParts.includes(part)
-      ? selectedBodyParts.filter((p) => p !== part)
-      : [...selectedBodyParts, part];
-    
-    setSelectedBodyParts(newSelectedParts);
-
-    // Update the textarea with a prefix
-    const currentSymptoms = form.getValues('symptoms');
-    
-    // Remove existing pain prefix if any
-    const symptomsWithoutPrefix = currentSymptoms.replace(/^Pain in \[.*?\]\.?\s*/i, '');
-    
-    if (newSelectedParts.length > 0) {
-      const selectedPartNames = newSelectedParts.map(p => BODY_PARTS[p]);
-      const prefix = `Pain in [${selectedPartNames.join(', ')}]. `;
-      form.setValue('symptoms', prefix + symptomsWithoutPrefix, { shouldValidate: true });
-    } else {
-      form.setValue('symptoms', symptomsWithoutPrefix, { shouldValidate: true });
-    }
-  };
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Symptoms & Vital Signs</CardTitle>
         <CardDescription>
-          Describe the patient's symptoms and provide vital signs if available. You can also click on the body diagram to indicate pain areas.
+          Describe the patient's symptoms and provide vital signs if available.
         </CardDescription>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="symptoms"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Label>Symptom Description</Label>
-                      <FormControl>
-                        <Textarea
-                          placeholder="e.g., persistent headache, fever, and sore throat for 3 days..."
-                          className="resize-none h-40"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <div>
-                    <Label className="text-base">Vital Signs</Label>
-                     <div className="grid grid-cols-3 gap-4 mt-2">
-                        <FormField control={form.control} name="temperature" render={({ field }) => (
-                            <FormItem><Label className="text-sm font-normal">Temp (°C)</Label><FormControl><Input placeholder="37.5" {...field} /></FormControl></FormItem>
-                        )}/>
-                        <FormField control={form.control} name="bloodPressure" render={({ field }) => (
-                            <FormItem><Label className="text-sm font-normal">BP (mmHg)</Label><FormControl><Input placeholder="120/80" {...field} /></FormControl></FormItem>
-                        )}/>
-                        <FormField control={form.control} name="heartRate" render={({ field }) => (
-                            <FormItem><Label className="text-sm font-normal">HR (bpm)</Label><FormControl><Input placeholder="70" {...field} /></FormControl></FormItem>
-                        )}/>
-                    </div>
+            <FormField
+              control={form.control}
+              name="symptoms"
+              render={({ field }) => (
+                <FormItem>
+                  <Label>Symptom Description</Label>
+                  <FormControl>
+                    <Textarea
+                      placeholder="e.g., persistent headache, fever, and sore throat for 3 days..."
+                      className="resize-none h-40"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div>
+                <Label className="text-base">Vital Signs (Optional)</Label>
+                <div className="grid grid-cols-3 gap-4 mt-2">
+                    <FormField control={form.control} name="temperature" render={({ field }) => (
+                        <FormItem><Label className="text-sm font-normal">Temp (°C)</Label><FormControl><Input placeholder="37.5" {...field} /></FormControl></FormItem>
+                    )}/>
+                    <FormField control={form.control} name="bloodPressure" render={({ field }) => (
+                        <FormItem><Label className="text-sm font-normal">BP (mmHg)</Label><FormControl><Input placeholder="120/80" {...field} /></FormControl></FormItem>
+                    )}/>
+                    <FormField control={form.control} name="heartRate" render={({ field }) => (
+                        <FormItem><Label className="text-sm font-normal">HR (bpm)</Label><FormControl><Input placeholder="70" {...field} /></FormControl></FormItem>
+                    )}/>
                 </div>
-              </div>
-              <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-4">
-                  <InteractiveBodyDiagram
-                    selectedParts={selectedBodyParts}
-                    onPartClick={handlePartSelect}
-                  />
-                  <p className="text-sm text-muted-foreground mt-2 text-center">Click on the body to select pain areas.</p>
-              </div>
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
