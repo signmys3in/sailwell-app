@@ -51,7 +51,6 @@ export default function StockPage() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[35%]">Drug Name</TableHead>
-              <TableHead>Narcotic</TableHead>
               <TableHead>Current Stock</TableHead>
               <TableHead>Max Stock</TableHead>
               <TableHead className="w-[25%] text-right">Refill</TableHead>
@@ -61,10 +60,10 @@ export default function StockPage() {
             {drugStock.map((drug) => (
               <TableRow key={drug.id}>
                 <TableCell className="font-medium">
-                  {drug.name}
-                </TableCell>
-                <TableCell>
-                  {drug.isNarcotic && <ShieldCheck className="h-4 w-4 text-destructive" />}
+                  <div className="flex items-center gap-2">
+                    {drug.name}
+                    {drug.isNarcotic && <ShieldCheck className="h-4 w-4 text-destructive" />}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-4">
