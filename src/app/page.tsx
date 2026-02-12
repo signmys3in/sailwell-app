@@ -56,7 +56,7 @@ import {
 
 import { getDrugSuggestions } from "@/app/actions";
 import { CHRONIC_DISEASES, COUNTRY_DRUG_NAMES } from "@/lib/data";
-import type { DrugSuggestion, DrugStock as DrugStockType } from "@/lib/types";
+import type { DrugSuggestion, DrugStock as DrugStockType, PatientInfo } from "@/lib/types";
 import { AppContext } from "@/contexts/app-context";
 import { useToast } from "@/hooks/use-toast";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -79,7 +79,6 @@ const symptomsSchema = z.object({
   heartRate: z.string().optional(),
 });
 
-type PatientInfo = z.infer<typeof patientInfoSchema>;
 type SymptomsInfo = z.infer<typeof symptomsSchema>;
 
 // Main Component
@@ -155,7 +154,7 @@ export default function MediAssistantPage() {
             isLoading={isPending}
             error={error}
             onStartOver={startOver}
-            patientName={patientInfo.name}
+            patientInfo={patientInfo}
           />
         )}
       </div>
@@ -412,7 +411,7 @@ function SymptomsStep({ onSubmit, onBack }: { onSubmit: (values: SymptomsInfo) =
 }
 
 // Step 3: Suggestions
-function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientName }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, patientName: string }) {
+function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientInfo }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, patientInfo: PatientInfo }) {
   const { drugStock } = useContext(AppContext);
 
   if (isLoading) {
@@ -454,7 +453,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientNa
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {suggestions.map((suggestion) => {
                 const stockInfo = drugStock.find(d => d.name.toLowerCase() === suggestion.drugName.toLowerCase());
-                return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} patientName={patientName} />;
+                return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} patientInfo={patientInfo} />;
               })}
             </div>
           ) : (
@@ -474,7 +473,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientNa
 }
 
 // Drug Card Component
-function DrugCard({ suggestion, stockInfo, patientName }: { suggestion: DrugSuggestion, stockInfo: DrugStockType | undefined, patientName: string }) {
+function DrugCard({ suggestion, stockInfo, patientInfo }: { suggestion: DrugSuggestion, stockInfo: DrugStockType | undefined, patientInfo: PatientInfo }) {
   const { dispenseDrug } = useContext(AppContext);
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
@@ -491,14 +490,14 @@ function DrugCard({ suggestion, stockInfo, patientName }: { suggestion: DrugSugg
     if (stockInfo.isNarcotic) {
         setNarcoticModalOpen(true);
     } else {
-        dispenseDrug(stockInfo.id, quantity, patientName);
+        dispenseDrug(stockInfo.id, quantity, patientInfo.name, patientInfo.chronicDiseases);
         toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed.`, className: "bg-accent text-accent-foreground" });
     }
   };
 
   const onNarcoticApproved = () => {
       if (!stockInfo) return;
-      dispenseDrug(stockInfo.id, quantity, patientName);
+      dispenseDrug(stockInfo.id, quantity, patientInfo.name, patientInfo.chronicDiseases);
       toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed with approval.`, className: "bg-accent text-accent-foreground" });
       setNarcoticModalOpen(false);
   }

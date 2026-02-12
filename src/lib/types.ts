@@ -33,4 +33,5 @@ export type DispenseLog = {
     quantity: number;
     timestamp: Date;
     diagnosis: string;
+    diseases: string[];
 }
