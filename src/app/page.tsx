@@ -60,6 +60,8 @@ import { AppContext } from "@/contexts/app-context";
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, ArrowLeft, ArrowRight, Bot, Loader2, Pill, Redo, ShieldCheck } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import InteractiveBodyDiagram, { BodyPart, BODY_PARTS } from "@/components/interactive-body-diagram";
+import { Badge } from "@/components/ui/badge";
 
 
 // Schemas
@@ -84,6 +86,7 @@ type SymptomsInfo = z.infer<typeof symptomsSchema>;
 export default function MediAssistantPage() {
   const [step, setStep] = useState(1);
   const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null);
+  const [selectedBodyParts, setSelectedBodyParts] = useState<BodyPart[]>([]);
   const [suggestions, setSuggestions] = useState<DrugSuggestion[]>([]);
   const [diagnosis, setDiagnosis] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -93,6 +96,7 @@ export default function MediAssistantPage() {
   const startOver = () => {
     setStep(1);
     setPatientInfo(null);
+    setSelectedBodyParts([]);
     setSuggestions([]);
     setError(null);
     setDiagnosis(null);
@@ -101,6 +105,11 @@ export default function MediAssistantPage() {
   const onPatientInfoSubmit = (values: PatientInfo) => {
     setPatientInfo(values);
     setStep(2);
+  };
+
+  const onBodyPartSelectionSubmit = (parts: BodyPart[]) => {
+    setSelectedBodyParts(parts);
+    setStep(3);
   };
 
   const onSymptomsSubmit = (values: SymptomsInfo) => {
@@ -113,7 +122,7 @@ export default function MediAssistantPage() {
       heartRate: values.heartRate,
     };
 
-    setStep(3);
+    setStep(4);
     startTransition(async () => {
       const result = await getDrugSuggestions(input);
       if (result.error) {
@@ -130,7 +139,7 @@ export default function MediAssistantPage() {
     });
   };
 
-  const currentProgress = (step / 3) * 100;
+  const currentProgress = (step / 4) * 100;
 
   return (
     <div className="flex flex-col h-full">
@@ -145,12 +154,20 @@ export default function MediAssistantPage() {
       <div className="flex-grow">
         {step === 1 && <PatientInfoStep onSubmit={onPatientInfoSubmit} />}
         {step === 2 && (
-          <SymptomsStep
-            onSubmit={onSymptomsSubmit}
+          <BodyPartSelectionStep
+            initialSelectedParts={selectedBodyParts}
+            onSubmit={onBodyPartSelectionSubmit}
             onBack={() => setStep(1)}
           />
         )}
-        {step === 3 && patientInfo && (
+        {step === 3 && (
+          <SymptomsStep
+            onSubmit={onSymptomsSubmit}
+            onBack={() => setStep(2)}
+            initialSelectedParts={selectedBodyParts}
+          />
+        )}
+        {step === 4 && patientInfo && (
           <SuggestionsStep
             suggestions={suggestions}
             isLoading={isPending}
@@ -327,8 +344,72 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void
   );
 }
 
-// Step 2: Symptoms
-function SymptomsStep({ onSubmit, onBack }: { onSubmit: (values: SymptomsInfo) => void; onBack: () => void; }) {
+// Step 2: Body Part Selection
+function BodyPartSelectionStep({
+  initialSelectedParts,
+  onSubmit,
+  onBack,
+}: {
+  initialSelectedParts: BodyPart[];
+  onSubmit: (parts: BodyPart[]) => void;
+  onBack: () => void;
+}) {
+  const [selectedParts, setSelectedParts] = useState<BodyPart[]>(initialSelectedParts);
+
+  const handlePartClick = (part: BodyPart) => {
+    setSelectedParts((prev) =>
+      prev.includes(part) ? prev.filter((p) => p !== part) : [...prev, part]
+    );
+  };
+
+  const handleSubmit = () => {
+    onSubmit(selectedParts);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Pain Area Selection</CardTitle>
+        <CardDescription>
+          Click on the body parts where the patient is experiencing pain. You can
+          select multiple areas.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <InteractiveBodyDiagram
+          selectedParts={selectedParts}
+          onPartClick={handlePartClick}
+        />
+        <div className="mt-4 flex flex-wrap gap-2">
+            {selectedParts.map(part => (
+                <Badge key={part} variant="secondary" className="text-sm">
+                    {BODY_PARTS[part]}
+                </Badge>
+            ))}
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button type="button" variant="outline" onClick={onBack}>
+          <ArrowLeft /> Back
+        </Button>
+        <Button type="button" onClick={handleSubmit}>
+          Next <ArrowRight />
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+
+// Step 3: Symptoms
+function SymptomsStep({
+  onSubmit,
+  onBack,
+  initialSelectedParts,
+}: {
+  onSubmit: (values: SymptomsInfo) => void;
+  onBack: () => void;
+  initialSelectedParts: BodyPart[];
+}) {
   const form = useForm<SymptomsInfo>({
     resolver: zodResolver(symptomsSchema),
     defaultValues: {
@@ -338,6 +419,15 @@ function SymptomsStep({ onSubmit, onBack }: { onSubmit: (values: SymptomsInfo) =
       heartRate: "",
     },
   });
+
+  useEffect(() => {
+    if (initialSelectedParts.length > 0) {
+      const initialSymptoms = initialSelectedParts
+        .map(part => `Pain in ${BODY_PARTS[part]}`)
+        .join(', ');
+      form.setValue('symptoms', initialSymptoms + '. ');
+    }
+  }, [initialSelectedParts, form]);
 
   return (
     <Card>
@@ -363,6 +453,9 @@ function SymptomsStep({ onSubmit, onBack }: { onSubmit: (values: SymptomsInfo) =
                       {...field}
                     />
                   </FormControl>
+                  <FormDescription>
+                    Describe the patient's symptoms in detail. You can add more information to what was pre-filled from the body diagram.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -396,7 +489,7 @@ function SymptomsStep({ onSubmit, onBack }: { onSubmit: (values: SymptomsInfo) =
   );
 }
 
-// Step 3: Suggestions
+// Step 4: Suggestions
 function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientInfo, diagnosis }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, patientInfo: PatientInfo, diagnosis: string | null }) {
   const { drugStock } = useContext(AppContext);
   const [isDiagnosisModalOpen, setDiagnosisModalOpen] = useState(false);
