@@ -482,6 +482,20 @@ function DrugCard({ suggestion, stockInfo, patientInfo }: { suggestion: DrugSugg
 
   const stockLevel = stockInfo ? (stockInfo.stock / stockInfo.maxStock) * 100 : 0;
   
+  const availableCountries = Object.keys(COUNTRY_DRUG_NAMES).filter(country => 
+    Object.keys(COUNTRY_DRUG_NAMES[country]).some(drug => drug.toLowerCase() === suggestion.drugName.toLowerCase())
+  );
+
+  const getCommercialName = (country: string, drug: string) => {
+    if (country === 'Generic' || !COUNTRY_DRUG_NAMES[country]) {
+        return undefined;
+    }
+    const drugKey = Object.keys(COUNTRY_DRUG_NAMES[country]).find(key => key.toLowerCase() === drug.toLowerCase());
+    return drugKey ? COUNTRY_DRUG_NAMES[country][drugKey] : undefined;
+  }
+  
+  const commercialName = getCommercialName(selectedCountry, suggestion.drugName);
+
   const handleDispense = () => {
     if (!stockInfo || stockInfo.stock < quantity) {
       toast({ variant: "destructive", title: "Out of Stock", description: "Not enough stock to dispense." });
@@ -501,8 +515,6 @@ function DrugCard({ suggestion, stockInfo, patientInfo }: { suggestion: DrugSugg
       toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed with approval.`, className: "bg-accent text-accent-foreground" });
       setNarcoticModalOpen(false);
   }
-
-  const commercialName = COUNTRY_DRUG_NAMES[selectedCountry]?.[suggestion.drugName];
 
   return (
     <Card className="flex flex-col">
@@ -536,13 +548,13 @@ function DrugCard({ suggestion, stockInfo, patientInfo }: { suggestion: DrugSugg
         </div>
         <div>
             <Label>Brand Name by Country</Label>
-            <Select onValueChange={setSelectedCountry} defaultValue={selectedCountry}>
+            <Select onValueChange={setSelectedCountry} defaultValue={selectedCountry} disabled={availableCountries.length === 0}>
                 <SelectTrigger>
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="Generic">Generic</SelectItem>
-                    {Object.keys(COUNTRY_DRUG_NAMES).map(country => (
+                    {availableCountries.map(country => (
                         <SelectItem key={country} value={country}>{country}</SelectItem>
                     ))}
                 </SelectContent>
