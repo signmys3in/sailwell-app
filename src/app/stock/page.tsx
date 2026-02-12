@@ -71,7 +71,9 @@ export default function StockPage() {
                     <span>{drug.stock}</span>
                   </div>
                 </TableCell>
-                <TableCell>{drug.maxStock}</TableCell>
+                <TableCell>
+                  <div>{drug.maxStock}</div>
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
                     <Input
