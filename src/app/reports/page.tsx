@@ -28,6 +28,7 @@ export default function ReportsPage() {
           <TableCaption>A log of all drug dispensing activities.</TableCaption>
           <TableHeader>
             <TableRow>
+              <TableHead>Patient Name</TableHead>
               <TableHead>Drug Name</TableHead>
               <TableHead>Quantity</TableHead>
               <TableHead>Diagnosis</TableHead>
@@ -38,6 +39,7 @@ export default function ReportsPage() {
             {dispenseLog.length > 0 ? (
               dispenseLog.sort((a,b) => b.timestamp.getTime() - a.timestamp.getTime()).map((log) => (
                 <TableRow key={log.id}>
+                  <TableCell className="font-medium">{log.patientName}</TableCell>
                   <TableCell className="font-medium">{log.drugName}</TableCell>
                   <TableCell>{log.quantity}</TableCell>
                   <TableCell className="text-muted-foreground">{log.diagnosis}</TableCell>
@@ -48,7 +50,7 @@ export default function ReportsPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center">
+                <TableCell colSpan={5} className="h-24 text-center">
                   No dispensing activities recorded yet.
                 </TableCell>
               </TableRow>

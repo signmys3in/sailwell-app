@@ -21,7 +21,7 @@ const INITIAL_DRUG_STOCK: DrugStock[] = [
 interface AppContextType {
   drugStock: DrugStock[];
   dispenseLog: DispenseLog[];
-  dispenseDrug: (drugId: string, quantity: number) => void;
+  dispenseDrug: (drugId: string, quantity: number, patientName: string) => void;
   refillStock: (drugId: string, quantity: number) => void;
   addDrugsToStock: (drugNames: string[]) => void;
 }
@@ -63,7 +63,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const dispenseDrug = (drugId: string, quantity: number) => {
+  const dispenseDrug = (drugId: string, quantity: number, patientName: string) => {
     setDrugStock((prevStock) =>
       prevStock.map((drug) =>
         drug.id === drugId ? { ...drug, stock: drug.stock - quantity } : drug
@@ -73,6 +73,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         ...prevLog,
         {
             id: new Date().toISOString(),
+            patientName: patientName,
             drugName: drugId,
             quantity: quantity,
             timestamp: new Date(),

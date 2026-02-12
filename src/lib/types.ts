@@ -28,6 +28,7 @@ export type DrugStock = {
 
 export type DispenseLog = {
     id: string;
+    patientName: string;
     drugName: string;
     quantity: number;
     timestamp: Date;

@@ -149,12 +149,13 @@ export default function MediAssistantPage() {
             onBack={() => setStep(1)}
           />
         )}
-        {step === 3 && (
+        {step === 3 && patientInfo && (
           <SuggestionsStep
             suggestions={suggestions}
             isLoading={isPending}
             error={error}
             onStartOver={startOver}
+            patientName={patientInfo.name}
           />
         )}
       </div>
@@ -411,7 +412,7 @@ function SymptomsStep({ onSubmit, onBack }: { onSubmit: (values: SymptomsInfo) =
 }
 
 // Step 3: Suggestions
-function SuggestionsStep({ suggestions, isLoading, error, onStartOver }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void }) {
+function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientName }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, patientName: string }) {
   const { drugStock } = useContext(AppContext);
 
   if (isLoading) {
@@ -453,7 +454,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver }: { sugge
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {suggestions.map((suggestion) => {
                 const stockInfo = drugStock.find(d => d.name.toLowerCase() === suggestion.drugName.toLowerCase());
-                return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} />;
+                return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} patientName={patientName} />;
               })}
             </div>
           ) : (
@@ -473,7 +474,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver }: { sugge
 }
 
 // Drug Card Component
-function DrugCard({ suggestion, stockInfo }: { suggestion: DrugSuggestion, stockInfo: DrugStockType | undefined }) {
+function DrugCard({ suggestion, stockInfo, patientName }: { suggestion: DrugSuggestion, stockInfo: DrugStockType | undefined, patientName: string }) {
   const { dispenseDrug } = useContext(AppContext);
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
@@ -490,14 +491,14 @@ function DrugCard({ suggestion, stockInfo }: { suggestion: DrugSuggestion, stock
     if (stockInfo.isNarcotic) {
         setNarcoticModalOpen(true);
     } else {
-        dispenseDrug(stockInfo.id, quantity);
+        dispenseDrug(stockInfo.id, quantity, patientName);
         toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed.`, className: "bg-accent text-accent-foreground" });
     }
   };
 
   const onNarcoticApproved = () => {
       if (!stockInfo) return;
-      dispenseDrug(stockInfo.id, quantity);
+      dispenseDrug(stockInfo.id, quantity, patientName);
       toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed with approval.`, className: "bg-accent text-accent-foreground" });
       setNarcoticModalOpen(false);
   }
