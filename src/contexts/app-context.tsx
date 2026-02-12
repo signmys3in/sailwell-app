@@ -46,6 +46,10 @@ const INITIAL_DRUG_STOCK: DrugStock[] = [
     { id: 'BENGAY 50gr', name: 'BENGAY 50gr', stock: 30, maxStock: 30, isNarcotic: false },
     { id: 'OKSIZINC POMAT 100gr', name: 'OKSIZINC POMAT 100gr', stock: 30, maxStock: 30, isNarcotic: false },
     { id: 'SILVERDIN 40gr', name: 'SILVERDIN 40gr', stock: 30, maxStock: 30, isNarcotic: false },
+    { id: 'Morphine 15mg', name: 'Morphine 15mg', stock: 30, maxStock: 30, isNarcotic: true },
+    { id: 'Codeine 30mg', name: 'Codeine 30mg', stock: 30, maxStock: 30, isNarcotic: true },
+    { id: 'Oxycodone 10mg', name: 'Oxycodone 10mg', stock: 30, maxStock: 30, isNarcotic: true },
+    { id: 'Fentanyl 50mcg', name: 'Fentanyl 50mcg', stock: 30, maxStock: 30, isNarcotic: true },
 ];
 
 
