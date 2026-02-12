@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "human-anatomy",
+      "description": "A diagram of human anatomy.",
+      "imageUrl": "https://images.unsplash.com/photo-1539815208687-a0f05e15d601?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxodW1hbiUyMGFuYXRvbXl8ZW58MHx8fHwxNzcwODcyNzkyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "human anatomy"
+    }
+  ]
 }
