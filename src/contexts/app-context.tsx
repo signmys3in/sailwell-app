@@ -23,6 +23,7 @@ interface AppContextType {
   dispenseLog: DispenseLog[];
   dispenseDrug: (drugId: string, quantity: number) => void;
   refillStock: (drugId: string, quantity: number) => void;
+  addDrugsToStock: (drugNames: string[]) => void;
 }
 
 export const AppContext = createContext<AppContextType>({
@@ -30,11 +31,37 @@ export const AppContext = createContext<AppContextType>({
   dispenseLog: [],
   dispenseDrug: () => {},
   refillStock: () => {},
+  addDrugsToStock: () => {},
 });
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [drugStock, setDrugStock] = useState<DrugStock[]>(INITIAL_DRUG_STOCK);
   const [dispenseLog, setDispenseLog] = useState<DispenseLog[]>([]);
+
+  const addDrugsToStock = (drugNames: string[]) => {
+    setDrugStock((prevStock) => {
+      const newDrugs: DrugStock[] = [];
+      const lowercasedStockNames = prevStock.map(d => d.name.toLowerCase());
+
+      drugNames.forEach(drugName => {
+        if (!lowercasedStockNames.includes(drugName.toLowerCase())) {
+            const isNarcotic = ['morphine', 'codeine', 'fentanyl'].includes(drugName.toLowerCase());
+            newDrugs.push({
+                id: drugName,
+                name: drugName,
+                stock: 20,
+                maxStock: 20,
+                isNarcotic,
+            });
+        }
+      });
+
+      if (newDrugs.length > 0) {
+        return [...prevStock, ...newDrugs];
+      }
+      return prevStock;
+    });
+  };
 
   const dispenseDrug = (drugId: string, quantity: number) => {
     setDrugStock((prevStock) =>
@@ -63,7 +90,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AppContext.Provider value={{ drugStock, dispenseLog, dispenseDrug, refillStock }}>
+    <AppContext.Provider value={{ drugStock, dispenseLog, dispenseDrug, refillStock, addDrugsToStock }}>
       {children}
     </AppContext.Provider>
   );

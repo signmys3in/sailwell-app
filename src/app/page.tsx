@@ -13,7 +13,6 @@ import {
   FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -90,6 +89,7 @@ export default function MediAssistantPage() {
   const [suggestions, setSuggestions] = useState<DrugSuggestion[]>([]);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const { addDrugsToStock } = useContext(AppContext);
 
   const startOver = () => {
     setStep(1);
@@ -119,7 +119,12 @@ export default function MediAssistantPage() {
       if (result.error) {
         setError(result.error);
       } else {
-        setSuggestions(result.suggestions || []);
+        const newSuggestions = result.suggestions || [];
+        if (newSuggestions.length > 0) {
+          const drugNames = newSuggestions.map(s => s.drugName);
+          addDrugsToStock(drugNames);
+        }
+        setSuggestions(newSuggestions);
       }
     });
   };
@@ -187,7 +192,7 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <Label>Full Name</Label>
                     <FormControl>
                       <Input placeholder="John Doe" {...field} />
                     </FormControl>
@@ -200,7 +205,7 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void
                 name="dob"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date of Birth</FormLabel>
+                    <Label>Date of Birth</Label>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -216,7 +221,7 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void
                 name="alcoholUsage"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Alcohol Usage</FormLabel>
+                    <Label>Alcohol Usage</Label>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -244,7 +249,7 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Smoker</FormLabel>
+                      <Label>Smoker</Label>
                       <FormDescription>
                         Check if the patient is a smoker.
                       </FormDescription>
@@ -260,7 +265,7 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void
               render={() => (
                 <FormItem>
                   <div className="mb-4">
-                    <FormLabel className="text-base">Chronic Diseases</FormLabel>
+                    <Label className="text-base">Chronic Diseases</Label>
                     <FormDescription>
                       Select any pre-existing chronic diseases.
                     </FormDescription>
@@ -294,9 +299,9 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void
                                   }}
                                 />
                               </FormControl>
-                              <FormLabel className="font-normal">
+                              <Label className="font-normal">
                                 {disease}
-                              </FormLabel>
+                              </Label>
                             </FormItem>
                           );
                         }}
@@ -351,7 +356,7 @@ function SymptomsStep({ onSubmit, onBack }: { onSubmit: (values: SymptomsInfo) =
                   name="symptoms"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Symptom Description</FormLabel>
+                      <Label>Symptom Description</Label>
                       <FormControl>
                         <Textarea
                           placeholder="e.g., persistent headache, fever, and sore throat for 3 days..."
@@ -367,13 +372,13 @@ function SymptomsStep({ onSubmit, onBack }: { onSubmit: (values: SymptomsInfo) =
                     <Label className="text-base">Vital Signs</Label>
                      <div className="grid grid-cols-3 gap-4 mt-2">
                         <FormField control={form.control} name="temperature" render={({ field }) => (
-                            <FormItem><FormLabel className="text-sm font-normal">Temp (°C)</FormLabel><FormControl><Input placeholder="37.5" {...field} /></FormControl></FormItem>
+                            <FormItem><Label className="text-sm font-normal">Temp (°C)</Label><FormControl><Input placeholder="37.5" {...field} /></FormControl></FormItem>
                         )}/>
                         <FormField control={form.control} name="bloodPressure" render={({ field }) => (
-                            <FormItem><FormLabel className="text-sm font-normal">BP (mmHg)</FormLabel><FormControl><Input placeholder="120/80" {...field} /></FormControl></FormItem>
+                            <FormItem><Label className="text-sm font-normal">BP (mmHg)</Label><FormControl><Input placeholder="120/80" {...field} /></FormControl></FormItem>
                         )}/>
                         <FormField control={form.control} name="heartRate" render={({ field }) => (
-                            <FormItem><FormLabel className="text-sm font-normal">HR (bpm)</FormLabel><FormControl><Input placeholder="70" {...field} /></FormControl></FormItem>
+                            <FormItem><Label className="text-sm font-normal">HR (bpm)</Label><FormControl><Input placeholder="70" {...field} /></FormControl></FormItem>
                         )}/>
                     </div>
                 </div>
