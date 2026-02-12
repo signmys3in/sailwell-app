@@ -20,6 +20,10 @@ export const BODY_PARTS = {
     liver: "Liver",
     stomach: "Stomach",
     kidneys: "Kidneys",
+    elbows: "Elbows",
+    hands: "Hands",
+    knees: "Knees",
+    feet: "Feet",
 } as const;
 
 export type BodyPart = keyof typeof BODY_PARTS;
@@ -141,6 +145,24 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                         data-testid="body-part-rightLeg"
                     />
 
+                    {/* Joints & Extremities */}
+                    <g onClick={() => onPartClick('elbows')} className={getPartClasses('elbows')}>
+                        <circle cx="80" cy="230" r="8" id="elbow-left" data-testid="body-part-elbows"/>
+                        <circle cx="170" cy="230" r="8" id="elbow-right" data-testid="body-part-elbows"/>
+                    </g>
+                    <g onClick={() => onPartClick('hands')} className={getPartClasses('hands')}>
+                        <ellipse cx="70" cy="282" rx="10" ry="8" id="hand-left" data-testid="body-part-hands"/>
+                        <ellipse cx="180" cy="282" rx="10" ry="8" id="hand-right" data-testid="body-part-hands"/>
+                    </g>
+                    <g onClick={() => onPartClick('knees')} className={getPartClasses('knees')}>
+                        <circle cx="95" cy="360" r="10" id="knee-left" data-testid="body-part-knees"/>
+                        <circle cx="155" cy="360" r="10" id="knee-right" data-testid="body-part-knees"/>
+                    </g>
+                    <g onClick={() => onPartClick('feet')} className={getPartClasses('feet')}>
+                        <ellipse cx="92" cy="425" rx="15" ry="8" id="foot-left" data-testid="body-part-feet"/>
+                        <ellipse cx="158" cy="425" rx="15" ry="8" id="foot-right" data-testid="body-part-feet"/>
+                    </g>
+
                     {/* Organs */}
                     {/* Lungs */}
                     <path
@@ -211,6 +233,11 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                     <text x="95" y="360" textAnchor="middle" visibility={isSelected('leftLeg') ? 'visible' : 'hidden'} className={isSelected('leftLeg') ? 'animate-in fade-in' : ''}>L. Leg</text>
                     <text x="155" y="360" textAnchor="middle" visibility={isSelected('rightLeg') ? 'visible' : 'hidden'} className={isSelected('rightLeg') ? 'animate-in fade-in' : ''}>R. Leg</text>
                     
+                    <text x="125" y="230" textAnchor="middle" visibility={isSelected('elbows') ? 'visible' : 'hidden'} className={isSelected('elbows') ? 'animate-in fade-in' : ''}>Elbows</text>
+                    <text x="125" y="282" textAnchor="middle" visibility={isSelected('hands') ? 'visible' : 'hidden'} className={isSelected('hands') ? 'animate-in fade-in' : ''}>Hands</text>
+                    <text x="125" y="360" textAnchor="middle" visibility={isSelected('knees') ? 'visible' : 'hidden'} className={isSelected('knees') ? 'animate-in fade-in' : ''}>Knees</text>
+                    <text x="125" y="425" textAnchor="middle" visibility={isSelected('feet') ? 'visible' : 'hidden'} className={isSelected('feet') ? 'animate-in fade-in' : ''}>Feet</text>
+
                     <text x="125" y="220" textAnchor="middle" visibility={isSelected('heart') ? 'visible' : 'hidden'} className={isSelected('heart') ? 'animate-in fade-in' : ''}>Heart</text>
                     <text x="125" y="190" textAnchor="middle" visibility={isSelected('lungs') ? 'visible' : 'hidden'} className={isSelected('lungs') ? 'animate-in fade-in' : ''}>Lungs</text>
                     <text x="140" y="255" textAnchor="middle" visibility={isSelected('liver') ? 'visible' : 'hidden'} className={isSelected('liver') ? 'animate-in fade-in' : ''}>Liver</text>
