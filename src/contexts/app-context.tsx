@@ -59,6 +59,7 @@ interface AppContextType {
   dispenseDrug: (drugId: string, quantity: number, patientName: string, diagnosis: string, diseases: string[]) => void;
   refillStock: (drugId: string, quantity: number) => void;
   addDrugsToStock: (drugNames: string[]) => void;
+  addNewDrug: (drug: { name: string, quantity: number, isNarcotic: boolean }) => void;
 }
 
 export const AppContext = createContext<AppContextType>({
@@ -67,6 +68,7 @@ export const AppContext = createContext<AppContextType>({
   dispenseDrug: () => {},
   refillStock: () => {},
   addDrugsToStock: () => {},
+  addNewDrug: () => {},
 });
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
@@ -95,6 +97,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         return [...prevStock, ...newDrugs];
       }
       return prevStock;
+    });
+  };
+
+  const addNewDrug = (drug: { name: string, quantity: number, isNarcotic: boolean }) => {
+    setDrugStock((prevStock) => {
+        const newDrug: DrugStock = {
+            id: drug.name,
+            name: drug.name,
+            stock: drug.quantity,
+            maxStock: Math.max(50, drug.quantity * 2), // Reasonable default max
+            isNarcotic: drug.isNarcotic,
+        };
+        // Avoid adding if it already exists (case-insensitive)
+        if (prevStock.some(d => d.name.toLowerCase() === newDrug.name.toLowerCase())) {
+            return prevStock;
+        }
+        return [...prevStock, newDrug];
     });
   };
 
@@ -127,7 +146,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AppContext.Provider value={{ drugStock, dispenseLog, dispenseDrug, refillStock, addDrugsToStock }}>
+    <AppContext.Provider value={{ drugStock, dispenseLog, dispenseDrug, refillStock, addDrugsToStock, addNewDrug }}>
       {children}
     </AppContext.Provider>
   );
