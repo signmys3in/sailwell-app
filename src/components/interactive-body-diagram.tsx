@@ -10,6 +10,11 @@ export const BODY_PARTS = {
     rightArm: "Right Arm",
     leftLeg: "Left Leg",
     rightLeg: "Right Leg",
+    heart: "Heart",
+    lungs: "Lungs",
+    liver: "Liver",
+    stomach: "Stomach",
+    kidneys: "Kidneys",
 } as const;
 
 export type BodyPart = keyof typeof BODY_PARTS;
@@ -98,6 +103,62 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                         id="right-leg"
                         data-testid="body-part-rightLeg"
                     />
+
+                    {/* Organs */}
+                    {/* Lungs */}
+                    <path
+                        d="M122,180 C110,180 100,200 100,215 C100,230 110,235 122,235 Z"
+                        onClick={() => onPartClick('lungs')}
+                        className={getPartClasses('lungs')}
+                        id="lungs-right"
+                        data-testid="body-part-lungs"
+                    />
+                    <path
+                         d="M128,180 C140,180 150,200 150,215 C150,230 140,235 128,235 Z"
+                        onClick={() => onPartClick('lungs')}
+                        className={getPartClasses('lungs')}
+                        id="lungs-left"
+                        data-testid="body-part-lungs"
+                    />
+                    {/* Heart */}
+                    <path
+                        d="M125,200 C115,210 118,230 125,235 C132,230 135,210 125,200 Z"
+                        onClick={() => onPartClick('heart')}
+                        className={getPartClasses('heart')}
+                        id="heart"
+                        data-testid="body-part-heart"
+                    />
+                    {/* Liver */}
+                     <path
+                        d="M148,245 C148,265 128,265 128,255 C128,245 148,245 148,245 Z"
+                        onClick={() => onPartClick('liver')}
+                        className={getPartClasses('liver')}
+                        id="liver"
+                        data-testid="body-part-liver"
+                    />
+                    {/* Stomach */}
+                    <path
+                        d="M102,245 C102,265 122,265 122,255 C122,245 102,245 102,245 Z"
+                        onClick={() => onPartClick('stomach')}
+                        className={getPartClasses('stomach')}
+                        id="stomach"
+                        data-testid="body-part-stomach"
+                    />
+                    {/* Kidneys */}
+                    <path
+                        d="M118,275 C122,280 122,295 118,300 C110,300 110,275 118,275 Z"
+                        onClick={() => onPartClick('kidneys')}
+                        className={getPartClasses('kidneys')}
+                        id="kidneys-right"
+                        data-testid="body-part-kidneys"
+                    />
+                    <path
+                        d="M132,275 C128,280 128,295 132,300 C140,300 140,275 132,275 Z"
+                        onClick={() => onPartClick('kidneys')}
+                        className={getPartClasses('kidneys')}
+                        id="kidneys-left"
+                        data-testid="body-part-kidneys"
+                    />
                 </g>
                 <g className="text-sm font-medium fill-primary-foreground pointer-events-none">
                     <text x="125" y="130" textAnchor="middle" visibility={isSelected('head') ? 'visible' : 'hidden'} className={isSelected('head') ? 'animate-in fade-in' : ''}>Head</text>
@@ -107,6 +168,12 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                     <text x="185" y="230" textAnchor="middle" visibility={isSelected('rightArm') ? 'visible' : 'hidden'} className={isSelected('rightArm') ? 'animate-in fade-in' : ''}>R. Arm</text>
                     <text x="95" y="360" textAnchor="middle" visibility={isSelected('leftLeg') ? 'visible' : 'hidden'} className={isSelected('leftLeg') ? 'animate-in fade-in' : ''}>L. Leg</text>
                     <text x="155" y="360" textAnchor="middle" visibility={isSelected('rightLeg') ? 'visible' : 'hidden'} className={isSelected('rightLeg') ? 'animate-in fade-in' : ''}>R. Leg</text>
+                    
+                    <text x="125" y="220" textAnchor="middle" visibility={isSelected('heart') ? 'visible' : 'hidden'} className={isSelected('heart') ? 'animate-in fade-in' : ''}>Heart</text>
+                    <text x="125" y="190" textAnchor="middle" visibility={isSelected('lungs') ? 'visible' : 'hidden'} className={isSelected('lungs') ? 'animate-in fade-in' : ''}>Lungs</text>
+                    <text x="140" y="255" textAnchor="middle" visibility={isSelected('liver') ? 'visible' : 'hidden'} className={isSelected('liver') ? 'animate-in fade-in' : ''}>Liver</text>
+                    <text x="110" y="255" textAnchor="middle" visibility={isSelected('stomach') ? 'visible' : 'hidden'} className={isSelected('stomach') ? 'animate-in fade-in' : ''}>Stomach</text>
+                    <text x="125" y="285" textAnchor="middle" visibility={isSelected('kidneys') ? 'visible' : 'hidden'} className={isSelected('kidneys') ? 'animate-in fade-in' : ''}>Kidneys</text>
                 </g>
             </svg>
         </div>
