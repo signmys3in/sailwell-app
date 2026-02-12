@@ -4,6 +4,11 @@ import { cn } from "@/lib/utils";
 
 export const BODY_PARTS = {
     head: "Head",
+    brain: "Brain",
+    eyes: "Eyes",
+    ears: "Ears",
+    nose: "Nose",
+    mouth: "Mouth",
     chest: "Chest",
     abdomen: "Abdomen",
     leftArm: "Left Arm",
@@ -58,6 +63,38 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                         id="head"
                         data-testid="body-part-head"
                     />
+
+                    {/* Head Organs */}
+                    <path
+                        d="M125,82 C105,82 90,95 90,110 C90,115 105,120 125,120 C145,120 160,115 160,110 C160,95 145,82 125,82 Z"
+                        onClick={() => onPartClick('brain')}
+                        className={getPartClasses('brain')}
+                        id="brain"
+                        data-testid="body-part-brain"
+                    />
+                    <g onClick={() => onPartClick('eyes')} className={getPartClasses('eyes')}>
+                        <circle cx="108" cy="128" r="5" id="eye-left" data-testid="body-part-eyes"/>
+                        <circle cx="142" cy="128" r="5" id="eye-right" data-testid="body-part-eyes"/>
+                    </g>
+                    <g onClick={() => onPartClick('ears')} className={getPartClasses('ears')}>
+                        <path d="M80,120 C75,115 75,140 80,135" id="ear-left" data-testid="body-part-ears"/>
+                        <path d="M170,120 C175,115 175,140 170,135" id="ear-right" data-testid="body-part-ears"/>
+                    </g>
+                    <path
+                        d="M122,138 L125,148 L128,138 Z"
+                        onClick={() => onPartClick('nose')}
+                        className={getPartClasses('nose')}
+                        id="nose"
+                        data-testid="body-part-nose"
+                    />
+                    <path
+                        d="M115,155 C120,160 130,160 135,155"
+                        onClick={() => onPartClick('mouth')}
+                        className={getPartClasses('mouth')}
+                        id="mouth"
+                        data-testid="body-part-mouth"
+                    />
+
                     {/* Torso (Chest + Abdomen) */}
                     <path
                         d="M90,175 H160 V240 H90 Z"
@@ -162,6 +199,11 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                 </g>
                 <g className="text-sm font-medium fill-primary-foreground pointer-events-none">
                     <text x="125" y="130" textAnchor="middle" visibility={isSelected('head') ? 'visible' : 'hidden'} className={isSelected('head') ? 'animate-in fade-in' : ''}>Head</text>
+                    <text x="125" y="100" textAnchor="middle" visibility={isSelected('brain') ? 'visible' : 'hidden'} className={isSelected('brain') ? 'animate-in fade-in' : ''}>Brain</text>
+                    <text x="125" y="131" textAnchor="middle" visibility={isSelected('eyes') ? 'visible' : 'hidden'} className={isSelected('eyes') ? 'animate-in fade-in' : ''}>Eyes</text>
+                    <text x="125" y="128" textAnchor="middle" visibility={isSelected('ears') ? 'visible' : 'hidden'} className={isSelected('ears') ? 'animate-in fade-in' : ''}>Ears</text>
+                    <text x="125" y="146" textAnchor="middle" visibility={isSelected('nose') ? 'visible' : 'hidden'} className={isSelected('nose') ? 'animate-in fade-in' : ''}>Nose</text>
+                    <text x="125" y="158" textAnchor="middle" visibility={isSelected('mouth') ? 'visible' : 'hidden'} className={isSelected('mouth') ? 'animate-in fade-in' : ''}>Mouth</text>
                     <text x="125" y="210" textAnchor="middle" visibility={isSelected('chest') ? 'visible' : 'hidden'} className={isSelected('chest') ? 'animate-in fade-in' : ''}>Chest</text>
                     <text x="125" y="270" textAnchor="middle" visibility={isSelected('abdomen') ? 'visible' : 'hidden'} className={isSelected('abdomen') ? 'animate-in fade-in' : ''}>Abdomen</text>
                     <text x="65" y="230" textAnchor="middle" visibility={isSelected('leftArm') ? 'visible' : 'hidden'} className={isSelected('leftArm') ? 'animate-in fade-in' : ''}>L. Arm</text>
