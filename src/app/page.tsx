@@ -62,6 +62,7 @@ import { AppContext } from "@/contexts/app-context";
 import { useToast } from "@/hooks/use-toast";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { AlertTriangle, ArrowLeft, ArrowRight, Bot, Loader2, Pill, Redo, ShieldCheck } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 // Schemas
 const patientInfoSchema = z.object({
@@ -360,7 +361,7 @@ function SymptomsStep({ onSubmit, onBack }: { onSubmit: (values: SymptomsInfo) =
                   )}
                 />
                  <div>
-                    <FormLabel className="text-base">Vital Signs</FormLabel>
+                    <Label className="text-base">Vital Signs</Label>
                      <div className="grid grid-cols-3 gap-4 mt-2">
                         <FormField control={form.control} name="temperature" render={({ field }) => (
                             <FormItem><FormLabel className="text-sm font-normal">Temp (°C)</FormLabel><FormControl><Input placeholder="37.5" {...field} /></FormControl></FormItem>
@@ -524,7 +525,7 @@ function DrugCard({ suggestion, stockInfo }: { suggestion: DrugSuggestion, stock
             </TooltipProvider>
         </div>
         <div>
-            <FormLabel>Country-Specific Name</FormLabel>
+            <Label>Country-Specific Name</Label>
             <Select onValueChange={setSelectedCountry} defaultValue={selectedCountry}>
                 <SelectTrigger>
                     <SelectValue />
