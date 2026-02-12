@@ -25,8 +25,7 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
 
     const getPartClasses = (part: BodyPart) => {
         return cn(
-            "transition-colors",
-            "stroke-foreground stroke-2 cursor-pointer",
+            "transition-colors cursor-pointer",
             "hover:fill-primary/20",
             isSelected(part) ? "fill-primary" : "fill-transparent"
         );
@@ -41,6 +40,8 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                 className="max-h-[400px] w-auto"
                 aria-label="Interactive human body diagram"
                 fill="none"
+                stroke="hsl(var(--foreground))"
+                strokeWidth="2"
             >
                 <g>
                     {/* Head */}

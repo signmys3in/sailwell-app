@@ -23,7 +23,8 @@ export default function DiseaseTrendsPage() {
 
   const diagnosisCounts = dispenseLog.reduce((acc, log) => {
     if (log.diagnosis && log.diagnosis !== 'AI-assisted diagnosis' && log.diagnosis !== 'No diagnosis provided.') {
-      acc[log.diagnosis] = (acc[log.diagnosis] || 0) + 1;
+      const mainDiagnosis = log.diagnosis.split("(")[0].trim();
+      acc[mainDiagnosis] = (acc[mainDiagnosis] || 0) + 1;
     }
     return acc;
   }, {} as Record<string, number>);
@@ -65,6 +66,7 @@ export default function DiseaseTrendsPage() {
                   interval={0}
                   angle={-45}
                   textAnchor="end"
+                  height={100}
                 />
                 <YAxis allowDecimals={false} />
                 <ChartTooltip
