@@ -25,9 +25,11 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
 
     const getPartClasses = (part: BodyPart) => {
         return cn(
-            "transition-colors cursor-pointer",
-            "hover:fill-primary/20",
-            isSelected(part) ? "fill-primary" : "fill-transparent"
+            "transition-all duration-300 ease-in-out cursor-pointer",
+            "hover:fill-primary/20 hover:stroke-primary",
+            isSelected(part) 
+                ? "fill-primary stroke-primary animate-pulse-glow" 
+                : "fill-transparent stroke-foreground"
         );
     };
 
@@ -40,7 +42,6 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                 className="max-h-[400px] w-auto"
                 aria-label="Interactive human body diagram"
                 fill="none"
-                stroke="hsl(var(--foreground))"
                 strokeWidth="2"
             >
                 <g>
@@ -99,13 +100,13 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                     />
                 </g>
                 <g className="text-sm font-medium fill-primary-foreground pointer-events-none">
-                    <text x="125" y="130" textAnchor="middle" visibility={isSelected('head') ? 'visible' : 'hidden'}>Head</text>
-                    <text x="125" y="210" textAnchor="middle" visibility={isSelected('chest') ? 'visible' : 'hidden'}>Chest</text>
-                    <text x="125" y="270" textAnchor="middle" visibility={isSelected('abdomen') ? 'visible' : 'hidden'}>Abdomen</text>
-                    <text x="65" y="230" textAnchor="middle" visibility={isSelected('leftArm') ? 'visible' : 'hidden'}>L. Arm</text>
-                    <text x="185" y="230" textAnchor="middle" visibility={isSelected('rightArm') ? 'visible' : 'hidden'}>R. Arm</text>
-                    <text x="95" y="360" textAnchor="middle" visibility={isSelected('leftLeg') ? 'visible' : 'hidden'}>L. Leg</text>
-                    <text x="155" y="360" textAnchor="middle" visibility={isSelected('rightLeg') ? 'visible' : 'hidden'}>R. Leg</text>
+                    <text x="125" y="130" textAnchor="middle" visibility={isSelected('head') ? 'visible' : 'hidden'} className={isSelected('head') ? 'animate-in fade-in' : ''}>Head</text>
+                    <text x="125" y="210" textAnchor="middle" visibility={isSelected('chest') ? 'visible' : 'hidden'} className={isSelected('chest') ? 'animate-in fade-in' : ''}>Chest</text>
+                    <text x="125" y="270" textAnchor="middle" visibility={isSelected('abdomen') ? 'visible' : 'hidden'} className={isSelected('abdomen') ? 'animate-in fade-in' : ''}>Abdomen</text>
+                    <text x="65" y="230" textAnchor="middle" visibility={isSelected('leftArm') ? 'visible' : 'hidden'} className={isSelected('leftArm') ? 'animate-in fade-in' : ''}>L. Arm</text>
+                    <text x="185" y="230" textAnchor="middle" visibility={isSelected('rightArm') ? 'visible' : 'hidden'} className={isSelected('rightArm') ? 'animate-in fade-in' : ''}>R. Arm</text>
+                    <text x="95" y="360" textAnchor="middle" visibility={isSelected('leftLeg') ? 'visible' : 'hidden'} className={isSelected('leftLeg') ? 'animate-in fade-in' : ''}>L. Leg</text>
+                    <text x="155" y="360" textAnchor="middle" visibility={isSelected('rightLeg') ? 'visible' : 'hidden'} className={isSelected('rightLeg') ? 'animate-in fade-in' : ''}>R. Leg</text>
                 </g>
             </svg>
         </div>
