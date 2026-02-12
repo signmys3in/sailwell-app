@@ -21,14 +21,14 @@ import type { ChartConfig } from "@/components/ui/chart";
 export default function DiseaseTrendsPage() {
   const { dispenseLog } = useContext(AppContext);
 
-  const diseaseCounts = dispenseLog
-    .flatMap((log) => log.diseases || [])
-    .reduce((acc, disease) => {
-      acc[disease] = (acc[disease] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+  const diagnosisCounts = dispenseLog.reduce((acc, log) => {
+    if (log.diagnosis && log.diagnosis !== 'AI-assisted diagnosis' && log.diagnosis !== 'No diagnosis provided.') {
+      acc[log.diagnosis] = (acc[log.diagnosis] || 0) + 1;
+    }
+    return acc;
+  }, {} as Record<string, number>);
 
-  const chartData = Object.entries(diseaseCounts)
+  const chartData = Object.entries(diagnosisCounts)
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count);
 
@@ -54,14 +54,17 @@ export default function DiseaseTrendsPage() {
         </CardHeader>
         <CardContent>
           {chartData.length > 0 ? (
-            <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-              <BarChart accessibilityLayer data={chartData}>
+            <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+              <BarChart accessibilityLayer data={chartData} margin={{ bottom: 70 }}>
                 <CartesianGrid vertical={false} />
                 <XAxis
                   dataKey="name"
                   tickLine={false}
                   tickMargin={10}
                   axisLine={false}
+                  interval={0}
+                  angle={-45}
+                  textAnchor="end"
                 />
                 <YAxis allowDecimals={false} />
                 <ChartTooltip
@@ -73,7 +76,7 @@ export default function DiseaseTrendsPage() {
             </ChartContainer>
           ) : (
             <div className="text-center py-12">
-              <p>No disease data available to display.</p>
+              <p>No diagnosis data available to display.</p>
             </div>
           )}
         </CardContent>
