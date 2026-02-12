@@ -23,6 +23,16 @@ interface InteractiveBodyDiagramProps {
 export default function InteractiveBodyDiagram({ selectedParts, onPartClick, className }: InteractiveBodyDiagramProps) {
     const isSelected = (part: BodyPart) => selectedParts.includes(part);
 
+    const getPartClasses = (part: BodyPart) => {
+        return cn(
+            "transition-colors",
+            "stroke-foreground stroke-2 cursor-pointer",
+            "hover:fill-primary/20",
+            isSelected(part) ? "fill-primary" : "fill-transparent"
+        );
+    };
+
+
     return (
         <div className={cn("flex justify-center items-center", className)}>
             <svg
@@ -30,13 +40,14 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                 viewBox="0 0 250 500"
                 className="max-h-[400px] w-auto"
                 aria-label="Interactive human body diagram"
+                fill="none"
             >
-                <g className="stroke-foreground stroke-2 cursor-pointer group">
+                <g>
                     {/* Head */}
                     <path
                         d="M125,80 C100,80 80,100 80,125 C80,150 100,170 125,170 C150,170 170,150 170,125 C170,100 150,80 125,80 Z"
                         onClick={() => onPartClick('head')}
-                        className={cn("hover:fill-primary/50 transition-colors", isSelected('head') ? "fill-primary" : "fill-transparent")}
+                        className={getPartClasses('head')}
                         id="head"
                         data-testid="body-part-head"
                     />
@@ -44,14 +55,14 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                     <path
                         d="M90,175 H160 V240 H90 Z"
                         onClick={() => onPartClick('chest')}
-                        className={cn("hover:fill-primary/50 transition-colors", isSelected('chest') ? "fill-primary" : "fill-transparent")}
+                        className={getPartClasses('chest')}
                         id="chest"
                         data-testid="body-part-chest"
                     />
                     <path
                         d="M90,240 H160 V300 H90 Z"
                         onClick={() => onPartClick('abdomen')}
-                        className={cn("hover:fill-primary/50 transition-colors", isSelected('abdomen') ? "fill-primary" : "fill-transparent")}
+                        className={getPartClasses('abdomen')}
                         id="abdomen"
                         data-testid="body-part-abdomen"
                     />
@@ -59,14 +70,14 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                     <path
                         d="M90,175 L60,280 L80,285 L105,180 Z"
                         onClick={() => onPartClick('leftArm')}
-                        className={cn("hover:fill-primary/50 transition-colors", isSelected('leftArm') ? "fill-primary" : "fill-transparent")}
+                        className={getPartClasses('leftArm')}
                         id="left-arm"
                         data-testid="body-part-leftArm"
                     />
                     <path
                         d="M160,175 L190,280 L170,285 L145,180 Z"
                         onClick={() => onPartClick('rightArm')}
-                        className={cn("hover:fill-primary/50 transition-colors", isSelected('rightArm') ? "fill-primary" : "fill-transparent")}
+                        className={getPartClasses('rightArm')}
                         id="right-arm"
                         data-testid="body-part-rightArm"
                     />
@@ -74,14 +85,14 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                     <path
                         d="M90,300 L80,420 L105,420 L110,300 Z"
                         onClick={() => onPartClick('leftLeg')}
-                        className={cn("hover:fill-primary/50 transition-colors", isSelected('leftLeg') ? "fill-primary" : "fill-transparent")}
+                        className={getPartClasses('leftLeg')}
                         id="left-leg"
                         data-testid="body-part-leftLeg"
                     />
                     <path
                         d="M160,300 L170,420 L145,420 L140,300 Z"
                         onClick={() => onPartClick('rightLeg')}
-                        className={cn("hover:fill-primary/50 transition-colors", isSelected('rightLeg') ? "fill-primary" : "fill-transparent")}
+                        className={getPartClasses('rightLeg')}
                         id="right-leg"
                         data-testid="body-part-rightLeg"
                     />
