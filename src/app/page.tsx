@@ -494,16 +494,16 @@ function DrugCard({ suggestion, stockInfo }: { suggestion: DrugSuggestion, stock
       setNarcoticModalOpen(false);
   }
 
-  const commercialName = COUNTRY_DRUG_NAMES[selectedCountry]?.[suggestion.drugName] || suggestion.drugName;
+  const commercialName = COUNTRY_DRUG_NAMES[selectedCountry]?.[suggestion.drugName];
 
   return (
     <Card className="flex flex-col">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-            <Pill /> {commercialName}
+            <Pill /> {suggestion.drugName}
             {stockInfo?.isNarcotic && <ShieldCheck className="text-destructive"/>}
         </CardTitle>
-        {selectedCountry !== 'Generic' && <CardDescription>Generic: {suggestion.drugName}</CardDescription>}
+        {commercialName && <CardDescription>{selectedCountry} Brand: {commercialName}</CardDescription>}
         <CardDescription>{suggestion.dosage || 'Dosage not specified'}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow space-y-4">
@@ -525,7 +525,7 @@ function DrugCard({ suggestion, stockInfo }: { suggestion: DrugSuggestion, stock
             </TooltipProvider>
         </div>
         <div>
-            <Label>Country-Specific Name</Label>
+            <Label>Brand Name by Country</Label>
             <Select onValueChange={setSelectedCountry} defaultValue={selectedCountry}>
                 <SelectTrigger>
                     <SelectValue />
