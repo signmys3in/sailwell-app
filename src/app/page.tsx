@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useState, useTransition, useContext, useEffect } from "react";
-import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -59,9 +58,10 @@ import { CHRONIC_DISEASES, COUNTRY_DRUG_NAMES } from "@/lib/data";
 import type { DrugSuggestion, DrugStock as DrugStockType, PatientInfo } from "@/lib/types";
 import { AppContext } from "@/contexts/app-context";
 import { useToast } from "@/hooks/use-toast";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { AlertTriangle, ArrowLeft, ArrowRight, Bot, Loader2, Pill, Redo, ShieldCheck } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import InteractiveBodyDiagram, { BODY_PARTS, type BodyPart } from "@/components/interactive-body-diagram";
+
 
 // Schemas
 const patientInfoSchema = z.object({
@@ -341,14 +341,39 @@ function SymptomsStep({ onSubmit, onBack }: { onSubmit: (values: SymptomsInfo) =
     },
   });
 
-  const bodyDiagram = PlaceHolderImages.find(p => p.id === 'human-anatomy');
+  const [selectedBodyParts, setSelectedBodyParts] = useState<BodyPart[]>([]);
+
+  const handlePartSelect = (part: BodyPart) => {
+    const partName = BODY_PARTS[part];
+    if (!partName) return;
+
+    const newSelectedParts = selectedBodyParts.includes(part)
+      ? selectedBodyParts.filter((p) => p !== part)
+      : [...selectedBodyParts, part];
+    
+    setSelectedBodyParts(newSelectedParts);
+
+    // Update the textarea with a prefix
+    const currentSymptoms = form.getValues('symptoms');
+    
+    // Remove existing pain prefix if any
+    const symptomsWithoutPrefix = currentSymptoms.replace(/^Pain in \[.*?\]\.?\s*/i, '');
+    
+    if (newSelectedParts.length > 0) {
+      const selectedPartNames = newSelectedParts.map(p => BODY_PARTS[p]);
+      const prefix = `Pain in [${selectedPartNames.join(', ')}]. `;
+      form.setValue('symptoms', prefix + symptomsWithoutPrefix, { shouldValidate: true });
+    } else {
+      form.setValue('symptoms', symptomsWithoutPrefix, { shouldValidate: true });
+    }
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Symptoms & Vital Signs</CardTitle>
         <CardDescription>
-          Describe the patient's symptoms and provide vital signs if available.
+          Describe the patient's symptoms and provide vital signs if available. You can also click on the body diagram to indicate pain areas.
         </CardDescription>
       </CardHeader>
       <Form {...form}>
@@ -389,15 +414,11 @@ function SymptomsStep({ onSubmit, onBack }: { onSubmit: (values: SymptomsInfo) =
                 </div>
               </div>
               <div className="flex flex-col items-center justify-center bg-muted/50 rounded-lg p-4">
-                  {bodyDiagram && <Image
-                    src={bodyDiagram.imageUrl}
-                    alt={bodyDiagram.description}
-                    width={300}
-                    height={400}
-                    className="object-contain rounded-md"
-                    data-ai-hint={bodyDiagram.imageHint}
-                  />}
-                  <p className="text-sm text-muted-foreground mt-2 text-center">Pinpoint pain areas and describe them in the text box.</p>
+                  <InteractiveBodyDiagram
+                    selectedParts={selectedBodyParts}
+                    onPartClick={handlePartSelect}
+                  />
+                  <p className="text-sm text-muted-foreground mt-2 text-center">Click on the body to select pain areas.</p>
               </div>
             </div>
           </CardContent>
