@@ -58,9 +58,11 @@ export default function StockPage() {
           <TableBody>
             {drugStock.map((drug) => (
               <TableRow key={drug.id}>
-                <TableCell className="font-medium flex items-center gap-2">
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-2">
                     {drug.name}
                     {drug.isNarcotic && <ShieldCheck className="h-4 w-4 text-destructive" />}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-4">

@@ -51,9 +51,11 @@ export default function NarcoticsPage() {
                     <TableBody>
                         {narcoticDrugs.map((drug) => (
                             <TableRow key={drug.id}>
-                                <TableCell className="font-medium flex items-center gap-2">
-                                    <ShieldCheck className="h-4 w-4 text-destructive" />
-                                    {drug.name}
+                                <TableCell className="font-medium">
+                                    <div className="flex items-center gap-2">
+                                        <ShieldCheck className="h-4 w-4 text-destructive" />
+                                        {drug.name}
+                                    </div>
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-4">
