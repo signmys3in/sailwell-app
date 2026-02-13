@@ -30,6 +30,31 @@ export const BODY_PARTS = {
 
 export type BodyPart = keyof typeof BODY_PARTS;
 
+const LABEL_POSITIONS: Record<BodyPart, { x: number; y: number; anchor?: 'start' | 'middle' | 'end' }> = {
+    head: { x: 230, y: 80 },
+    brain: { x: 220, y: 40 },
+    eyes: { x: 200, y: 95 },
+    ears: { x: 70, y: 95, anchor: 'end' },
+    nose: { x: 160, y: 110 },
+    mouth: { x: 175, y: 135 },
+    chest: { x: 95, y: 210, anchor: 'end' },
+    abdomen: { x: 95, y: 295, anchor: 'end' },
+    leftArm: { x: 55, y: 200, anchor: 'end' },
+    rightArm: { x: 245, y: 200 },
+    leftLeg: { x: 85, y: 420, anchor: 'end' },
+    rightLeg: { x: 215, y: 420 },
+    heart: { x: 170, y: 235 },
+    lungs: { x: 105, y: 220, anchor: 'end' },
+    liver: { x: 200, y: 275 },
+    stomach: { x: 100, y: 275, anchor: 'end' },
+    kidneys: { x: 195, y: 320 },
+    elbows: { x: 75, y: 240, anchor: 'end' },
+    hands: { x: 60, y: 310, anchor: 'end' },
+    knees: { x: 105, y: 425, anchor: 'end' },
+    feet: { x: 105, y: 515, anchor: 'end' },
+};
+
+
 interface InteractiveBodyDiagramProps {
     selectedParts: BodyPart[];
     onPartClick: (part: BodyPart) => void;
@@ -216,21 +241,24 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                       <path d="M160 300 C170 305 170 325 160 330 C155 325 155 305 160 300 Z" />
                     </g>
                 </g>
-                <g className="pointer-events-none text-base font-semibold">
-                    {displayedParts.map((part, index) => (
-                        <text 
-                            key={part} 
-                            x="10" 
-                            y={20 + index * 20} 
-                            className="fill-foreground"
-                        >
-                            {BODY_PARTS[part]}
-                        </text>
-                    ))}
+                <g className="pointer-events-none text-sm font-semibold">
+                    {displayedParts.map((part) => {
+                        const pos = LABEL_POSITIONS[part];
+                        return (
+                            <text 
+                                key={part} 
+                                x={pos.x} 
+                                y={pos.y}
+                                textAnchor={pos.anchor || 'start'}
+                                className="fill-foreground"
+                            >
+                                {BODY_PARTS[part]}
+                            </text>
+                        );
+                    })}
                 </g>
             </svg>
         </div>
     );
-}
 
     
