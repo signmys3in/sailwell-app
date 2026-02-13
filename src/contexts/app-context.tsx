@@ -131,8 +131,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const addPatient = useCallback((patient: PatientInfo) => {
     setPatients(prev => {
-        if (prev.some(p => p.medicalId === patient.medicalId)) {
-            return prev;
+        const existingPatientIndex = prev.findIndex(p => p.medicalId === patient.medicalId);
+        if (existingPatientIndex > -1) {
+            const newPatients = [...prev];
+            newPatients[existingPatientIndex] = patient;
+            return newPatients;
         }
         return [...prev, patient];
     });

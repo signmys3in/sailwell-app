@@ -17,6 +17,10 @@ const AIPoweredDrugRecommendationInputSchema = z.object({
   chronicDiseases: z
     .array(z.string())
     .describe('A list of chronic diseases the patient has.'),
+  allergies: z
+    .array(z.string())
+    .optional()
+    .describe('A list of known allergies the patient has.'),
   temperature: z.string().optional().describe("Patient's body temperature."),
   bloodPressure: z.string().optional().describe("Patient's blood pressure."),
   heartRate: z.string().optional().describe("Patient's heart rate."),
@@ -101,6 +105,15 @@ Patient's Chronic Diseases:
 {{else}}
 None
 {{/if}}
+
+Patient's Allergies:
+{{#if allergies}}
+{{#each allergies}}- {{{this}}}
+{{/each}}
+{{else}}
+None
+{{/if}}
+
 
 Provide the diagnosis, shortDiagnosis, severity, and suggestions in a JSON format, as specified in the output schema. For each drug, set the \`isNarcotic\` field to true if it is a controlled substance and false otherwise.`,
 });

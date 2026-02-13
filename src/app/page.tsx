@@ -60,7 +60,7 @@ import {
 } from "@/components/ui/tabs";
 
 import { getDrugSuggestions } from "@/app/actions";
-import { CHRONIC_DISEASES, COUNTRY_DRUG_NAMES } from "@/lib/data";
+import { CHRONIC_DISEASES, COUNTRY_DRUG_NAMES, ALLERGY_TYPES } from "@/lib/data";
 import type { DrugSuggestion, DrugStock as DrugStockType, PatientInfo } from "@/lib/types";
 import { AppContext } from "@/contexts/app-context";
 import { useToast } from "@/hooks/use-toast";
@@ -68,6 +68,7 @@ import { AlertTriangle, ArrowLeft, ArrowRight, Bot, Loader2, Pill, Redo, ShieldC
 import { Label } from "@/components/ui/label";
 import InteractiveBodyDiagram, { BodyPart, BODY_PARTS } from "@/components/interactive-body-diagram";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 
 // Schemas
@@ -77,6 +78,8 @@ const patientInfoFormSchema = z.object({
   alcoholUsage: z.enum(["none", "moderate", "heavy"]),
   isSmoker: z.boolean().default(false),
   chronicDiseases: z.array(z.string()),
+  hasAllergies: z.boolean().default(false),
+  allergies: z.array(z.string()).optional(),
 });
 
 const symptomsSchema = z.object({
@@ -114,8 +117,6 @@ export default function MediAssistantPage() {
   }, []);
 
   const onPatientInfoSubmit = useCallback((values: PatientInfo) => {
-    // addPatient is idempotent and will only add if the patient doesn't exist.
-    // This handles both new and existing patients gracefully.
     addPatient(values);
     setPatientInfo(values);
     setStep(2);
@@ -139,6 +140,7 @@ export default function MediAssistantPage() {
     const input = {
       symptoms: values.symptoms,
       chronicDiseases: patientInfo.chronicDiseases,
+      allergies: patientInfo.allergies,
       temperature: values.temperature,
       bloodPressure: values.bloodPressure,
       heartRate: values.heartRate,
@@ -220,6 +222,8 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
       alcoholUsage: "none",
       isSmoker: false,
       chronicDiseases: [],
+      hasAllergies: false,
+      allergies: [],
     },
   });
 
@@ -228,10 +232,14 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
   const [searchError, setSearchError] = useState("");
   const [medicalId, setMedicalId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("new-patient");
+  const [isAllergyDialogOpen, setAllergyDialogOpen] = useState(false);
 
-  const { watch, formState, getValues, reset } = form;
+  const { watch, formState, getValues, reset, setValue } = form;
   const nameValue = watch("name");
   const dobValue = watch("dob");
+  const hasAllergies = watch('hasAllergies');
+  const selectedAllergies = watch('allergies') || [];
+
 
   useEffect(() => {
     const { name, dob } = getValues();
@@ -239,13 +247,30 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
       setMedicalId(Math.floor(1000 + Math.random() * 9000).toString());
     }
   }, [nameValue, dobValue, formState.errors.dob, medicalId, getValues, activeTab]);
+  
+  useEffect(() => {
+    if (hasAllergies) {
+        setAllergyDialogOpen(true);
+    } else {
+        setValue('allergies', []);
+    }
+  }, [hasAllergies, setValue]);
+
+  const handleAllergySave = (allergies: string[]) => {
+      setValue('allergies', allergies, { shouldValidate: true });
+      if (allergies.length === 0) {
+          setValue('hasAllergies', false);
+      }
+      setAllergyDialogOpen(false);
+  };
 
   const handleNewPatientSubmit = (values: PatientInfoForm) => {
     const idToSubmit = medicalId || Math.floor(1000 + Math.random() * 9000).toString();
     if (!medicalId) {
       setMedicalId(idToSubmit);
     }
-    onSubmit({ ...values, medicalId: idToSubmit });
+    const { hasAllergies, ...patientData } = values;
+    onSubmit({ ...patientData, medicalId: idToSubmit });
   };
 
   const handleSearch = useCallback(() => {
@@ -256,7 +281,10 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
     const patient = findPatient(searchId);
     if (patient) {
       const { medicalId: foundMedicalId, ...formData } = patient;
-      reset(formData);
+      reset({
+        ...formData,
+        hasAllergies: !!(formData.allergies && formData.allergies.length > 0)
+      });
       setMedicalId(foundMedicalId);
       setActiveTab("new-patient");
       setSearchId("");
@@ -376,9 +404,9 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
                     render={() => (
                         <FormItem>
                         <div className="mb-4">
-                            <Label className="text-base">Chronic Diseases</Label>
+                            <Label className="text-base">Chronic Diseases & Allergies</Label>
                             <FormDescription>
-                            Select any pre-existing chronic diseases.
+                            Select any pre-existing conditions.
                             </FormDescription>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -418,11 +446,39 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
                                 }}
                             />
                             ))}
+                            <FormField
+                                control={form.control}
+                                name="hasAllergies"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                    <FormControl>
+                                        <Checkbox
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                    <Label className="font-normal text-destructive">
+                                        Allergies
+                                    </Label>
+                                    </FormItem>
+                                )}
+                            />
                         </div>
                         <FormMessage />
                         </FormItem>
                     )}
                     />
+
+                    {selectedAllergies.length > 0 && (
+                        <div className="p-4 border rounded-md bg-muted/50">
+                            <Label>Selected Allergies:</Label>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {selectedAllergies.map(allergy => (
+                                    <Badge key={allergy} variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20">{allergy}</Badge>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </CardContent>
                 <CardFooter className="flex justify-end">
                     <Button type="submit">
@@ -431,6 +487,17 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
                 </CardFooter>
                 </form>
             </Form>
+            <AllergySelectionDialog
+                open={isAllergyDialogOpen}
+                onOpenChange={(isOpen) => {
+                    setAllergyDialogOpen(isOpen);
+                    if (!isOpen && getValues('allergies')?.length === 0) {
+                        setValue('hasAllergies', false);
+                    }
+                }}
+                onSave={handleAllergySave}
+                selectedAllergies={getValues('allergies') || []}
+            />
         </TabsContent>
         <TabsContent value="find-patient">
              <CardContent className="space-y-6 pt-6">
@@ -846,4 +913,55 @@ function DiagnosisDialog({ open, onOpenChange, diagnosis, severity }: { open: bo
             </DialogContent>
         </Dialog>
     )
+}
+
+
+function AllergySelectionDialog({ open, onOpenChange, onSave, selectedAllergies }: { open: boolean, onOpenChange: (open: boolean) => void, onSave: (allergies: string[]) => void, selectedAllergies: string[] }) {
+    const [currentSelection, setCurrentSelection] = useState(selectedAllergies);
+
+    useEffect(() => {
+        setCurrentSelection(selectedAllergies);
+    }, [selectedAllergies, open]);
+
+    const handleAllergyToggle = (allergy: string) => {
+        setCurrentSelection(prev =>
+            prev.includes(allergy) ? prev.filter(a => a !== allergy) : [...prev, allergy]
+        );
+    };
+
+    const handleSave = () => {
+        onSave(currentSelection);
+        onOpenChange(false);
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Select Allergies</DialogTitle>
+                    <DialogDescription>
+                        Please select all known allergies from the list below.
+                    </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-72 my-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-1">
+                        {ALLERGY_TYPES.map((allergy) => (
+                            <div key={allergy} className="flex items-center space-x-2">
+                                <Checkbox
+                                    id={`allergy-${allergy}`}
+                                    checked={currentSelection.includes(allergy)}
+                                    onCheckedChange={() => handleAllergyToggle(allergy)}
+                                />
+                                <Label htmlFor={`allergy-${allergy}`} className="font-normal cursor-pointer">{allergy}</Label>
+                            </div>
+                        ))}
+                    </div>
+                </ScrollArea>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+                    <Button onClick={handleSave}>Save Allergies</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
 }

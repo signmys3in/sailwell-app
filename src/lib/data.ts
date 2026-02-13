@@ -6,8 +6,29 @@ export const CHRONIC_DISEASES = [
   "Kidney Disease",
   "Arthritis",
   "Depression",
-  "Allergies",
   "Migraine"
+];
+
+export const ALLERGY_TYPES = [
+  "Pollen",
+  "Dust Mites",
+  "Mold",
+  "Animal Dander",
+  "Insect Stings",
+  "Latex",
+  "Peanuts",
+  "Tree Nuts",
+  "Milk",
+  "Eggs",
+  "Soy",
+  "Wheat",
+  "Fish",
+  "Shellfish",
+  "Penicillin",
+  "Aspirin",
+  "Sulfa Drugs",
+  "Codeine",
+  "Ibuprofen"
 ];
 
 export const COUNTRY_DRUG_NAMES: Record<string, Record<string, string>> = {

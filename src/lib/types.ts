@@ -5,6 +5,7 @@ export type PatientInfo = {
   alcoholUsage: "none" | "moderate" | "heavy";
   isSmoker: boolean;
   chronicDiseases: string[];
+  allergies?: string[];
 };
 
 export type Vitals = {
