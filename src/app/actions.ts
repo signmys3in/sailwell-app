@@ -7,7 +7,7 @@ import { isDrugNarcotic } from "@/ai/flows/is-narcotic-check";
 export async function getDrugSuggestions(input: AIPoweredDrugRecommendationInput) {
   try {
     const result = await aiPoweredDrugRecommendation(input);
-    return { suggestions: result.drugSuggestions, diagnosis: result.diagnosis };
+    return { suggestions: result.drugSuggestions, diagnosis: result.diagnosis, severity: result.severity };
   } catch (e: any) {
     console.error(e);
     return { error: "Failed to get suggestions from AI. " + e.message };

@@ -89,6 +89,7 @@ export default function MediAssistantPage() {
   const [selectedBodyParts, setSelectedBodyParts] = useState<BodyPart[]>([]);
   const [suggestions, setSuggestions] = useState<DrugSuggestion[]>([]);
   const [diagnosis, setDiagnosis] = useState<string | null>(null);
+  const [severity, setSeverity] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const { addDrugsToStock } = useContext(AppContext);
@@ -100,6 +101,7 @@ export default function MediAssistantPage() {
     setSuggestions([]);
     setError(null);
     setDiagnosis(null);
+    setSeverity(null);
   };
 
   const onPatientInfoSubmit = (values: PatientInfo) => {
@@ -128,6 +130,7 @@ export default function MediAssistantPage() {
       if (result.error) {
         setError(result.error);
         setDiagnosis(null);
+        setSeverity(null);
       } else {
         const newSuggestions = result.suggestions || [];
         if (newSuggestions.length > 0) {
@@ -135,6 +138,7 @@ export default function MediAssistantPage() {
         }
         setSuggestions(newSuggestions);
         setDiagnosis(result.diagnosis || "No diagnosis provided.");
+        setSeverity(result.severity || null);
       }
     });
   };
@@ -175,6 +179,7 @@ export default function MediAssistantPage() {
             onStartOver={startOver}
             patientInfo={patientInfo}
             diagnosis={diagnosis}
+            severity={severity}
           />
         )}
       </div>
@@ -490,7 +495,7 @@ function SymptomsStep({
 }
 
 // Step 4: Suggestions
-function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientInfo, diagnosis }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, patientInfo: PatientInfo, diagnosis: string | null }) {
+function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientInfo, diagnosis, severity }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, patientInfo: PatientInfo, diagnosis: string | null, severity: string | null }) {
   const { drugStock } = useContext(AppContext);
   const [isDiagnosisModalOpen, setDiagnosisModalOpen] = useState(false);
 
@@ -554,7 +559,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientIn
             </Button>
         </CardFooter>
       </Card>
-      {diagnosis && <DiagnosisDialog open={isDiagnosisModalOpen} onOpenChange={setDiagnosisModalOpen} diagnosis={diagnosis} />}
+      {diagnosis && severity && <DiagnosisDialog open={isDiagnosisModalOpen} onOpenChange={setDiagnosisModalOpen} diagnosis={diagnosis} severity={severity} />}
     </div>
   );
 }
@@ -698,18 +703,41 @@ function NarcoticsDialog({ open, onOpenChange, onApproved, drugName }: { open: b
 }
 
 // Diagnosis Dialog Component
-function DiagnosisDialog({ open, onOpenChange, diagnosis }: { open: boolean, onOpenChange: (open: boolean) => void, diagnosis: string }) {
+function DiagnosisDialog({ open, onOpenChange, diagnosis, severity }: { open: boolean, onOpenChange: (open: boolean) => void, diagnosis: string, severity: string }) {
+    const severityInfo = {
+        red: {
+            message: "Requires immediate medical attention",
+            colorClass: "text-red-600 border-red-600 bg-red-50 dark:bg-red-950/50 dark:text-red-400 dark:border-red-500",
+            iconColor: "text-red-600 dark:text-red-400",
+        },
+        orange: {
+            message: "Needs close monitoring",
+            colorClass: "text-orange-600 border-orange-600 bg-orange-50 dark:bg-orange-950/50 dark:text-orange-400 dark:border-orange-500",
+            iconColor: "text-orange-600 dark:text-orange-400",
+        },
+        green: {
+            message: "Needs medication",
+            colorClass: "text-green-600 border-green-600 bg-green-50 dark:bg-green-950/50 dark:text-green-400 dark:border-green-500",
+            iconColor: "text-green-600 dark:text-green-400",
+        },
+    };
+
+    const currentSeverity = severityInfo[severity as keyof typeof severityInfo] || severityInfo.green;
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2"><Bot /> AI Diagnosis</DialogTitle>
+                    <DialogTitle className="flex items-center gap-2">
+                        <Bot className={currentSeverity.iconColor} /> AI Diagnosis
+                    </DialogTitle>
                     <DialogDescription>
                         Based on the symptoms provided, here is a possible diagnosis. This is not a substitute for professional medical advice.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="py-4 text-center">
-                    <p className="font-semibold text-lg">{diagnosis}</p>
+                <div className={`p-4 rounded-lg border ${currentSeverity.colorClass}`}>
+                    <p className="font-semibold text-lg text-center">{diagnosis}</p>
+                    <p className="text-sm text-center mt-1">{currentSeverity.message}</p>
                 </div>
                 <DialogFooter>
                     <Button onClick={() => onOpenChange(false)}>Close</Button>
