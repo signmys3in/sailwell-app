@@ -82,12 +82,18 @@ const patientInfoFormSchema = z.object({
   allergies: z.array(z.string()).optional(),
 });
 
+const CONSCIOUSNESS_LEVELS = ["Alert", "Responds to Voice", "Responds to Pain", "Unresponsive"] as const;
+
 const symptomsSchema = z.object({
   symptoms: z.string().min(10, "Please describe symptoms in at least 10 characters."),
-  temperature: z.string().optional(),
-  bloodPressure: z.string().optional(),
-  heartRate: z.string().optional(),
+  temperature: z.string().min(1, "Temperature is required."),
+  bloodPressure: z.string().min(1, "Blood pressure is required."),
+  heartRate: z.string().min(1, "Heart rate is required."),
+  consciousnessLevel: z.enum(CONSCIOUSNESS_LEVELS, {
+    required_error: "You need to select a consciousness level.",
+  }),
 });
+
 
 type PatientInfoForm = z.infer<typeof patientInfoFormSchema>;
 type SymptomsInfo = z.infer<typeof symptomsSchema>;
@@ -144,6 +150,7 @@ export default function MediAssistantPage() {
       temperature: values.temperature,
       bloodPressure: values.bloodPressure,
       heartRate: values.heartRate,
+      consciousnessLevel: values.consciousnessLevel,
     };
 
     setStep(4);
@@ -592,6 +599,7 @@ function SymptomsStep({
       temperature: "",
       bloodPressure: "",
       heartRate: "",
+      consciousnessLevel: "Alert",
     },
   });
 
@@ -617,7 +625,7 @@ function SymptomsStep({
       <CardHeader>
         <CardTitle>Symptoms & Vital Signs</CardTitle>
         <CardDescription>
-          Describe the patient's symptoms and provide vital signs if available.
+          Describe the patient's symptoms and provide vital signs.
         </CardDescription>
       </CardHeader>
       <Form {...form}>
@@ -643,18 +651,52 @@ function SymptomsStep({
                 </FormItem>
               )}
             />
-            <div>
-                <Label className="text-base">Vital Signs (Optional)</Label>
-                <div className="grid grid-cols-3 gap-4 mt-2">
+            <div className="space-y-4">
+                <Label className="text-base">Vital Signs & Consciousness (Required)</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <FormField control={form.control} name="temperature" render={({ field }) => (
-                        <FormItem><Label className="text-sm font-normal">Temp (°C)</Label><FormControl><Input placeholder="37.5" {...field} /></FormControl></FormItem>
+                        <FormItem>
+                            <Label className="text-sm font-normal">Temp (°C)</Label>
+                            <FormControl><Input placeholder="37.5" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
                     )}/>
                     <FormField control={form.control} name="bloodPressure" render={({ field }) => (
-                        <FormItem><Label className="text-sm font-normal">BP (mmHg)</Label><FormControl><Input placeholder="120/80" {...field} /></FormControl></FormItem>
+                        <FormItem>
+                            <Label className="text-sm font-normal">BP (mmHg)</Label>
+                            <FormControl><Input placeholder="120/80" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
                     )}/>
                     <FormField control={form.control} name="heartRate" render={({ field }) => (
-                        <FormItem><Label className="text-sm font-normal">HR (bpm)</Label><FormControl><Input placeholder="70" {...field} /></FormControl></FormItem>
+                        <FormItem>
+                            <Label className="text-sm font-normal">HR (bpm)</Label>
+                            <FormControl><Input placeholder="70" {...field} /></FormControl>
+                             <FormMessage />
+                        </FormItem>
                     )}/>
+                     <FormField
+                        control={form.control}
+                        name="consciousnessLevel"
+                        render={({ field }) => (
+                        <FormItem>
+                            <Label className="text-sm font-normal">Consciousness</Label>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                                <SelectTrigger>
+                                <SelectValue placeholder="Select level" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {CONSCIOUSNESS_LEVELS.map(level => (
+                                    <SelectItem key={level} value={level}>{level}</SelectItem>
+                                ))}
+                            </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
                 </div>
             </div>
           </CardContent>

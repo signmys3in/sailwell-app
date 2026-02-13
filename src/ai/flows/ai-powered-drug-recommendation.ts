@@ -21,9 +21,12 @@ const AIPoweredDrugRecommendationInputSchema = z.object({
     .array(z.string())
     .optional()
     .describe('A list of known allergies the patient has.'),
-  temperature: z.string().optional().describe("Patient's body temperature."),
-  bloodPressure: z.string().optional().describe("Patient's blood pressure."),
-  heartRate: z.string().optional().describe("Patient's heart rate."),
+  temperature: z.string().describe("Patient's body temperature."),
+  bloodPressure: z.string().describe("Patient's blood pressure."),
+  heartRate: z.string().describe("Patient's heart rate."),
+  consciousnessLevel: z
+    .enum(['Alert', 'Responds to Voice', 'Responds to Pain', 'Unresponsive'])
+    .describe("Patient's level of consciousness."),
 });
 export type AIPoweredDrugRecommendationInput = z.infer<
   typeof AIPoweredDrugRecommendationInputSchema
@@ -79,7 +82,7 @@ const prompt = ai.definePrompt({
   name: 'aiPoweredDrugRecommendationPrompt',
   input: {schema: AIPoweredDrugRecommendationInputSchema},
   output: {schema: AIPoweredDrugRecommendationOutputSchema},
-  prompt: `You are an AI medical assistant specialized in suggesting appropriate medications based on patient symptoms, vital signs, and chronic diseases. You are also a pharmacology expert.
+  prompt: `You are an AI medical assistant specialized in suggesting appropriate medications based on patient symptoms, vital signs, level of consciousness, and chronic diseases. You are also a pharmacology expert.
 
 First, provide a concise medical diagnosis based on the patient's information.
 Then, provide a short, summarized parent medical term for the diagnosis (e.g., "Common Cold", "Migraine", "Gastritis"). This will be used for analytics.
@@ -88,15 +91,10 @@ Then, based on the following information, suggest suitable drugs. For each sugge
 
 Patient Symptoms: {{{symptoms}}}
 
-{{#if temperature}}
 Patient's Temperature: {{{temperature}}}
-{{/if}}
-{{#if bloodPressure}}
 Patient's Blood Pressure: {{{bloodPressure}}}
-{{/if}}
-{{#if heartRate}}
 Patient's Heart Rate: {{{heartRate}}}
-{{/if}}
+Patient's Level of Consciousness: {{{consciousnessLevel}}}
 
 Patient's Chronic Diseases:
 {{#if chronicDiseases}}
