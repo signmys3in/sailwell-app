@@ -30,6 +30,7 @@ export const BODY_PARTS = {
 
 export type BodyPart = keyof typeof BODY_PARTS;
 
+// Fine-tuned positions for the new diagram
 const LABEL_POSITIONS: Record<BodyPart, { x: number; y: number; anchor?: 'start' | 'middle' | 'end' }> = {
     head: { x: 275, y: 105 },
     brain: { x: 265, y: 65 },
@@ -43,15 +44,15 @@ const LABEL_POSITIONS: Record<BodyPart, { x: number; y: number; anchor?: 'start'
     rightArm: { x: 340, y: 280 },
     leftLeg: { x: 115, y: 520, anchor: 'end' },
     rightLeg: { x: 285, y: 520 },
-    heart: { x: 200, y: 270, anchor: 'middle' },
-    lungs: { x: 145, y: 250, anchor: 'end' },
-    liver: { x: 245, y: 340 },
-    stomach: { x: 155, y: 340, anchor: 'end' },
-    kidneys: { x: 230, y: 385 },
-    elbows: { x: 85, y: 295, anchor: 'end' },
-    hands: { x: 45, y: 360, anchor: 'end' },
-    knees: { x: 120, y: 530, anchor: 'end' },
-    feet: { x: 120, y: 635, anchor: 'end' },
+    heart: { x: 200, y: 285, anchor: 'middle' },
+    lungs: { x: 145, y: 260, anchor: 'end' },
+    liver: { x: 265, y: 350 },
+    stomach: { x: 135, y: 350, anchor: 'end' },
+    kidneys: { x: 250, y: 400 },
+    elbows: { x: 85, y: 340, anchor: 'end' },
+    hands: { x: 45, y: 450, anchor: 'end' },
+    knees: { x: 120, y: 580, anchor: 'end' },
+    feet: { x: 120, y: 700, anchor: 'end' },
 };
 
 
@@ -70,7 +71,7 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
             "transition-all duration-300 ease-in-out cursor-pointer",
             "hover:fill-primary/20 hover:stroke-primary",
             isSelected(part) 
-                ? "fill-primary stroke-primary-foreground animate-pulse-glow" 
+                ? "fill-primary/80 stroke-primary-foreground animate-pulse-glow" 
                 : "fill-transparent stroke-foreground/80"
         );
     };
@@ -90,14 +91,24 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
             >
                 <defs>
                     <linearGradient id="body-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="hsl(var(--primary) / 0.05)" />
-                        <stop offset="100%" stopColor="hsl(var(--primary) / 0.15)" />
+                        <stop offset="0%" stopColor="hsl(var(--primary) / 0.08)" />
+                        <stop offset="100%" stopColor="hsl(var(--primary) / 0.18)" />
                     </linearGradient>
+                     <filter id="glow">
+                        <feGaussianBlur stdDeviation="3.5" result="coloredBlur" />
+                        <feMerge>
+                            <feMergeNode in="coloredBlur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
                 </defs>
                 
-                {/* Base Body Silhouette */}
-                <g stroke="hsl(var(--foreground) / 0.1)" strokeWidth="1">
-                    <path fill="url(#body-gradient)" d="M200 30 C 150 30, 120 60, 120 110 C 120 160, 150 180, 160 190 L 120 200 C 70 210, 50 280, 70 400 L 120 600 L 140 720 H 260 L 280 600 L 330 400 C 350 280, 330 210, 280 200 L 240 190 C 250 180, 280 160, 280 110 C 280 60, 250 30, 200 30 Z" />
+                {/* Base Body Silhouette with more details */}
+                <g stroke="hsl(var(--foreground) / 0.1)" strokeWidth="1.5">
+                    <path fill="url(#body-gradient)" d="M200,30 C160,30,130,60,130,110 S150,180,165,190 L135,200 C80,210,65,280,80,410 L125,590 L140,720 H260 L275,590 L320,410 C335,280,320,210,265,200 L235,190 C250,180,270,160,270,110 S240,30,200,30 Z" />
+                    {/* Subtle muscle/bone lines */}
+                    <path d="M200,190 V 450" stroke="hsl(var(--foreground) / 0.05)" />
+                    <path d="M165,190 C175,230,175,230,200,240 C225,230,225,230,235,190" stroke="hsl(var(--foreground) / 0.05)" /> {/* Clavicle */}
                 </g>
 
                 <g onMouseLeave={() => setHoveredPart(null)}>
@@ -149,7 +160,7 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
 
                     {/* Torso (Chest + Abdomen) */}
                     <path
-                        d="M165,180L130,210C120,270,120,350,130,420L170,430 H230 L270,420 C280,350,280,270,270,210 L235,180Z"
+                        d="M165,190L135,210C125,270,125,350,135,430L170,450 H230 L265,430 C275,350,275,270,265,210 L235,190Z"
                         onClick={() => onPartClick('chest')}
                         onMouseEnter={() => setHoveredPart('chest')}
                         className={getPartClasses('chest')}
@@ -157,7 +168,7 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                         data-testid="body-part-chest"
                     />
                     <path
-                        d="M130,320 C130,380,130,380,130,420 L170,430 H230 L270,420 C270,380,270,380,270,320Z"
+                        d="M135,330 C135,390,135,390,135,430 L170,450 H230 L265,430 C265,390,265,390,265,330Z"
                         onClick={() => onPartClick('abdomen')}
                         onMouseEnter={() => setHoveredPart('abdomen')}
                         className={getPartClasses('abdomen')}
@@ -167,7 +178,7 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
 
                     {/* Arms */}
                     <path
-                        d="M130,210 Q80,240,70,350 L90,355 Q100,270,145,215 Z"
+                        d="M135,210 Q80,250,70,380 L95,385 Q105,280,150,215 Z"
                         onClick={() => onPartClick('leftArm')}
                         onMouseEnter={() => setHoveredPart('leftArm')}
                         className={getPartClasses('leftArm')}
@@ -175,7 +186,7 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                         data-testid="body-part-leftArm"
                     />
                     <path
-                        d="M270,210 Q320,240,330,350 L310,355 Q300,270,255,215 Z"
+                        d="M265,210 Q320,250,330,380 L305,385 Q295,280,250,215 Z"
                         onClick={() => onPartClick('rightArm')}
                         onMouseEnter={() => setHoveredPart('rightArm')}
                         className={getPartClasses('rightArm')}
@@ -185,7 +196,7 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
 
                     {/* Legs */}
                     <path
-                        d="M170,430 L130,620 L180,620 L175,430 Z"
+                        d="M170,450 L125,650 L185,650 L175,450 Z"
                         onClick={() => onPartClick('leftLeg')}
                         onMouseEnter={() => setHoveredPart('leftLeg')}
                         className={getPartClasses('leftLeg')}
@@ -193,7 +204,7 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                         data-testid="body-part-leftLeg"
                     />
                     <path
-                        d="M230,430 L270,620 L220,620 L225,430 Z"
+                        d="M230,450 L275,650 L215,650 L225,450 Z"
                         onClick={() => onPartClick('rightLeg')}
                         onMouseEnter={() => setHoveredPart('rightLeg')}
                         className={getPartClasses('rightLeg')}
@@ -201,56 +212,59 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                         data-testid="body-part-rightLeg"
                     />
 
-                    {/* Joints & Extremities */}
+                     {/* Joints & Extremities */}
                     <g onClick={() => onPartClick('elbows')} onMouseEnter={() => setHoveredPart('elbows')} className={getPartClasses('elbows')}>
-                        <circle cx="95" cy="290" r="12" id="elbow-left" data-testid="body-part-elbows"/>
-                        <circle cx="305" cy="290" r="12" id="elbow-right" data-testid="body-part-elbows"/>
+                        <circle cx="90" cy="330" r="14" id="elbow-left" data-testid="body-part-elbows"/>
+                        <circle cx="310" cy="330" r="14" id="elbow-right" data-testid="body-part-elbows"/>
                     </g>
                     <g onClick={() => onPartClick('hands')} onMouseEnter={() => setHoveredPart('hands')} className={getPartClasses('hands')}>
-                        <path d="M70,350 C50,350 50,370 70,370 L 90,355 Z" id="hand-left" data-testid="body-part-hands"/>
-                        <path d="M330,350 C350,350 350,370 330,370 L 310,355 Z" id="hand-right" data-testid="body-part-hands"/>
+                        <path d="M70,380 C40,390,40,430,70,440 L95,385 Z" id="hand-left" data-testid="body-part-hands"/>
+                        <path d="M330,380 C360,390,360,430,330,440 L305,385 Z" id="hand-right" data-testid="body-part-hands"/>
                     </g>
                     <g onClick={() => onPartClick('knees')} onMouseEnter={() => setHoveredPart('knees')} className={getPartClasses('knees')}>
-                        <circle cx="155" cy="520" r="15" id="knee-left" data-testid="body-part-knees"/>
-                        <circle cx="245" cy="520" r="15" id="knee-right" data-testid="body-part-knees"/>
+                        <circle cx="155" cy="570" r="18" id="knee-left" data-testid="body-part-knees"/>
+                        <circle cx="245" cy="570" r="18" id="knee-right" data-testid="body-part-knees"/>
                     </g>
                     <g onClick={() => onPartClick('feet')} onMouseEnter={() => setHoveredPart('feet')} className={getPartClasses('feet')}>
-                        <path d="M130,620 C110,630 150,650 180,630" id="foot-left" data-testid="body-part-feet" />
-                        <path d="M220,630 C250,650 290,630 270,620" id="foot-right" data-testid="body-part-feet" />
+                        <path d="M125,650 C100,660,140,700,185,670" id="foot-left" data-testid="body-part-feet" />
+                        <path d="M215,670 C260,700,300,660,275,650" id="foot-right" data-testid="body-part-feet" />
                     </g>
 
-                    {/* Organs */}
-                    <g onClick={() => onPartClick('lungs')} onMouseEnter={() => setHoveredPart('lungs')} className={getPartClasses('lungs')} id="lungs" data-testid="body-part-lungs">
-                        <path d="M190,210 C150,210,150,290,180,310 L190,300Z" />
-                        <path d="M210,210 C250,210,250,290,220,310 L210,300Z" />
+                    {/* Fine-tuned Organs */}
+                    <g onClick={() => onPartClick('lungs')} onMouseEnter={() => setHoveredPart('lungs')} className={getPartClasses('lungs')} id="lungs" data-testid="body-part-lungs" style={isSelected('lungs') ? {filter: 'url(#glow)'} : {}}>
+                        <path d="M195,230 C150,230,140,300,170,330 C180,310,195,300,195,230 Z" />
+                        <path d="M205,230 C250,230,260,300,230,330 C220,310,205,300,205,230 Z" />
                     </g>
                     <path
-                        d="M200,250 C185,260 188,285 200,290 C212,285 215,260 200,250 Z"
+                        d="M200,270 C180,280,180,310,200,320 C220,310,220,280,200,270 Z"
                         onClick={() => onPartClick('heart')}
                         onMouseEnter={() => setHoveredPart('heart')}
                         className={getPartClasses('heart')}
                         id="heart"
                         data-testid="body-part-heart"
+                        style={isSelected('heart') ? {filter: 'url(#glow)'} : {}}
                     />
                     <path
-                        d="M205,320 C240,320,245,360,210,360 L205,355Z"
+                        d="M205,340 C250,330,260,380,210,385 Z"
                         onClick={() => onPartClick('liver')}
                         onMouseEnter={() => setHoveredPart('liver')}
                         className={getPartClasses('liver')}
                         id="liver"
                         data-testid="body-part-liver"
+                        style={isSelected('liver') ? {filter: 'url(#glow)'} : {}}
                     />
                     <path
-                        d="M195,320 C160,320,155,360,190,360 L195,355Z"
+                        d="M195,340 C150,330,140,380,190,385 Z"
                         onClick={() => onPartClick('stomach')}
                         onMouseEnter={() => setHoveredPart('stomach')}
                         className={getPartClasses('stomach')}
                         id="stomach"
                         data-testid="body-part-stomach"
+                        style={isSelected('stomach') ? {filter: 'url(#glow)'} : {}}
                     />
-                    <g onClick={() => onPartClick('kidneys')} onMouseEnter={() => setHoveredPart('kidneys')} className={getPartClasses('kidneys')} id="kidneys" data-testid="body-part-kidneys">
-                        <path d="M180,370 C170,375,170,395,180,400 C185,395,185,375,180,370 Z" />
-                        <path d="M220,370 C230,375,230,395,220,400 C215,395,215,375,220,370 Z" />
+                    <g onClick={() => onPartClick('kidneys')} onMouseEnter={() => setHoveredPart('kidneys')} className={getPartClasses('kidneys')} id="kidneys" data-testid="body-part-kidneys" style={isSelected('kidneys') ? {filter: 'url(#glow)'} : {}}>
+                        <path d="M175,390 C160,390,160,420,175,420 C190,410,190,400,175,390 Z" />
+                        <path d="M225,390 C240,390,240,420,225,420 C210,410,210,400,225,390 Z" />
                     </g>
                 </g>
                 <g className="pointer-events-none text-sm font-semibold">
@@ -272,5 +286,4 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
             </svg>
         </div>
     );
-
-    
+}
