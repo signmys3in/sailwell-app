@@ -1,0 +1,13 @@
+<svg width="120" height="30" viewBox="0 0 120 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<style>
+    .logo-text {
+      fill: hsl(222.2, 47.4%, 11.2%);
+    }
+    @media (prefers-color-scheme: dark) {
+      .logo-text {
+        fill: hsl(210, 40%, 98%);
+      }
+    }
+  </style>
+  <text x="10" y="22" font-family="Inter, sans-serif" font-size="20" font-weight="bold" class="logo-text">SailWell</text>
+</svg>
