@@ -6,13 +6,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     <div className="flex min-h-screen w-full flex-col bg-background">
       <div className="flex flex-1">
         <aside className="fixed inset-y-0 left-0 z-10 hidden w-64 flex-col border-r bg-sidebar sm:flex">
-          <div className="flex h-28 items-center justify-center border-b px-6">
+          <div className="flex h-64 items-center justify-center border-b">
             <a href="/" className="flex items-center gap-2 font-semibold">
               <Image
                 src="/logo.png"
                 alt="SailWell Logo"
-                width={96}
-                height={90}
+                width={256}
+                height={240}
               />
             </a>
           </div>
