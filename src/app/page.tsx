@@ -100,7 +100,7 @@ export default function MediAssistantPage() {
   const [severity, setSeverity] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const { addDrugsToStock, addPatient, findPatient } = useContext(AppContext);
+  const { addDrugsToStock, addPatient } = useContext(AppContext);
 
   const startOver = useCallback(() => {
     setStep(1);
@@ -113,21 +113,13 @@ export default function MediAssistantPage() {
     setShortDiagnosis(null);
   }, []);
 
-  const onPatientInfoSubmit = useCallback((values: PatientInfoForm | PatientInfo) => {
-    let patientToSet: PatientInfo;
-    if ('medicalId' in values) {
-      patientToSet = values as PatientInfo;
-    } else {
-      const medicalId = crypto.randomUUID().toUpperCase();
-      patientToSet = { ...values, medicalId };
-    }
-
-    if (!findPatient(patientToSet.medicalId)) {
-      addPatient(patientToSet);
-    }
-    setPatientInfo(patientToSet);
+  const onPatientInfoSubmit = useCallback((values: PatientInfo) => {
+    // addPatient is idempotent and will only add if the patient doesn't exist.
+    // This handles both new and existing patients gracefully.
+    addPatient(values);
+    setPatientInfo(values);
     setStep(2);
-  }, [addPatient, findPatient]);
+  }, [addPatient]);
 
   const onBodyPartSelectionSubmit = useCallback((parts: BodyPart[]) => {
     setSelectedBodyParts(parts);
@@ -211,7 +203,7 @@ export default function MediAssistantPage() {
 }
 
 // Step 1: Patient Info
-function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfoForm | PatientInfo) => void }) {
+function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void }) {
   const form = useForm<PatientInfoForm>({
     resolver: zodResolver(patientInfoFormSchema),
     defaultValues: {
