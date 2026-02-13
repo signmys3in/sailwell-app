@@ -17,8 +17,16 @@ import {
   ChartLegend,
   ChartLegendContent,
 } from "@/components/ui/chart";
-import { PieChart, Pie } from "recharts";
+import { PieChart, Pie, Cell } from "recharts";
 import type { ChartConfig } from "@/components/ui/chart";
+
+const COLORS = [
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
+];
 
 export default function DiseaseTrendsPage() {
   const { dispenseLog } = useContext(AppContext);
@@ -44,8 +52,11 @@ export default function DiseaseTrendsPage() {
         label: "Cases",
       },
     };
-    chartData.forEach((item) => {
-        config[item.name] = { label: item.name };
+    chartData.forEach((item, index) => {
+        config[item.name] = { 
+          label: item.name,
+          color: COLORS[index % COLORS.length] 
+        };
     });
     return config;
   }, [chartData]);
@@ -106,7 +117,11 @@ export default function DiseaseTrendsPage() {
                       </text>
                     );
                   }}
-                />
+                >
+                  {chartData.map((_entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
                  <ChartLegend
                     content={<ChartLegendContent nameKey="name" />}
                     verticalAlign="bottom"
