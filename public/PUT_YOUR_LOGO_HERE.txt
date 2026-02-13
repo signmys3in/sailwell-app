@@ -1,0 +1,3 @@
+Please add your logo file to this 'public' directory and name it 'logo.png'.
+
+You can do this by dragging your logo image file from your computer and dropping it into this 'public' folder in the file explorer.
