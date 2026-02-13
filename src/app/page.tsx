@@ -100,7 +100,7 @@ export default function MediAssistantPage() {
   const [severity, setSeverity] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const { addDrugsToStock, addPatient } = useContext(AppContext);
+  const { addDrugsToStock, addPatient, findPatient } = useContext(AppContext);
 
   const startOver = useCallback(() => {
     setStep(1);
@@ -120,6 +120,14 @@ export default function MediAssistantPage() {
     setPatientInfo(values);
     setStep(2);
   }, [addPatient]);
+
+  const onPatientLookup = useCallback((medicalId: string) => {
+    const foundPatient = findPatient(medicalId);
+    if(foundPatient) {
+      setPatientInfo(foundPatient);
+      setStep(2);
+    }
+  }, [findPatient]);
 
   const onBodyPartSelectionSubmit = useCallback((parts: BodyPart[]) => {
     setSelectedBodyParts(parts);
@@ -161,16 +169,16 @@ export default function MediAssistantPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <header className="mb-6">
-        <h1 className="text-4xl font-bold tracking-tighter">Diagnosing & Drug Selection</h1>
-        <p className="text-muted-foreground">AI-powered diagnosis and medication suggestions.</p>
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">Diagnosing & Drug Selection</h1>
+        <p className="text-muted-foreground mt-1">AI-powered diagnosis and medication suggestions.</p>
       </header>
       <div className="w-full mb-6">
         <Progress value={currentProgress} className="h-2" />
       </div>
 
       <div className="flex-grow">
-        {step === 1 && <PatientInfoStep onSubmit={onPatientInfoSubmit} />}
+        {step === 1 && <PatientInfoStep onSubmit={onPatientInfoSubmit} onPatientLookup={onPatientLookup} />}
         {step === 2 && (
           <BodyPartSelectionStep
             initialSelectedParts={selectedBodyParts}
@@ -203,7 +211,7 @@ export default function MediAssistantPage() {
 }
 
 // Step 1: Patient Info
-function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void }) {
+function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: PatientInfo) => void; onPatientLookup: (medicalId: string) => void; }) {
   const form = useForm<PatientInfoForm>({
     resolver: zodResolver(patientInfoFormSchema),
     defaultValues: {
