@@ -1,3 +1,4 @@
+
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -226,32 +227,34 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                       <path d="M160 300 C170 305 170 325 160 330 C155 325 155 305 160 300 Z" />
                     </g>
                 </g>
-                <g className="text-sm font-medium fill-primary-foreground pointer-events-none">
-                    <text x="150" y="90" textAnchor="middle" visibility={isSelected('head') || hoveredPart === 'head' ? 'visible' : 'hidden'} className={isSelected('head') ? 'animate-in fade-in' : ''}>Head</text>
-                    <text x="150" y="60" textAnchor="middle" visibility={isSelected('brain') || hoveredPart === 'brain' ? 'visible' : 'hidden'} className={isSelected('brain') ? 'animate-in fade-in' : ''}>Brain</text>
-                    <text x="150" y="100" textAnchor="middle" visibility={isSelected('eyes') || hoveredPart === 'eyes' ? 'visible' : 'hidden'} className={isSelected('eyes') ? 'animate-in fade-in' : ''}>Eyes</text>
-                    <text x="150" y="95" textAnchor="middle" visibility={isSelected('ears') || hoveredPart === 'ears' ? 'visible' : 'hidden'} className={isSelected('ears') ? 'animate-in fade-in' : ''}>Ears</text>
-                    <text x="150" y="115" textAnchor="middle" visibility={isSelected('nose') || hoveredPart === 'nose' ? 'visible' : 'hidden'} className={isSelected('nose') ? 'animate-in fade-in' : ''}>Nose</text>
-                    <text x="150" y="133" textAnchor="middle" visibility={isSelected('mouth') || hoveredPart === 'mouth' ? 'visible' : 'hidden'} className={isSelected('mouth') ? 'animate-in fade-in' : ''}>Mouth</text>
-                    <text x="150" y="210" textAnchor="middle" visibility={isSelected('chest') || hoveredPart === 'chest' ? 'visible' : 'hidden'} className={isSelected('chest') ? 'animate-in fade-in' : ''}>Chest</text>
-                    <text x="150" y="290" textAnchor="middle" visibility={isSelected('abdomen') || hoveredPart === 'abdomen' ? 'visible' : 'hidden'} className={isSelected('abdomen') ? 'animate-in fade-in' : ''}>Abdomen</text>
-                    <text x="75" y="240" textAnchor="middle" visibility={isSelected('leftArm') || hoveredPart === 'leftArm' ? 'visible' : 'hidden'} className={isSelected('leftArm') ? 'animate-in fade-in' : ''}>L. Arm</text>
-                    <text x="225" y="240" textAnchor="middle" visibility={isSelected('rightArm') || hoveredPart === 'rightArm' ? 'visible' : 'hidden'} className={isSelected('rightArm') ? 'animate-in fade-in' : ''}>R. Arm</text>
-                    <text x="115" y="420" textAnchor="middle" visibility={isSelected('leftLeg') || hoveredPart === 'leftLeg' ? 'visible' : 'hidden'} className={isSelected('leftLeg') ? 'animate-in fade-in' : ''}>L. Leg</text>
-                    <text x="185" y="420" textAnchor="middle" visibility={isSelected('rightLeg') || hoveredPart === 'rightLeg' ? 'visible' : 'hidden'} className={isSelected('rightLeg') ? 'animate-in fade-in' : ''}>R. Leg</text>
+                <g className="text-sm font-medium pointer-events-none">
+                    <text x="150" y="90" textAnchor="middle" visibility={isSelected('head') || hoveredPart === 'head' ? 'visible' : 'hidden'} className={cn(isSelected('head') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Head</text>
+                    <text x="150" y="60" textAnchor="middle" visibility={isSelected('brain') || hoveredPart === 'brain' ? 'visible' : 'hidden'} className={cn(isSelected('brain') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Brain</text>
+                    <text x="150" y="100" textAnchor="middle" visibility={isSelected('eyes') || hoveredPart === 'eyes' ? 'visible' : 'hidden'} className={cn(isSelected('eyes') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Eyes</text>
+                    <text x="150" y="95" textAnchor="middle" visibility={isSelected('ears') || hoveredPart === 'ears' ? 'visible' : 'hidden'} className={cn(isSelected('ears') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Ears</text>
+                    <text x="150" y="115" textAnchor="middle" visibility={isSelected('nose') || hoveredPart === 'nose' ? 'visible' : 'hidden'} className={cn(isSelected('nose') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Nose</text>
+                    <text x="150" y="133" textAnchor="middle" visibility={isSelected('mouth') || hoveredPart === 'mouth' ? 'visible' : 'hidden'} className={cn(isSelected('mouth') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Mouth</text>
+                    <text x="150" y="210" textAnchor="middle" visibility={isSelected('chest') || hoveredPart === 'chest' ? 'visible' : 'hidden'} className={cn(isSelected('chest') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Chest</text>
+                    <text x="150" y="290" textAnchor="middle" visibility={isSelected('abdomen') || hoveredPart === 'abdomen' ? 'visible' : 'hidden'} className={cn(isSelected('abdomen') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Abdomen</text>
+                    <text x="75" y="240" textAnchor="middle" visibility={isSelected('leftArm') || hoveredPart === 'leftArm' ? 'visible' : 'hidden'} className={cn(isSelected('leftArm') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>L. Arm</text>
+                    <text x="225" y="240" textAnchor="middle" visibility={isSelected('rightArm') || hoveredPart === 'rightArm' ? 'visible' : 'hidden'} className={cn(isSelected('rightArm') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>R. Arm</text>
+                    <text x="115" y="420" textAnchor="middle" visibility={isSelected('leftLeg') || hoveredPart === 'leftLeg' ? 'visible' : 'hidden'} className={cn(isSelected('leftLeg') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>L. Leg</text>
+                    <text x="185" y="420" textAnchor="middle" visibility={isSelected('rightLeg') || hoveredPart === 'rightLeg' ? 'visible' : 'hidden'} className={cn(isSelected('rightLeg') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>R. Leg</text>
                     
-                    <text x="150" y="245" textAnchor="middle" visibility={isSelected('elbows') || hoveredPart === 'elbows' ? 'visible' : 'hidden'} className={isSelected('elbows') ? 'animate-in fade-in' : ''}>Elbows</text>
-                    <text x="150" y="305" textAnchor="middle" visibility={isSelected('hands') || hoveredPart === 'hands' ? 'visible' : 'hidden'} className={isSelected('hands') ? 'animate-in fade-in' : ''}>Hands</text>
-                    <text x="150" y="425" textAnchor="middle" visibility={isSelected('knees') || hoveredPart === 'knees' ? 'visible' : 'hidden'} className={isSelected('knees') ? 'animate-in fade-in' : ''}>Knees</text>
-                    <text x="150" y="510" textAnchor="middle" visibility={isSelected('feet') || hoveredPart === 'feet' ? 'visible' : 'hidden'} className={isSelected('feet') ? 'animate-in fade-in' : ''}>Feet</text>
+                    <text x="150" y="245" textAnchor="middle" visibility={isSelected('elbows') || hoveredPart === 'elbows' ? 'visible' : 'hidden'} className={cn(isSelected('elbows') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Elbows</text>
+                    <text x="150" y="305" textAnchor="middle" visibility={isSelected('hands') || hoveredPart === 'hands' ? 'visible' : 'hidden'} className={cn(isSelected('hands') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Hands</text>
+                    <text x="150" y="425" textAnchor="middle" visibility={isSelected('knees') || hoveredPart === 'knees' ? 'visible' : 'hidden'} className={cn(isSelected('knees') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Knees</text>
+                    <text x="150" y="510" textAnchor="middle" visibility={isSelected('feet') || hoveredPart === 'feet' ? 'visible' : 'hidden'} className={cn(isSelected('feet') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Feet</text>
 
-                    <text x="150" y="235" textAnchor="middle" visibility={isSelected('heart') || hoveredPart === 'heart' ? 'visible' : 'hidden'} className={isSelected('heart') ? 'animate-in fade-in' : ''}>Heart</text>
-                    <text x="150" y="200" textAnchor="middle" visibility={isSelected('lungs') || hoveredPart === 'lungs' ? 'visible' : 'hidden'} className={isSelected('lungs') ? 'animate-in fade-in' : ''}>Lungs</text>
-                    <text x="170" y="275" textAnchor="middle" visibility={isSelected('liver') || hoveredPart === 'liver' ? 'visible' : 'hidden'} className={isSelected('liver') ? 'animate-in fade-in' : ''}>Liver</text>
-                    <text x="130" y="275" textAnchor="middle" visibility={isSelected('stomach') || hoveredPart === 'stomach' ? 'visible' : 'hidden'} className={isSelected('stomach') ? 'animate-in fade-in' : ''}>Stomach</text>
-                    <text x="150" y="315" textAnchor="middle" visibility={isSelected('kidneys') || hoveredPart === 'kidneys' ? 'visible' : 'hidden'} className={isSelected('kidneys') ? 'animate-in fade-in' : ''}>Kidneys</text>
+                    <text x="150" y="235" textAnchor="middle" visibility={isSelected('heart') || hoveredPart === 'heart' ? 'visible' : 'hidden'} className={cn(isSelected('heart') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Heart</text>
+                    <text x="150" y="200" textAnchor="middle" visibility={isSelected('lungs') || hoveredPart === 'lungs' ? 'visible' : 'hidden'} className={cn(isSelected('lungs') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Lungs</text>
+                    <text x="170" y="275" textAnchor="middle" visibility={isSelected('liver') || hoveredPart === 'liver' ? 'visible' : 'hidden'} className={cn(isSelected('liver') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Liver</text>
+                    <text x="130" y="275" textAnchor="middle" visibility={isSelected('stomach') || hoveredPart === 'stomach' ? 'visible' : 'hidden'} className={cn(isSelected('stomach') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Stomach</text>
+                    <text x="150" y="315" textAnchor="middle" visibility={isSelected('kidneys') || hoveredPart === 'kidneys' ? 'visible' : 'hidden'} className={cn(isSelected('kidneys') ? 'animate-in fade-in fill-primary-foreground' : 'fill-foreground')}>Kidneys</text>
                 </g>
             </svg>
         </div>
     );
 }
+
+    
