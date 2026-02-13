@@ -19,7 +19,7 @@ const links = [
   },
   {
     href: "/reports",
-    label: "Reports",
+    label: "Dispensing Activities and Diagnoses",
     icon: AreaChart,
   },
   {
