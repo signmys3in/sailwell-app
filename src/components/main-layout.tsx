@@ -12,7 +12,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 src="/logo.png"
                 alt="SailWell Logo"
                 width={512}
-                height={180}
+                height={220}
                 className="w-full h-auto"
               />
             </a>
