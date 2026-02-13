@@ -84,7 +84,7 @@ const prompt = ai.definePrompt({
 First, provide a concise medical diagnosis based on the patient's information.
 Then, provide a short, summarized parent medical term for the diagnosis (e.g., "Common Cold", "Migraine", "Gastritis"). This will be used for analytics.
 Then, determine the severity of the diagnosis. Use 'red' if it requires immediate medical attention, 'orange' if it needs close monitoring, and 'green' if it just needs medication.
-Then, based on the following information, suggest suitable drugs. For each suggestion, provide a brief reasoning why it is appropriate, a suggested dosage if applicable, and determine if the drug is a narcotic.
+Then, based on the following information, suggest suitable drugs. For each suggestion, provide a brief reasoning why it is appropriate, a suggested dosage if applicable, and determine if the drug is a narcotic. Pay close attention to the patient's allergies listed below and in the symptoms description to avoid suggesting medications that could cause an allergic reaction.
 
 Patient Symptoms: {{{symptoms}}}
 

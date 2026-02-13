@@ -193,6 +193,7 @@ export default function MediAssistantPage() {
             onSubmit={onSymptomsSubmit}
             onBack={() => setStep(2)}
             initialSelectedParts={selectedBodyParts}
+            patientInfo={patientInfo}
           />
         )}
         {step === 4 && patientInfo && (
@@ -577,10 +578,12 @@ function SymptomsStep({
   onSubmit,
   onBack,
   initialSelectedParts,
+  patientInfo,
 }: {
   onSubmit: (values: SymptomsInfo) => void;
   onBack: () => void;
   initialSelectedParts: BodyPart[];
+  patientInfo: PatientInfo | null;
 }) {
   const form = useForm<SymptomsInfo>({
     resolver: zodResolver(symptomsSchema),
@@ -593,13 +596,21 @@ function SymptomsStep({
   });
 
   useEffect(() => {
+    let initialSymptoms = "";
     if (initialSelectedParts.length > 0) {
-      const initialSymptoms = initialSelectedParts
+      initialSymptoms = initialSelectedParts
         .map(part => `Pain in ${BODY_PARTS[part]}`)
         .join(', ');
-      form.setValue('symptoms', initialSymptoms + '. ');
+      initialSymptoms += '. ';
     }
-  }, [initialSelectedParts, form]);
+    
+    if(patientInfo?.allergies && patientInfo.allergies.length > 0) {
+        const allergyText = `Patient has known allergies to: ${patientInfo.allergies.join(', ')}. `;
+        initialSymptoms += allergyText;
+    }
+    
+    form.setValue('symptoms', initialSymptoms);
+  }, [initialSelectedParts, patientInfo, form]);
 
   return (
     <Card>
@@ -626,7 +637,7 @@ function SymptomsStep({
                     />
                   </FormControl>
                   <FormDescription>
-                    Describe the patient's symptoms in detail. You can add more information to what was pre-filled from the body diagram.
+                    Describe the patient's symptoms in detail. You can add more information to what was pre-filled from the body diagram and allergy selection.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
