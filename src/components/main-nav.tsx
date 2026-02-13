@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Pill, Boxes, AreaChart, LineChart, ShieldCheck } from "lucide-react";
+import { Pill, Boxes, AreaChart, LineChart, ShieldCheck, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -26,6 +26,11 @@ const links = [
     href: "/reports/disease-trends",
     label: "Disease Trends",
     icon: LineChart,
+  },
+  {
+    href: "/reports/low-stock",
+    label: "Low Stock",
+    icon: AlertTriangle,
   },
   {
     href: "/narcotics",
