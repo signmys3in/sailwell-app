@@ -100,7 +100,7 @@ export default function MediAssistantPage() {
   const [severity, setSeverity] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const { addDrugsToStock, addPatient } = useContext(AppContext);
+  const { addDrugsToStock, addPatient, findPatient } = useContext(AppContext);
 
   const startOver = useCallback(() => {
     setStep(1);
@@ -114,16 +114,20 @@ export default function MediAssistantPage() {
   }, []);
 
   const onPatientInfoSubmit = useCallback((values: PatientInfoForm | PatientInfo) => {
+    let patientToSet: PatientInfo;
     if ('medicalId' in values) {
-      setPatientInfo(values);
+      patientToSet = values as PatientInfo;
     } else {
-      const medicalId = crypto.randomUUID();
-      const newPatient: PatientInfo = { ...values, medicalId };
-      setPatientInfo(newPatient);
-      addPatient(newPatient);
+      const medicalId = crypto.randomUUID().toUpperCase();
+      patientToSet = { ...values, medicalId };
     }
+
+    if (!findPatient(patientToSet.medicalId)) {
+      addPatient(patientToSet);
+    }
+    setPatientInfo(patientToSet);
     setStep(2);
-  }, [addPatient]);
+  }, [addPatient, findPatient]);
 
   const onBodyPartSelectionSubmit = useCallback((parts: BodyPart[]) => {
     setSelectedBodyParts(parts);
@@ -222,6 +226,26 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfoForm | Pa
   const { findPatient } = useContext(AppContext);
   const [searchId, setSearchId] = useState("");
   const [searchError, setSearchError] = useState("");
+  const [medicalId, setMedicalId] = useState<string | null>(null);
+
+  const { watch, formState, getValues } = form;
+  const nameValue = watch("name");
+  const dobValue = watch("dob");
+
+  useEffect(() => {
+    const { name, dob } = getValues();
+    if (name && name.length >= 2 && dob && !formState.errors.dob && !medicalId) {
+      setMedicalId(crypto.randomUUID().toUpperCase());
+    }
+  }, [nameValue, dobValue, formState.errors.dob, medicalId, getValues]);
+
+  const handleNewPatientSubmit = (values: PatientInfoForm) => {
+    const idToSubmit = medicalId || crypto.randomUUID().toUpperCase();
+    if (!medicalId) {
+      setMedicalId(idToSubmit);
+    }
+    onSubmit({ ...values, medicalId: idToSubmit });
+  };
 
   const handleSearch = useCallback(() => {
     if (!searchId) {
@@ -252,7 +276,7 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfoForm | Pa
         </TabsList>
         <TabsContent value="new-patient">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
+                <form onSubmit={form.handleSubmit(handleNewPatientSubmit)}>
                 <CardContent className="space-y-6 pt-6">
                     <div className="grid md:grid-cols-2 gap-6">
                     <FormField
@@ -282,6 +306,19 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfoForm | Pa
                         )}
                     />
                     </div>
+                    {medicalId && (
+                      <div className="space-y-2">
+                        <Label>Generated Medical ID</Label>
+                        <Input
+                          readOnly
+                          value={medicalId}
+                          className="font-mono bg-muted"
+                        />
+                        <FormDescription>
+                          This unique ID will be used to identify the patient in the future.
+                        </FormDescription>
+                      </div>
+                    )}
 
                     <div className="grid md:grid-cols-2 gap-6">
                     <FormField
