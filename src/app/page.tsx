@@ -227,12 +227,12 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void
   useEffect(() => {
     const { name, dob } = getValues();
     if (name && name.length >= 2 && dob && !formState.errors.dob && !medicalId) {
-      setMedicalId(crypto.randomUUID().toUpperCase());
+      setMedicalId(Math.floor(1000 + Math.random() * 9000).toString());
     }
   }, [nameValue, dobValue, formState.errors.dob, medicalId, getValues]);
 
   const handleNewPatientSubmit = (values: PatientInfoForm) => {
-    const idToSubmit = medicalId || crypto.randomUUID().toUpperCase();
+    const idToSubmit = medicalId || Math.floor(1000 + Math.random() * 9000).toString();
     if (!medicalId) {
       setMedicalId(idToSubmit);
     }

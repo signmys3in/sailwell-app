@@ -120,7 +120,7 @@ function DispenseNarcoticDialog({ drug, open, onOpenChange }: { drug: DrugStock,
 
             const patientForLog: PatientInfo = {
                 name: patientName,
-                medicalId: `N/A-${crypto.randomUUID()}`,
+                medicalId: Math.floor(1000 + Math.random() * 9000).toString(),
                 dob: "",
                 alcoholUsage: "none",
                 isSmoker: false,
