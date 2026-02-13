@@ -36,4 +36,5 @@ export type DispenseLog = {
     timestamp: Date;
     diagnosis: string;
     diseases: string[];
+    shortDiagnosis?: string;
 }

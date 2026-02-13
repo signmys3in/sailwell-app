@@ -56,7 +56,7 @@ const INITIAL_DRUG_STOCK: DrugStock[] = [
 interface AppContextType {
   drugStock: DrugStock[];
   dispenseLog: DispenseLog[];
-  dispenseDrug: (drugId: string, quantity: number, patientName: string, diagnosis: string, diseases: string[]) => void;
+  dispenseDrug: (drugId: string, quantity: number, patientName: string, diagnosis: string, diseases: string[], shortDiagnosis?: string) => void;
   refillStock: (drugId: string, quantity: number) => void;
   addDrugsToStock: (drugs: { name: string, isNarcotic: boolean }[]) => void;
   addNewDrug: (drug: { name: string, quantity: number, isNarcotic: boolean, expiryDate: Date }) => void;
@@ -122,7 +122,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
-  const dispenseDrug = useCallback((drugId: string, quantity: number, patientName: string, diagnosis: string, diseases: string[]) => {
+  const dispenseDrug = useCallback((drugId: string, quantity: number, patientName: string, diagnosis: string, diseases: string[], shortDiagnosis?: string) => {
     setDrugStock((prevStock) =>
       prevStock.map((drug) =>
         drug.id === drugId ? { ...drug, stock: drug.stock - quantity } : drug
@@ -137,7 +137,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             quantity: quantity,
             timestamp: new Date(),
             diagnosis: diagnosis,
-            diseases: diseases || []
+            diseases: diseases || [],
+            shortDiagnosis: shortDiagnosis || diagnosis.split("(")[0].trim(),
         }
     ]);
   }, []);

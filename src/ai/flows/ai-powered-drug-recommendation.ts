@@ -47,6 +47,11 @@ const AIPoweredDrugRecommendationOutputSchema = z.object({
     .describe(
       'A concise medical diagnosis based on the provided symptoms and vitals.'
     ),
+  shortDiagnosis: z
+    .string()
+    .describe(
+      'A short, summarized parent medical term for the diagnosis, suitable for chart labels (e.g., "Common Cold", "Migraine").'
+    ),
   severity: z
     .enum(['red', 'orange', 'green'])
     .describe(
@@ -73,6 +78,7 @@ const prompt = ai.definePrompt({
   prompt: `You are an AI medical assistant specialized in suggesting appropriate medications based on patient symptoms, vital signs, and chronic diseases. You are also a pharmacology expert.
 
 First, provide a concise medical diagnosis based on the patient's information.
+Then, provide a short, summarized parent medical term for the diagnosis (e.g., "Common Cold", "Migraine", "Gastritis"). This will be used for analytics.
 Then, determine the severity of the diagnosis. Use 'red' if it requires immediate medical attention, 'orange' if it needs close monitoring, and 'green' if it just needs medication.
 Then, based on the following information, suggest suitable drugs. For each suggestion, provide a brief reasoning why it is appropriate, a suggested dosage if applicable, and determine if the drug is a narcotic.
 
@@ -96,7 +102,7 @@ Patient's Chronic Diseases:
 None
 {{/if}}
 
-Provide the diagnosis, severity, and suggestions in a JSON format, as specified in the output schema. For each drug, set the \`isNarcotic\` field to true if it is a controlled substance and false otherwise.`,
+Provide the diagnosis, shortDiagnosis, severity, and suggestions in a JSON format, as specified in the output schema. For each drug, set the \`isNarcotic\` field to true if it is a controlled substance and false otherwise.`,
 });
 
 const aiPoweredDrugRecommendationFlow = ai.defineFlow(

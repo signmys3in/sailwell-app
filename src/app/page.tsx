@@ -89,6 +89,7 @@ export default function MediAssistantPage() {
   const [selectedBodyParts, setSelectedBodyParts] = useState<BodyPart[]>([]);
   const [suggestions, setSuggestions] = useState<DrugSuggestion[]>([]);
   const [diagnosis, setDiagnosis] = useState<string | null>(null);
+  const [shortDiagnosis, setShortDiagnosis] = useState<string | null>(null);
   const [severity, setSeverity] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -102,6 +103,7 @@ export default function MediAssistantPage() {
     setError(null);
     setDiagnosis(null);
     setSeverity(null);
+    setShortDiagnosis(null);
   }, []);
 
   const onPatientInfoSubmit = useCallback((values: PatientInfo) => {
@@ -131,6 +133,7 @@ export default function MediAssistantPage() {
         setError(result.error);
         setDiagnosis(null);
         setSeverity(null);
+        setShortDiagnosis(null);
       } else {
         const newSuggestions = result.suggestions || [];
         if (newSuggestions.length > 0) {
@@ -139,6 +142,7 @@ export default function MediAssistantPage() {
         setSuggestions(newSuggestions);
         setDiagnosis(result.diagnosis || "No diagnosis provided.");
         setSeverity(result.severity || null);
+        setShortDiagnosis(result.shortDiagnosis || null);
       }
     });
   }, [patientInfo, addDrugsToStock]);
@@ -180,6 +184,7 @@ export default function MediAssistantPage() {
             patientInfo={patientInfo}
             diagnosis={diagnosis}
             severity={severity}
+            shortDiagnosis={shortDiagnosis}
           />
         )}
       </div>
@@ -495,7 +500,7 @@ function SymptomsStep({
 }
 
 // Step 4: Suggestions
-function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientInfo, diagnosis, severity }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, patientInfo: PatientInfo, diagnosis: string | null, severity: string | null }) {
+function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientInfo, diagnosis, severity, shortDiagnosis }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, patientInfo: PatientInfo, diagnosis: string | null, severity: string | null, shortDiagnosis: string | null }) {
   const { drugStock } = useContext(AppContext);
   const [isDiagnosisModalOpen, setDiagnosisModalOpen] = useState(false);
 
@@ -544,7 +549,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientIn
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {suggestions.map((suggestion) => {
                 const stockInfo = drugStock.find(d => d.name.toLowerCase() === suggestion.drugName.toLowerCase());
-                return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} patientInfo={patientInfo} diagnosis={diagnosis} />;
+                return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} patientInfo={patientInfo} diagnosis={diagnosis} shortDiagnosis={shortDiagnosis} />;
               })}
             </div>
           ) : (
@@ -565,7 +570,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientIn
 }
 
 // Drug Card Component
-function DrugCard({ suggestion, stockInfo, patientInfo, diagnosis }: { suggestion: DrugSuggestion, stockInfo: DrugStockType | undefined, patientInfo: PatientInfo, diagnosis: string | null }) {
+function DrugCard({ suggestion, stockInfo, patientInfo, diagnosis, shortDiagnosis }: { suggestion: DrugSuggestion, stockInfo: DrugStockType | undefined, patientInfo: PatientInfo, diagnosis: string | null, shortDiagnosis: string | null }) {
   const { dispenseDrug } = useContext(AppContext);
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
@@ -595,17 +600,17 @@ function DrugCard({ suggestion, stockInfo, patientInfo, diagnosis }: { suggestio
     if (stockInfo.isNarcotic) {
         setNarcoticModalOpen(true);
     } else {
-        dispenseDrug(stockInfo.id, quantity, patientInfo.name, diagnosis || 'AI-assisted diagnosis', patientInfo.chronicDiseases);
+        dispenseDrug(stockInfo.id, quantity, patientInfo.name, diagnosis || 'AI-assisted diagnosis', patientInfo.chronicDiseases, shortDiagnosis);
         toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed.`, className: "bg-accent text-accent-foreground" });
     }
-  }, [stockInfo, quantity, toast, dispenseDrug, patientInfo, diagnosis]);
+  }, [stockInfo, quantity, toast, dispenseDrug, patientInfo, diagnosis, shortDiagnosis]);
 
   const onNarcoticApproved = useCallback(() => {
       if (!stockInfo) return;
-      dispenseDrug(stockInfo.id, quantity, patientInfo.name, diagnosis || 'AI-assisted diagnosis', patientInfo.chronicDiseases);
+      dispenseDrug(stockInfo.id, quantity, patientInfo.name, diagnosis || 'AI-assisted diagnosis', patientInfo.chronicDiseases, shortDiagnosis);
       toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed with approval.`, className: "bg-accent text-accent-foreground" });
       setNarcoticModalOpen(false);
-  }, [stockInfo, dispenseDrug, quantity, patientInfo, diagnosis, toast]);
+  }, [stockInfo, dispenseDrug, quantity, patientInfo, diagnosis, shortDiagnosis, toast]);
 
   return (
     <Card className="flex flex-col">
