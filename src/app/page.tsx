@@ -219,17 +219,18 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void
   const [searchId, setSearchId] = useState("");
   const [searchError, setSearchError] = useState("");
   const [medicalId, setMedicalId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("new-patient");
 
-  const { watch, formState, getValues } = form;
+  const { watch, formState, getValues, reset } = form;
   const nameValue = watch("name");
   const dobValue = watch("dob");
 
   useEffect(() => {
     const { name, dob } = getValues();
-    if (name && name.length >= 2 && dob && !formState.errors.dob && !medicalId) {
+    if (activeTab === "new-patient" && name && name.length >= 2 && dob && !formState.errors.dob && !medicalId) {
       setMedicalId(Math.floor(1000 + Math.random() * 9000).toString());
     }
-  }, [nameValue, dobValue, formState.errors.dob, medicalId, getValues]);
+  }, [nameValue, dobValue, formState.errors.dob, medicalId, getValues, activeTab]);
 
   const handleNewPatientSubmit = (values: PatientInfoForm) => {
     const idToSubmit = medicalId || Math.floor(1000 + Math.random() * 9000).toString();
@@ -246,11 +247,16 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void
     }
     const patient = findPatient(searchId);
     if (patient) {
-      onSubmit(patient);
+      const { medicalId: foundMedicalId, ...formData } = patient;
+      reset(formData);
+      setMedicalId(foundMedicalId);
+      setActiveTab("new-patient");
+      setSearchId("");
+      setSearchError("");
     } else {
       setSearchError("Patient with this Medical ID not found.");
     }
-  }, [searchId, findPatient, onSubmit]);
+  }, [searchId, findPatient, reset]);
 
 
   return (
@@ -261,7 +267,7 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void
           Create a new patient record or find an existing one using their medical ID.
         </CardDescription>
       </CardHeader>
-      <Tabs defaultValue="new-patient" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="new-patient">New Patient</TabsTrigger>
             <TabsTrigger value="find-patient">Find by Medical ID</TabsTrigger>
@@ -319,7 +325,7 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void
                         render={({ field }) => (
                         <FormItem>
                             <Label>Alcohol Usage</Label>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                                 <SelectTrigger>
                                 <SelectValue placeholder="Select usage level" />
