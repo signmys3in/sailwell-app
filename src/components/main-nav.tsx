@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { useState } from "react";
+import { Separator } from "@/components/ui/separator";
 
 const links = [
   {
@@ -89,27 +90,31 @@ export default function MainNav() {
                   <ChevronDown className={cn("ml-auto h-4 w-4 transition-transform", isAnalyticsOpen && "rotate-180")} />
                 </button>
               </CollapsibleTrigger>
-              <CollapsibleContent className="py-1 pl-6">
-                <nav className="grid gap-1">
-                  {link.subLinks.map(({ href, label, icon: Icon }) => {
+              <CollapsibleContent className="py-2 pl-6 pr-4">
+                <nav className="flex flex-col gap-2">
+                  {link.subLinks.map(({ href, label, icon: Icon }, index) => {
                     const isActive = pathname === href;
                     return (
-                      <Link
-                        key={href}
-                        href={href}
-                        className={cn(
-                          buttonVariants({
-                            variant: isActive ? "secondary" : "ghost",
-                            size: "sm",
-                          }),
-                          "justify-start whitespace-normal h-auto",
-                          isActive &&
-                            "text-secondary-foreground"
+                      <div key={href}>
+                        <Link
+                          href={href}
+                          className={cn(
+                            buttonVariants({
+                              variant: isActive ? "secondary" : "ghost",
+                              size: "sm",
+                            }),
+                            "justify-start whitespace-normal h-auto w-full text-left",
+                            isActive &&
+                              "text-secondary-foreground"
+                          )}
+                        >
+                          <Icon className="mr-2 h-4 w-4" />
+                          {label}
+                        </Link>
+                        {index < link.subLinks.length - 1 && (
+                           <Separator className="mt-2 bg-sidebar-border/30" />
                         )}
-                      >
-                        <Icon className="mr-2 h-4 w-4" />
-                        {label}
-                      </Link>
+                      </div>
                     )
                   })}
                 </nav>
