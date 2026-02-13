@@ -42,7 +42,7 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
             "transition-all duration-300 ease-in-out cursor-pointer",
             "hover:fill-primary/20 hover:stroke-primary",
             isSelected(part) 
-                ? "fill-primary stroke-primary animate-pulse-glow" 
+                ? "fill-primary stroke-primary-foreground animate-pulse-glow" 
                 : "fill-transparent stroke-foreground"
         );
     };
@@ -52,7 +52,7 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
         <div className={cn("flex justify-center items-center", className)}>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 250 500"
+                viewBox="0 0 300 600"
                 className="max-h-[400px] w-auto"
                 aria-label="Interactive human body diagram"
                 fill="none"
@@ -61,84 +61,88 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
                 <g>
                     {/* Head */}
                     <path
-                        d="M125,80 C100,80 80,100 80,125 C80,150 100,170 125,170 C150,170 170,150 170,125 C170,100 150,80 125,80 Z"
+                        d="M150 20 C110 20 80 50 80 90 C80 120 100 140 120 145 L130 150 L130 160 C130 160 170 160 170 160 L170 150 L180 145 C200 140 220 120 220 90 C220 50 190 20 150 20 Z"
                         onClick={() => onPartClick('head')}
                         className={getPartClasses('head')}
                         id="head"
                         data-testid="body-part-head"
                     />
 
-                    {/* Head Organs */}
+                    {/* Brain */}
                     <path
-                        d="M125,82 C105,82 90,95 90,110 C90,115 105,120 125,120 C145,120 160,115 160,110 C160,95 145,82 125,82 Z"
+                        d="M150 25 C115 25 90 50 90 80 C90 105 110 120 150 120 C190 120 210 105 210 80 C210 50 185 25 150 25 Z"
                         onClick={() => onPartClick('brain')}
                         className={getPartClasses('brain')}
                         id="brain"
                         data-testid="body-part-brain"
                     />
+
+                    {/* Facial Features */}
                     <g onClick={() => onPartClick('eyes')} className={getPartClasses('eyes')}>
-                        <circle cx="108" cy="128" r="5" id="eye-left" data-testid="body-part-eyes"/>
-                        <circle cx="142" cy="128" r="5" id="eye-right" data-testid="body-part-eyes"/>
+                        <ellipse cx="125" cy="95" rx="8" ry="5" id="eye-left" data-testid="body-part-eyes"/>
+                        <ellipse cx="175" cy="95" rx="8" ry="5" id="eye-right" data-testid="body-part-eyes"/>
                     </g>
                     <g onClick={() => onPartClick('ears')} className={getPartClasses('ears')}>
-                        <path d="M80,120 C75,115 75,140 80,135" id="ear-left" data-testid="body-part-ears"/>
-                        <path d="M170,120 C175,115 175,140 170,135" id="ear-right" data-testid="body-part-ears"/>
+                        <path d="M80 90 C70 80 70 110 80 100" id="ear-left" data-testid="body-part-ears"/>
+                        <path d="M220 90 C230 80 230 110 220 100" id="ear-right" data-testid="body-part-ears"/>
                     </g>
                     <path
-                        d="M122,138 L125,148 L128,138 Z"
+                        d="M148,105 L152,115 L150,105 Z"
                         onClick={() => onPartClick('nose')}
                         className={getPartClasses('nose')}
                         id="nose"
                         data-testid="body-part-nose"
                     />
                     <path
-                        d="M115,155 C120,160 130,160 135,155"
+                        d="M140,130 C150,135 160,135 170,130"
                         onClick={() => onPartClick('mouth')}
                         className={getPartClasses('mouth')}
                         id="mouth"
                         data-testid="body-part-mouth"
                     />
 
-                    {/* Torso (Chest + Abdomen) */}
+                    {/* Torso */}
                     <path
-                        d="M90,175 H160 V240 H90 Z"
+                        d="M130 160 L110 170 L100 250 L105 340 L195 340 L200 250 L190 170 L170 160 Z"
                         onClick={() => onPartClick('chest')}
                         className={getPartClasses('chest')}
                         id="chest"
                         data-testid="body-part-chest"
                     />
-                    <path
-                        d="M90,240 H160 V300 H90 Z"
+                     <path
+                        d="M105 250 H195 V340 H105 Z"
                         onClick={() => onPartClick('abdomen')}
                         className={getPartClasses('abdomen')}
                         id="abdomen"
                         data-testid="body-part-abdomen"
                     />
+
                     {/* Arms */}
                     <path
-                        d="M90,175 L60,280 L80,285 L105,180 Z"
+                        d="M110 172 L95 180 L60 300 L80 305 L108 178 Z"
                         onClick={() => onPartClick('leftArm')}
                         className={getPartClasses('leftArm')}
                         id="left-arm"
                         data-testid="body-part-leftArm"
                     />
                     <path
-                        d="M160,175 L190,280 L170,285 L145,180 Z"
+                        d="M190 172 L205 180 L240 300 L220 305 L192 178 Z"
                         onClick={() => onPartClick('rightArm')}
                         className={getPartClasses('rightArm')}
                         id="right-arm"
                         data-testid="body-part-rightArm"
                     />
+
                     {/* Legs */}
-                    <path
-                        d="M90,300 L80,420 L105,420 L110,300 Z"
+                     <path
+                        d="M105 340 L100 350 L90 500 L140 500 L135 340 Z"
                         onClick={() => onPartClick('leftLeg')}
                         className={getPartClasses('leftLeg')}
                         id="left-leg"
                         data-testid="body-part-leftLeg"
                     />
-                    <path
-                        d="M160,300 L170,420 L145,420 L140,300 Z"
+                     <path
+                        d="M195 340 L200 350 L210 500 L160 500 L165 340 Z"
                         onClick={() => onPartClick('rightLeg')}
                         className={getPartClasses('rightLeg')}
                         id="right-leg"
@@ -147,102 +151,77 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
 
                     {/* Joints & Extremities */}
                     <g onClick={() => onPartClick('elbows')} className={getPartClasses('elbows')}>
-                        <circle cx="80" cy="230" r="8" id="elbow-left" data-testid="body-part-elbows"/>
-                        <circle cx="170" cy="230" r="8" id="elbow-right" data-testid="body-part-elbows"/>
+                        <circle cx="85" cy="240" r="10" id="elbow-left" data-testid="body-part-elbows"/>
+                        <circle cx="215" cy="240" r="10" id="elbow-right" data-testid="body-part-elbows"/>
                     </g>
                     <g onClick={() => onPartClick('hands')} className={getPartClasses('hands')}>
-                        <ellipse cx="70" cy="282" rx="10" ry="8" id="hand-left" data-testid="body-part-hands"/>
-                        <ellipse cx="180" cy="282" rx="10" ry="8" id="hand-right" data-testid="body-part-hands"/>
+                        <ellipse cx="70" cy="302" rx="15" ry="12" id="hand-left" data-testid="body-part-hands"/>
+                        <ellipse cx="230" cy="302" rx="15" ry="12" id="hand-right" data-testid="body-part-hands"/>
                     </g>
                     <g onClick={() => onPartClick('knees')} className={getPartClasses('knees')}>
-                        <circle cx="95" cy="360" r="10" id="knee-left" data-testid="body-part-knees"/>
-                        <circle cx="155" cy="360" r="10" id="knee-right" data-testid="body-part-knees"/>
+                        <circle cx="115" cy="420" r="12" id="knee-left" data-testid="body-part-knees"/>
+                        <circle cx="185" cy="420" r="12" id="knee-right" data-testid="body-part-knees"/>
                     </g>
                     <g onClick={() => onPartClick('feet')} className={getPartClasses('feet')}>
-                        <ellipse cx="92" cy="425" rx="15" ry="8" id="foot-left" data-testid="body-part-feet"/>
-                        <ellipse cx="158" cy="425" rx="15" ry="8" id="foot-right" data-testid="body-part-feet"/>
+                        <ellipse cx="115" cy="505" rx="25" ry="10" id="foot-left" data-testid="body-part-feet"/>
+                        <ellipse cx="185" cy="505" rx="25" ry="10" id="foot-right" data-testid="body-part-feet"/>
                     </g>
 
                     {/* Organs */}
-                    {/* Lungs */}
+                    <g onClick={() => onPartClick('lungs')} className={getPartClasses('lungs')} id="lungs" data-testid="body-part-lungs">
+                      <path d="M140 180 C110 180 110 240 130 250 L140 250 Z" />
+                      <path d="M160 180 C190 180 190 240 170 250 L160 250 Z" />
+                    </g>
                     <path
-                        d="M122,180 C110,180 100,200 100,215 C100,230 110,235 122,235 Z"
-                        onClick={() => onPartClick('lungs')}
-                        className={getPartClasses('lungs')}
-                        id="lungs-right"
-                        data-testid="body-part-lungs"
-                    />
-                    <path
-                         d="M128,180 C140,180 150,200 150,215 C150,230 140,235 128,235 Z"
-                        onClick={() => onPartClick('lungs')}
-                        className={getPartClasses('lungs')}
-                        id="lungs-left"
-                        data-testid="body-part-lungs"
-                    />
-                    {/* Heart */}
-                    <path
-                        d="M125,200 C115,210 118,230 125,235 C132,230 135,210 125,200 Z"
+                        d="M150 210 C135 220 138 245 150 250 C162 245 165 220 150 210 Z"
                         onClick={() => onPartClick('heart')}
                         className={getPartClasses('heart')}
                         id="heart"
                         data-testid="body-part-heart"
                     />
-                    {/* Liver */}
-                     <path
-                        d="M148,245 C148,265 128,265 128,255 C128,245 148,245 148,245 Z"
+                    <path
+                        d="M155 260 C180 260 185 290 160 290 L155 285 Z"
                         onClick={() => onPartClick('liver')}
                         className={getPartClasses('liver')}
                         id="liver"
                         data-testid="body-part-liver"
                     />
-                    {/* Stomach */}
                     <path
-                        d="M102,245 C102,265 122,265 122,255 C122,245 102,245 102,245 Z"
+                        d="M145 260 C120 260 115 290 140 290 L145 285 Z"
                         onClick={() => onPartClick('stomach')}
                         className={getPartClasses('stomach')}
                         id="stomach"
                         data-testid="body-part-stomach"
                     />
-                    {/* Kidneys */}
-                    <path
-                        d="M118,275 C122,280 122,295 118,300 C110,300 110,275 118,275 Z"
-                        onClick={() => onPartClick('kidneys')}
-                        className={getPartClasses('kidneys')}
-                        id="kidneys-right"
-                        data-testid="body-part-kidneys"
-                    />
-                    <path
-                        d="M132,275 C128,280 128,295 132,300 C140,300 140,275 132,275 Z"
-                        onClick={() => onPartClick('kidneys')}
-                        className={getPartClasses('kidneys')}
-                        id="kidneys-left"
-                        data-testid="body-part-kidneys"
-                    />
+                    <g onClick={() => onPartClick('kidneys')} className={getPartClasses('kidneys')} id="kidneys" data-testid="body-part-kidneys">
+                      <path d="M140 300 C130 305 130 325 140 330 C145 325 145 305 140 300 Z" />
+                      <path d="M160 300 C170 305 170 325 160 330 C155 325 155 305 160 300 Z" />
+                    </g>
                 </g>
                 <g className="text-sm font-medium fill-primary-foreground pointer-events-none">
-                    <text x="125" y="130" textAnchor="middle" visibility={isSelected('head') ? 'visible' : 'hidden'} className={isSelected('head') ? 'animate-in fade-in' : ''}>Head</text>
-                    <text x="125" y="100" textAnchor="middle" visibility={isSelected('brain') ? 'visible' : 'hidden'} className={isSelected('brain') ? 'animate-in fade-in' : ''}>Brain</text>
-                    <text x="125" y="131" textAnchor="middle" visibility={isSelected('eyes') ? 'visible' : 'hidden'} className={isSelected('eyes') ? 'animate-in fade-in' : ''}>Eyes</text>
-                    <text x="125" y="128" textAnchor="middle" visibility={isSelected('ears') ? 'visible' : 'hidden'} className={isSelected('ears') ? 'animate-in fade-in' : ''}>Ears</text>
-                    <text x="125" y="146" textAnchor="middle" visibility={isSelected('nose') ? 'visible' : 'hidden'} className={isSelected('nose') ? 'animate-in fade-in' : ''}>Nose</text>
-                    <text x="125" y="158" textAnchor="middle" visibility={isSelected('mouth') ? 'visible' : 'hidden'} className={isSelected('mouth') ? 'animate-in fade-in' : ''}>Mouth</text>
-                    <text x="125" y="210" textAnchor="middle" visibility={isSelected('chest') ? 'visible' : 'hidden'} className={isSelected('chest') ? 'animate-in fade-in' : ''}>Chest</text>
-                    <text x="125" y="270" textAnchor="middle" visibility={isSelected('abdomen') ? 'visible' : 'hidden'} className={isSelected('abdomen') ? 'animate-in fade-in' : ''}>Abdomen</text>
-                    <text x="65" y="230" textAnchor="middle" visibility={isSelected('leftArm') ? 'visible' : 'hidden'} className={isSelected('leftArm') ? 'animate-in fade-in' : ''}>L. Arm</text>
-                    <text x="185" y="230" textAnchor="middle" visibility={isSelected('rightArm') ? 'visible' : 'hidden'} className={isSelected('rightArm') ? 'animate-in fade-in' : ''}>R. Arm</text>
-                    <text x="95" y="360" textAnchor="middle" visibility={isSelected('leftLeg') ? 'visible' : 'hidden'} className={isSelected('leftLeg') ? 'animate-in fade-in' : ''}>L. Leg</text>
-                    <text x="155" y="360" textAnchor="middle" visibility={isSelected('rightLeg') ? 'visible' : 'hidden'} className={isSelected('rightLeg') ? 'animate-in fade-in' : ''}>R. Leg</text>
+                    <text x="150" y="90" textAnchor="middle" visibility={isSelected('head') ? 'visible' : 'hidden'} className={isSelected('head') ? 'animate-in fade-in' : ''}>Head</text>
+                    <text x="150" y="60" textAnchor="middle" visibility={isSelected('brain') ? 'visible' : 'hidden'} className={isSelected('brain') ? 'animate-in fade-in' : ''}>Brain</text>
+                    <text x="150" y="100" textAnchor="middle" visibility={isSelected('eyes') ? 'visible' : 'hidden'} className={isSelected('eyes') ? 'animate-in fade-in' : ''}>Eyes</text>
+                    <text x="150" y="95" textAnchor="middle" visibility={isSelected('ears') ? 'visible' : 'hidden'} className={isSelected('ears') ? 'animate-in fade-in' : ''}>Ears</text>
+                    <text x="150" y="115" textAnchor="middle" visibility={isSelected('nose') ? 'visible' : 'hidden'} className={isSelected('nose') ? 'animate-in fade-in' : ''}>Nose</text>
+                    <text x="150" y="133" textAnchor="middle" visibility={isSelected('mouth') ? 'visible' : 'hidden'} className={isSelected('mouth') ? 'animate-in fade-in' : ''}>Mouth</text>
+                    <text x="150" y="210" textAnchor="middle" visibility={isSelected('chest') ? 'visible' : 'hidden'} className={isSelected('chest') ? 'animate-in fade-in' : ''}>Chest</text>
+                    <text x="150" y="290" textAnchor="middle" visibility={isSelected('abdomen') ? 'visible' : 'hidden'} className={isSelected('abdomen') ? 'animate-in fade-in' : ''}>Abdomen</text>
+                    <text x="75" y="240" textAnchor="middle" visibility={isSelected('leftArm') ? 'visible' : 'hidden'} className={isSelected('leftArm') ? 'animate-in fade-in' : ''}>L. Arm</text>
+                    <text x="225" y="240" textAnchor="middle" visibility={isSelected('rightArm') ? 'visible' : 'hidden'} className={isSelected('rightArm') ? 'animate-in fade-in' : ''}>R. Arm</text>
+                    <text x="115" y="420" textAnchor="middle" visibility={isSelected('leftLeg') ? 'visible' : 'hidden'} className={isSelected('leftLeg') ? 'animate-in fade-in' : ''}>L. Leg</text>
+                    <text x="185" y="420" textAnchor="middle" visibility={isSelected('rightLeg') ? 'visible' : 'hidden'} className={isSelected('rightLeg') ? 'animate-in fade-in' : ''}>R. Leg</text>
                     
-                    <text x="125" y="230" textAnchor="middle" visibility={isSelected('elbows') ? 'visible' : 'hidden'} className={isSelected('elbows') ? 'animate-in fade-in' : ''}>Elbows</text>
-                    <text x="125" y="282" textAnchor="middle" visibility={isSelected('hands') ? 'visible' : 'hidden'} className={isSelected('hands') ? 'animate-in fade-in' : ''}>Hands</text>
-                    <text x="125" y="360" textAnchor="middle" visibility={isSelected('knees') ? 'visible' : 'hidden'} className={isSelected('knees') ? 'animate-in fade-in' : ''}>Knees</text>
-                    <text x="125" y="425" textAnchor="middle" visibility={isSelected('feet') ? 'visible' : 'hidden'} className={isSelected('feet') ? 'animate-in fade-in' : ''}>Feet</text>
+                    <text x="150" y="245" textAnchor="middle" visibility={isSelected('elbows') ? 'visible' : 'hidden'} className={isSelected('elbows') ? 'animate-in fade-in' : ''}>Elbows</text>
+                    <text x="150" y="305" textAnchor="middle" visibility={isSelected('hands') ? 'visible' : 'hidden'} className={isSelected('hands') ? 'animate-in fade-in' : ''}>Hands</text>
+                    <text x="150" y="425" textAnchor="middle" visibility={isSelected('knees') ? 'visible' : 'hidden'} className={isSelected('knees') ? 'animate-in fade-in' : ''}>Knees</text>
+                    <text x="150" y="510" textAnchor="middle" visibility={isSelected('feet') ? 'visible' : 'hidden'} className={isSelected('feet') ? 'animate-in fade-in' : ''}>Feet</text>
 
-                    <text x="125" y="220" textAnchor="middle" visibility={isSelected('heart') ? 'visible' : 'hidden'} className={isSelected('heart') ? 'animate-in fade-in' : ''}>Heart</text>
-                    <text x="125" y="190" textAnchor="middle" visibility={isSelected('lungs') ? 'visible' : 'hidden'} className={isSelected('lungs') ? 'animate-in fade-in' : ''}>Lungs</text>
-                    <text x="140" y="255" textAnchor="middle" visibility={isSelected('liver') ? 'visible' : 'hidden'} className={isSelected('liver') ? 'animate-in fade-in' : ''}>Liver</text>
-                    <text x="110" y="255" textAnchor="middle" visibility={isSelected('stomach') ? 'visible' : 'hidden'} className={isSelected('stomach') ? 'animate-in fade-in' : ''}>Stomach</text>
-                    <text x="125" y="285" textAnchor="middle" visibility={isSelected('kidneys') ? 'visible' : 'hidden'} className={isSelected('kidneys') ? 'animate-in fade-in' : ''}>Kidneys</text>
+                    <text x="150" y="235" textAnchor="middle" visibility={isSelected('heart') ? 'visible' : 'hidden'} className={isSelected('heart') ? 'animate-in fade-in' : ''}>Heart</text>
+                    <text x="150" y="200" textAnchor="middle" visibility={isSelected('lungs') ? 'visible' : 'hidden'} className={isSelected('lungs') ? 'animate-in fade-in' : ''}>Lungs</text>
+                    <text x="170" y="275" textAnchor="middle" visibility={isSelected('liver') ? 'visible' : 'hidden'} className={isSelected('liver') ? 'animate-in fade-in' : ''}>Liver</text>
+                    <text x="130" y="275" textAnchor="middle" visibility={isSelected('stomach') ? 'visible' : 'hidden'} className={isSelected('stomach') ? 'animate-in fade-in' : ''}>Stomach</text>
+                    <text x="150" y="315" textAnchor="middle" visibility={isSelected('kidneys') ? 'visible' : 'hidden'} className={isSelected('kidneys') ? 'animate-in fade-in' : ''}>Kidneys</text>
                 </g>
             </svg>
         </div>
