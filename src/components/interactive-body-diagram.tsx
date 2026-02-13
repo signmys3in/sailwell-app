@@ -287,3 +287,5 @@ export default function InteractiveBodyDiagram({ selectedParts, onPartClick, cla
         </div>
     );
 }
+
+    
