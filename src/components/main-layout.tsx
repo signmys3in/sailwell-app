@@ -11,10 +11,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <img
                 src="https://sailwell.org/wp-content/uploads/2023/07/cropped-cropped-SailWell-Logo-Final-config-files.png"
                 alt="SailWell Logo"
-                width={48}
-                height={48}
+                className="h-16 w-16"
               />
-              <span className="text-2xl font-bold">SailWell</span>
+              <span className="text-3xl font-bold">SailWell</span>
             </a>
           </div>
           <div className="flex-1 overflow-auto py-2">
