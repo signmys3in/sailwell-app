@@ -10,7 +10,8 @@ import {
   AlertTriangle,
   PieChart,
   ClipboardList,
-  ChevronDown
+  ChevronDown,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -46,6 +47,11 @@ const links = [
         href: "/reports/low-stock",
         label: "Low Stock",
         icon: AlertTriangle,
+      },
+      {
+        href: "/reports/patient-list",
+        label: "Patient List",
+        icon: Users,
       },
     ]
   },
