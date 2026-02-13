@@ -737,7 +737,7 @@ function DiagnosisDialog({ open, onOpenChange, diagnosis, severity }: { open: bo
                 </DialogHeader>
                 <div className={`p-4 rounded-lg border ${currentSeverity.colorClass}`}>
                     <p className="font-semibold text-lg text-center">{diagnosis}</p>
-                    <p className="text-sm text-center mt-1">{currentSeverity.message}</p>
+                    <p className="text-sm text-center mt-1 animate-flash">{currentSeverity.message}</p>
                 </div>
                 <DialogFooter>
                     <Button onClick={() => onOpenChange(false)}>Close</Button>

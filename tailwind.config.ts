@@ -96,11 +96,16 @@ export default {
             filter: 'drop-shadow(0 0 8px hsl(var(--primary)))',
           },
         },
+        flash: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.3' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        flash: 'flash 1.5s ease-in-out infinite',
       },
     },
   },
