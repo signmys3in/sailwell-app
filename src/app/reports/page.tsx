@@ -16,15 +16,25 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import type { DispenseLog } from "@/lib/types";
+import { Input } from "@/components/ui/input";
 
 type SortableKeys = 'patientName' | 'timestamp';
 
 export default function ReportsPage() {
   const { dispenseLog } = useContext(AppContext);
   const [sortConfig, setSortConfig] = useState<{ key: SortableKeys; direction: 'asc' | 'desc' }>({ key: 'timestamp', direction: 'desc' });
+  const [filterTerm, setFilterTerm] = useState("");
 
-  const sortedLog = useMemo(() => {
-    const sortableLog = [...dispenseLog];
+  const filteredAndSortedLog = useMemo(() => {
+    let sortableLog = [...dispenseLog];
+
+    if (filterTerm) {
+      sortableLog = sortableLog.filter(log =>
+        log.patientName.toLowerCase().includes(filterTerm.toLowerCase()) ||
+        log.medicalId.includes(filterTerm)
+      );
+    }
+    
     if (sortConfig.key) {
       sortableLog.sort((a, b) => {
         const aValue = a[sortConfig.key];
@@ -41,7 +51,7 @@ export default function ReportsPage() {
       });
     }
     return sortableLog;
-  }, [dispenseLog, sortConfig]);
+  }, [dispenseLog, sortConfig, filterTerm]);
 
   const requestSort = (key: SortableKeys) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -55,8 +65,16 @@ export default function ReportsPage() {
     <div>
       <PageHeader
         title="Dispensing and Diagnoses"
-        description="Review dispensing activities and diagnoses."
+        description="Review, filter, and sort dispensing activities and diagnoses."
       />
+       <div className="mb-4">
+        <Input
+            placeholder="Filter by patient name or medical ID..."
+            value={filterTerm}
+            onChange={(e) => setFilterTerm(e.target.value)}
+            className="max-w-sm"
+        />
+      </div>
       <div className="overflow-hidden rounded-lg border">
         <Table>
           <TableCaption>A log of all drug dispensing activities. Click a column header to sort.</TableCaption>
@@ -81,8 +99,8 @@ export default function ReportsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedLog.length > 0 ? (
-              sortedLog.map((log) => (
+            {filteredAndSortedLog.length > 0 ? (
+              filteredAndSortedLog.map((log) => (
                 <TableRow key={log.id}>
                   <TableCell className="font-medium">{log.patientName}</TableCell>
                   <TableCell className="font-mono text-xs">{log.medicalId}</TableCell>
@@ -97,7 +115,7 @@ export default function ReportsPage() {
             ) : (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center">
-                  No dispensing activities recorded yet.
+                  No dispensing activities found matching your criteria.
                 </TableCell>
               </TableRow>
             )}
