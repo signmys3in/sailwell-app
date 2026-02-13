@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useState, useMemo, useCallback } from "react";
 import { AppContext } from "@/contexts/app-context";
 import {
   Table,
@@ -31,7 +31,7 @@ export default function NarcoticsPage() {
     const { drugStock } = useContext(AppContext);
     const [dispensingDrug, setDispensingDrug] = useState<DrugStock | null>(null);
 
-    const narcoticDrugs = drugStock.filter(drug => drug.isNarcotic);
+    const narcoticDrugs = useMemo(() => drugStock.filter(drug => drug.isNarcotic), [drugStock]);
 
     return (
         <div>
@@ -98,7 +98,15 @@ function DispenseNarcoticDialog({ drug, open, onOpenChange }: { drug: DrugStock,
     const [quantity, setQuantity] = useState(1);
     const [error, setError] = useState("");
 
-    const handleVerifyAndDispense = () => {
+    const resetForm = useCallback(() => {
+        setPassword("");
+        setPatientName("");
+        setDiagnosis("");
+        setQuantity(1);
+        setError("");
+    }, []);
+
+    const handleVerifyAndDispense = useCallback(() => {
         if (!patientName || !diagnosis || quantity <= 0) {
             setError("Please fill in all patient and quantity fields.");
             return;
@@ -122,22 +130,14 @@ function DispenseNarcoticDialog({ drug, open, onOpenChange }: { drug: DrugStock,
         } else {
             setError("Invalid password. Approval denied.");
         }
-    }
+    }, [patientName, diagnosis, quantity, password, drug, dispenseDrug, toast, onOpenChange, resetForm]);
 
-    const resetForm = () => {
-        setPassword("");
-        setPatientName("");
-        setDiagnosis("");
-        setQuantity(1);
-        setError("");
-    }
-
-    const handleOpenChange = (isOpen: boolean) => {
+    const handleOpenChange = useCallback((isOpen: boolean) => {
         if (!isOpen) {
             resetForm();
         }
         onOpenChange(isOpen);
-    }
+    }, [onOpenChange, resetForm]);
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useState, useTransition, useContext, useEffect } from "react";
+import { useState, useTransition, useContext, useEffect, useCallback, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -94,7 +94,7 @@ export default function MediAssistantPage() {
   const [error, setError] = useState<string | null>(null);
   const { addDrugsToStock } = useContext(AppContext);
 
-  const startOver = () => {
+  const startOver = useCallback(() => {
     setStep(1);
     setPatientInfo(null);
     setSelectedBodyParts([]);
@@ -102,19 +102,19 @@ export default function MediAssistantPage() {
     setError(null);
     setDiagnosis(null);
     setSeverity(null);
-  };
+  }, []);
 
-  const onPatientInfoSubmit = (values: PatientInfo) => {
+  const onPatientInfoSubmit = useCallback((values: PatientInfo) => {
     setPatientInfo(values);
     setStep(2);
-  };
+  }, []);
 
-  const onBodyPartSelectionSubmit = (parts: BodyPart[]) => {
+  const onBodyPartSelectionSubmit = useCallback((parts: BodyPart[]) => {
     setSelectedBodyParts(parts);
     setStep(3);
-  };
+  }, []);
 
-  const onSymptomsSubmit = (values: SymptomsInfo) => {
+  const onSymptomsSubmit = useCallback((values: SymptomsInfo) => {
     if (!patientInfo) return;
     const input = {
       symptoms: values.symptoms,
@@ -141,7 +141,7 @@ export default function MediAssistantPage() {
         setSeverity(result.severity || null);
       }
     });
-  };
+  }, [patientInfo, addDrugsToStock]);
 
   const currentProgress = (step / 4) * 100;
 
@@ -361,15 +361,15 @@ function BodyPartSelectionStep({
 }) {
   const [selectedParts, setSelectedParts] = useState<BodyPart[]>(initialSelectedParts);
 
-  const handlePartClick = (part: BodyPart) => {
+  const handlePartClick = useCallback((part: BodyPart) => {
     setSelectedParts((prev) =>
       prev.includes(part) ? prev.filter((p) => p !== part) : [...prev, part]
     );
-  };
+  }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     onSubmit(selectedParts);
-  };
+  }, [onSubmit, selectedParts]);
 
   return (
     <Card>
@@ -574,21 +574,20 @@ function DrugCard({ suggestion, stockInfo, patientInfo, diagnosis }: { suggestio
 
   const stockLevel = stockInfo ? (stockInfo.stock / stockInfo.maxStock) * 100 : 0;
   
-  const availableCountries = Object.keys(COUNTRY_DRUG_NAMES).filter(country => 
+  const availableCountries = useMemo(() => Object.keys(COUNTRY_DRUG_NAMES).filter(country => 
     Object.keys(COUNTRY_DRUG_NAMES[country]).some(drug => drug.toLowerCase() === suggestion.drugName.toLowerCase())
-  );
+  ), [suggestion.drugName]);
 
-  const getCommercialName = (country: string, drug: string) => {
-    if (country === 'Generic' || !COUNTRY_DRUG_NAMES[country]) {
+  const commercialName = useMemo(() => {
+    if (selectedCountry === 'Generic' || !COUNTRY_DRUG_NAMES[selectedCountry]) {
         return undefined;
     }
-    const drugKey = Object.keys(COUNTRY_DRUG_NAMES[country]).find(key => key.toLowerCase() === drug.toLowerCase());
-    return drugKey ? COUNTRY_DRUG_NAMES[country][drugKey] : undefined;
-  }
+    const drugKey = Object.keys(COUNTRY_DRUG_NAMES[selectedCountry]).find(key => key.toLowerCase() === suggestion.drugName.toLowerCase());
+    return drugKey ? COUNTRY_DRUG_NAMES[selectedCountry][drugKey] : undefined;
+  }, [selectedCountry, suggestion.drugName]);
   
-  const commercialName = getCommercialName(selectedCountry, suggestion.drugName);
 
-  const handleDispense = () => {
+  const handleDispense = useCallback(() => {
     if (!stockInfo || stockInfo.stock < quantity) {
       toast({ variant: "destructive", title: "Out of Stock", description: "Not enough stock to dispense." });
       return;
@@ -599,14 +598,14 @@ function DrugCard({ suggestion, stockInfo, patientInfo, diagnosis }: { suggestio
         dispenseDrug(stockInfo.id, quantity, patientInfo.name, diagnosis || 'AI-assisted diagnosis', patientInfo.chronicDiseases);
         toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed.`, className: "bg-accent text-accent-foreground" });
     }
-  };
+  }, [stockInfo, quantity, toast, dispenseDrug, patientInfo, diagnosis]);
 
-  const onNarcoticApproved = () => {
+  const onNarcoticApproved = useCallback(() => {
       if (!stockInfo) return;
       dispenseDrug(stockInfo.id, quantity, patientInfo.name, diagnosis || 'AI-assisted diagnosis', patientInfo.chronicDiseases);
       toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed with approval.`, className: "bg-accent text-accent-foreground" });
       setNarcoticModalOpen(false);
-  }
+  }, [stockInfo, dispenseDrug, quantity, patientInfo, diagnosis, toast]);
 
   return (
     <Card className="flex flex-col">
@@ -670,7 +669,7 @@ function NarcoticsDialog({ open, onOpenChange, onApproved, drugName }: { open: b
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    const handleVerify = () => {
+    const handleVerify = useCallback(() => {
         if (password === "TAMER") {
             onApproved();
             setPassword("");
@@ -678,7 +677,7 @@ function NarcoticsDialog({ open, onOpenChange, onApproved, drugName }: { open: b
         } else {
             setError("Invalid password. Approval denied.");
         }
-    }
+    }, [password, onApproved]);
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => { onOpenChange(isOpen); setError(""); setPassword(""); }}>

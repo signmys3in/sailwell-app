@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useState, useCallback } from "react";
 import { AppContext } from "@/contexts/app-context";
 import {
   Table,
@@ -35,11 +35,11 @@ export default function StockPage() {
   const { toast } = useToast();
   const [isAddDialogOpen, setAddDialogOpen] = useState(false);
 
-  const handleRefillChange = (drugId: string, amount: string) => {
+  const handleRefillChange = useCallback((drugId: string, amount: string) => {
     setRefillAmounts((prev) => ({ ...prev, [drugId]: Number(amount) }));
-  };
+  }, []);
 
-  const handleRefillSubmit = (drugId: string) => {
+  const handleRefillSubmit = useCallback((drugId: string) => {
     const amount = refillAmounts[drugId] || 0;
     if (amount > 0) {
       refillStock(drugId, amount);
@@ -51,9 +51,9 @@ export default function StockPage() {
       // Clear input after refill
       setRefillAmounts((prev) => ({ ...prev, [drugId]: 0 }));
     }
-  };
+  }, [refillAmounts, refillStock, toast]);
 
-  const handleAddNewDrug = async (drugName: string, quantity: number, expiryDate: Date) => {
+  const handleAddNewDrug = useCallback(async (drugName: string, quantity: number, expiryDate: Date) => {
     if (drugStock.some(d => d.name.toLowerCase() === drugName.toLowerCase())) {
         toast({
             variant: "destructive",
@@ -88,9 +88,9 @@ export default function StockPage() {
     });
 
     return true;
-  };
+  }, [drugStock, addNewDrug, toast]);
 
-  const handleExpiryDateChange = (drugId: string, newDateString: string) => {
+  const handleExpiryDateChange = useCallback((drugId: string, newDateString: string) => {
     const newDate = parseISO(newDateString);
     if (!isNaN(newDate.getTime())) {
         updateExpiryDate(drugId, newDate);
@@ -100,7 +100,7 @@ export default function StockPage() {
             className: "bg-accent text-accent-foreground",
         });
     }
-  };
+  }, [updateExpiryDate, toast]);
 
   return (
     <div>
@@ -192,7 +192,14 @@ function AddDrugDialog({ onAddNewDrug, onOpenChange }: { onAddNewDrug: (drugName
     const [isSubmitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
 
-    const handleSubmit = async () => {
+    const resetForm = useCallback(() => {
+        setDrugName("");
+        setQuantity(1);
+        setExpiryDate(format(new Date(), 'yyyy-MM-dd'));
+        setError("");
+    }, []);
+
+    const handleSubmit = useCallback(async () => {
         if (!drugName || quantity <= 0 || !expiryDate) {
             setError("Please fill in all fields.");
             return;
@@ -209,21 +216,14 @@ function AddDrugDialog({ onAddNewDrug, onOpenChange }: { onAddNewDrug: (drugName
             resetForm();
             onOpenChange(false);
         }
-    }
+    }, [drugName, quantity, expiryDate, onAddNewDrug, onOpenChange, resetForm]);
 
-    const resetForm = () => {
-        setDrugName("");
-        setQuantity(1);
-        setExpiryDate(format(new Date(), 'yyyy-MM-dd'));
-        setError("");
-    }
-
-    const handleOpenChange = (isOpen: boolean) => {
+    const handleOpenChange = useCallback((isOpen: boolean) => {
         if (!isOpen) {
             resetForm();
         }
         onOpenChange(isOpen);
-    }
+    }, [onOpenChange, resetForm]);
 
     return (
         <DialogContent>

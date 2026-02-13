@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, ReactNode } from "react";
+import { createContext, useState, ReactNode, useCallback } from "react";
 import type { DrugStock, DispenseLog } from "@/lib/types";
 
 // Hardcoded initial stock for demonstration
@@ -77,7 +77,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [drugStock, setDrugStock] = useState<DrugStock[]>(INITIAL_DRUG_STOCK);
   const [dispenseLog, setDispenseLog] = useState<DispenseLog[]>([]);
 
-  const addDrugsToStock = (drugs: { name: string, isNarcotic: boolean }[]) => {
+  const addDrugsToStock = useCallback((drugs: { name: string, isNarcotic: boolean }[]) => {
     setDrugStock((prevStock) => {
       const newDrugs: DrugStock[] = [];
       const lowercasedStockNames = prevStock.map(d => d.name.toLowerCase());
@@ -102,9 +102,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
       return prevStock;
     });
-  };
+  }, []);
 
-  const addNewDrug = (drug: { name: string, quantity: number, isNarcotic: boolean, expiryDate: Date }) => {
+  const addNewDrug = useCallback((drug: { name: string, quantity: number, isNarcotic: boolean, expiryDate: Date }) => {
     setDrugStock((prevStock) => {
         const newDrug: DrugStock = {
             id: drug.name,
@@ -120,9 +120,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
         return [...prevStock, newDrug];
     });
-  };
+  }, []);
 
-  const dispenseDrug = (drugId: string, quantity: number, patientName: string, diagnosis: string, diseases: string[]) => {
+  const dispenseDrug = useCallback((drugId: string, quantity: number, patientName: string, diagnosis: string, diseases: string[]) => {
     setDrugStock((prevStock) =>
       prevStock.map((drug) =>
         drug.id === drugId ? { ...drug, stock: drug.stock - quantity } : drug
@@ -140,23 +140,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             diseases: diseases || []
         }
     ]);
-  };
+  }, []);
 
-  const refillStock = (drugId: string, quantity: number) => {
+  const refillStock = useCallback((drugId: string, quantity: number) => {
     setDrugStock((prevStock) =>
       prevStock.map((drug) =>
         drug.id === drugId ? { ...drug, stock: Math.min(drug.maxStock, drug.stock + quantity) } : drug
       )
     );
-  };
+  }, []);
   
-  const updateExpiryDate = (drugId: string, newDate: Date) => {
+  const updateExpiryDate = useCallback((drugId: string, newDate: Date) => {
     setDrugStock((prevStock) =>
       prevStock.map((drug) =>
         drug.id === drugId ? { ...drug, expiryDate: newDate } : drug
       )
     );
-  };
+  }, []);
 
   return (
     <AppContext.Provider value={{ drugStock, dispenseLog, dispenseDrug, refillStock, addDrugsToStock, addNewDrug, updateExpiryDate }}>

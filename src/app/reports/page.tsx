@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { AppContext } from "@/contexts/app-context";
 import {
   Table,
@@ -16,6 +16,11 @@ import { format } from "date-fns";
 
 export default function ReportsPage() {
   const { dispenseLog } = useContext(AppContext);
+
+  const sortedLog = useMemo(() => 
+    [...dispenseLog].sort((a,b) => b.timestamp.getTime() - a.timestamp.getTime()),
+    [dispenseLog]
+  );
 
   return (
     <div>
@@ -36,8 +41,8 @@ export default function ReportsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {dispenseLog.length > 0 ? (
-              dispenseLog.sort((a,b) => b.timestamp.getTime() - a.timestamp.getTime()).map((log) => (
+            {sortedLog.length > 0 ? (
+              sortedLog.map((log) => (
                 <TableRow key={log.id}>
                   <TableCell className="font-medium">{log.patientName}</TableCell>
                   <TableCell className="font-medium">{log.drugName}</TableCell>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { AppContext } from "@/contexts/app-context";
 import PageHeader from "@/components/page-header";
 import {
@@ -21,17 +21,20 @@ import type { ChartConfig } from "@/components/ui/chart";
 export default function DiseaseTrendsPage() {
   const { dispenseLog } = useContext(AppContext);
 
-  const diagnosisCounts = dispenseLog.reduce((acc, log) => {
-    if (log.diagnosis && log.diagnosis !== 'AI-assisted diagnosis' && log.diagnosis !== 'No diagnosis provided.') {
-      const mainDiagnosis = log.diagnosis.split("(")[0].trim();
-      acc[mainDiagnosis] = (acc[mainDiagnosis] || 0) + 1;
-    }
-    return acc;
-  }, {} as Record<string, number>);
+  const chartData = useMemo(() => {
+    const diagnosisCounts = dispenseLog.reduce((acc, log) => {
+      if (log.diagnosis && log.diagnosis !== 'AI-assisted diagnosis' && log.diagnosis !== 'No diagnosis provided.') {
+        const mainDiagnosis = log.diagnosis.split("(")[0].trim();
+        acc[mainDiagnosis] = (acc[mainDiagnosis] || 0) + 1;
+      }
+      return acc;
+    }, {} as Record<string, number>);
 
-  const chartData = Object.entries(diagnosisCounts)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
+    return Object.entries(diagnosisCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [dispenseLog]);
+
 
   const chartConfig: ChartConfig = {
     count: {
