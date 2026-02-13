@@ -34,6 +34,7 @@ export default function ReportsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Patient Name</TableHead>
+              <TableHead>Medical ID</TableHead>
               <TableHead>Drug Name</TableHead>
               <TableHead>Quantity</TableHead>
               <TableHead>Diagnosis</TableHead>
@@ -45,6 +46,7 @@ export default function ReportsPage() {
               sortedLog.map((log) => (
                 <TableRow key={log.id}>
                   <TableCell className="font-medium">{log.patientName}</TableCell>
+                  <TableCell className="font-mono text-xs">{log.medicalId}</TableCell>
                   <TableCell className="font-medium">{log.drugName}</TableCell>
                   <TableCell>{log.quantity}</TableCell>
                   <TableCell className="text-muted-foreground">{log.diagnosis}</TableCell>
@@ -55,7 +57,7 @@ export default function ReportsPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
+                <TableCell colSpan={6} className="h-24 text-center">
                   No dispensing activities recorded yet.
                 </TableCell>
               </TableRow>

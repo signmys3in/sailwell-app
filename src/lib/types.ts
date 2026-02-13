@@ -1,4 +1,5 @@
 export type PatientInfo = {
+  medicalId: string;
   name: string;
   dob: string;
   alcoholUsage: "none" | "moderate" | "heavy";
@@ -31,6 +32,7 @@ export type DrugStock = {
 export type DispenseLog = {
     id: string;
     patientName: string;
+    medicalId: string;
     drugName: string;
     quantity: number;
     timestamp: Date;

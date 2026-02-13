@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useState, ReactNode, useCallback } from "react";
-import type { DrugStock, DispenseLog } from "@/lib/types";
+import type { DrugStock, DispenseLog, PatientInfo } from "@/lib/types";
 
 // Hardcoded initial stock for demonstration
 const INITIAL_DRUG_STOCK: DrugStock[] = [
@@ -56,26 +56,33 @@ const INITIAL_DRUG_STOCK: DrugStock[] = [
 interface AppContextType {
   drugStock: DrugStock[];
   dispenseLog: DispenseLog[];
-  dispenseDrug: (drugId: string, quantity: number, patientName: string, diagnosis: string, diseases: string[], shortDiagnosis?: string) => void;
+  patients: PatientInfo[];
+  dispenseDrug: (drugId: string, quantity: number, patientInfo: PatientInfo, diagnosis: string, shortDiagnosis?: string | null) => void;
   refillStock: (drugId: string, quantity: number) => void;
   addDrugsToStock: (drugs: { name: string, isNarcotic: boolean }[]) => void;
   addNewDrug: (drug: { name: string, quantity: number, isNarcotic: boolean, expiryDate: Date }) => void;
   updateExpiryDate: (drugId: string, newDate: Date) => void;
+  addPatient: (patient: PatientInfo) => void;
+  findPatient: (medicalId: string) => PatientInfo | undefined;
 }
 
 export const AppContext = createContext<AppContextType>({
   drugStock: [],
   dispenseLog: [],
+  patients: [],
   dispenseDrug: () => {},
   refillStock: () => {},
   addDrugsToStock: () => {},
   addNewDrug: () => {},
   updateExpiryDate: () => {},
+  addPatient: () => {},
+  findPatient: () => undefined,
 });
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [drugStock, setDrugStock] = useState<DrugStock[]>(INITIAL_DRUG_STOCK);
   const [dispenseLog, setDispenseLog] = useState<DispenseLog[]>([]);
+  const [patients, setPatients] = useState<PatientInfo[]>([]);
 
   const addDrugsToStock = useCallback((drugs: { name: string, isNarcotic: boolean }[]) => {
     setDrugStock((prevStock) => {
@@ -122,7 +129,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
-  const dispenseDrug = useCallback((drugId: string, quantity: number, patientName: string, diagnosis: string, diseases: string[], shortDiagnosis?: string) => {
+  const addPatient = useCallback((patient: PatientInfo) => {
+    setPatients(prev => {
+        if (prev.some(p => p.medicalId === patient.medicalId)) {
+            return prev;
+        }
+        return [...prev, patient];
+    });
+  }, []);
+
+  const findPatient = useCallback((medicalId: string) => {
+    return patients.find(p => p.medicalId === medicalId);
+  }, [patients]);
+
+  const dispenseDrug = useCallback((drugId: string, quantity: number, patientInfo: PatientInfo, diagnosis: string, shortDiagnosis?: string | null) => {
     setDrugStock((prevStock) =>
       prevStock.map((drug) =>
         drug.id === drugId ? { ...drug, stock: drug.stock - quantity } : drug
@@ -132,13 +152,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         ...prevLog,
         {
             id: new Date().toISOString(),
-            patientName: patientName,
+            patientName: patientInfo.name,
+            medicalId: patientInfo.medicalId,
             drugName: drugId,
             quantity: quantity,
             timestamp: new Date(),
             diagnosis: diagnosis,
-            diseases: diseases || [],
-            shortDiagnosis: shortDiagnosis || diagnosis.split("(")[0].trim(),
+            diseases: patientInfo.chronicDiseases || [],
+            shortDiagnosis: shortDiagnosis || (diagnosis ? diagnosis.split("(")[0].trim() : ""),
         }
     ]);
   }, []);
@@ -160,7 +181,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AppContext.Provider value={{ drugStock, dispenseLog, dispenseDrug, refillStock, addDrugsToStock, addNewDrug, updateExpiryDate }}>
+    <AppContext.Provider value={{ drugStock, dispenseLog, patients, dispenseDrug, refillStock, addDrugsToStock, addNewDrug, updateExpiryDate, addPatient, findPatient }}>
       {children}
     </AppContext.Provider>
   );

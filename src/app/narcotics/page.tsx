@@ -25,7 +25,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import type { DrugStock } from "@/lib/types";
+import type { DrugStock, PatientInfo } from "@/lib/types";
 
 export default function NarcoticsPage() {
     const { drugStock } = useContext(AppContext);
@@ -118,7 +118,16 @@ function DispenseNarcoticDialog({ drug, open, onOpenChange }: { drug: DrugStock,
                 return;
             }
 
-            dispenseDrug(drug.id, quantity, patientName, diagnosis, []);
+            const patientForLog: PatientInfo = {
+                name: patientName,
+                medicalId: `N/A-${crypto.randomUUID()}`,
+                dob: "",
+                alcoholUsage: "none",
+                isSmoker: false,
+                chronicDiseases: [],
+            };
+
+            dispenseDrug(drug.id, quantity, patientForLog, diagnosis, null);
             toast({
                 variant: "default",
                 title: "Dispensed",

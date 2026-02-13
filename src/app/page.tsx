@@ -52,6 +52,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs";
 
 import { getDrugSuggestions } from "@/app/actions";
 import { CHRONIC_DISEASES, COUNTRY_DRUG_NAMES } from "@/lib/data";
@@ -65,7 +71,7 @@ import { Badge } from "@/components/ui/badge";
 
 
 // Schemas
-const patientInfoSchema = z.object({
+const patientInfoFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   dob: z.string().refine((val) => !isNaN(Date.parse(val)), "Invalid date of birth."),
   alcoholUsage: z.enum(["none", "moderate", "heavy"]),
@@ -80,6 +86,7 @@ const symptomsSchema = z.object({
   heartRate: z.string().optional(),
 });
 
+type PatientInfoForm = z.infer<typeof patientInfoFormSchema>;
 type SymptomsInfo = z.infer<typeof symptomsSchema>;
 
 // Main Component
@@ -93,7 +100,7 @@ export default function MediAssistantPage() {
   const [severity, setSeverity] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const { addDrugsToStock } = useContext(AppContext);
+  const { addDrugsToStock, addPatient } = useContext(AppContext);
 
   const startOver = useCallback(() => {
     setStep(1);
@@ -106,10 +113,17 @@ export default function MediAssistantPage() {
     setShortDiagnosis(null);
   }, []);
 
-  const onPatientInfoSubmit = useCallback((values: PatientInfo) => {
-    setPatientInfo(values);
+  const onPatientInfoSubmit = useCallback((values: PatientInfoForm | PatientInfo) => {
+    if ('medicalId' in values) {
+      setPatientInfo(values);
+    } else {
+      const medicalId = crypto.randomUUID();
+      const newPatient: PatientInfo = { ...values, medicalId };
+      setPatientInfo(newPatient);
+      addPatient(newPatient);
+    }
     setStep(2);
-  }, []);
+  }, [addPatient]);
 
   const onBodyPartSelectionSubmit = useCallback((parts: BodyPart[]) => {
     setSelectedBodyParts(parts);
@@ -193,9 +207,9 @@ export default function MediAssistantPage() {
 }
 
 // Step 1: Patient Info
-function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void }) {
-  const form = useForm<PatientInfo>({
-    resolver: zodResolver(patientInfoSchema),
+function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfoForm | PatientInfo) => void }) {
+  const form = useForm<PatientInfoForm>({
+    resolver: zodResolver(patientInfoFormSchema),
     defaultValues: {
       name: "",
       dob: "",
@@ -205,151 +219,189 @@ function PatientInfoStep({ onSubmit }: { onSubmit: (values: PatientInfo) => void
     },
   });
 
+  const { findPatient } = useContext(AppContext);
+  const [searchId, setSearchId] = useState("");
+  const [searchError, setSearchError] = useState("");
+
+  const handleSearch = useCallback(() => {
+    if (!searchId) {
+        setSearchError("Please enter a Medical ID.");
+        return;
+    }
+    const patient = findPatient(searchId);
+    if (patient) {
+      onSubmit(patient);
+    } else {
+      setSearchError("Patient with this Medical ID not found.");
+    }
+  }, [searchId, findPatient, onSubmit]);
+
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Patient Medical ID</CardTitle>
         <CardDescription>
-          Please enter the patient's information. All data is handled locally.
+          Create a new patient record or find an existing one using their medical ID.
         </CardDescription>
       </CardHeader>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <Label>Full Name</Label>
-                    <FormControl>
-                      <Input placeholder="John Doe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="dob"
-                render={({ field }) => (
-                  <FormItem>
-                    <Label>Date of Birth</Label>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="alcoholUsage"
-                render={({ field }) => (
-                  <FormItem>
-                    <Label>Alcohol Usage</Label>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select usage level" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        <SelectItem value="moderate">Moderate</SelectItem>
-                        <SelectItem value="heavy">Heavy</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="isSmoker"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-start space-x-3 space-y-0 rounded-md border p-4 h-full">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <Label>Smoker</Label>
-                      <FormDescription>
-                        Check if the patient is a smoker.
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="chronicDiseases"
-              render={() => (
-                <FormItem>
-                  <div className="mb-4">
-                    <Label className="text-base">Chronic Diseases</Label>
-                    <FormDescription>
-                      Select any pre-existing chronic diseases.
-                    </FormDescription>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {CHRONIC_DISEASES.map((disease) => (
-                      <FormField
-                        key={disease}
+      <Tabs defaultValue="new-patient" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="new-patient">New Patient</TabsTrigger>
+            <TabsTrigger value="find-patient">Find by Medical ID</TabsTrigger>
+        </TabsList>
+        <TabsContent value="new-patient">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                <CardContent className="space-y-6 pt-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                    <FormField
                         control={form.control}
-                        name="chronicDiseases"
-                        render={({ field }) => {
-                          return (
-                            <FormItem
-                              key={disease}
-                              className="flex flex-row items-start space-x-3 space-y-0"
-                            >
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value?.includes(disease)}
-                                  onCheckedChange={(checked) => {
-                                    return checked
-                                      ? field.onChange([
-                                          ...field.value,
-                                          disease,
-                                        ])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (value) => value !== disease
-                                          )
-                                        );
-                                  }}
-                                />
-                              </FormControl>
-                              <Label className="font-normal">
-                                {disease}
-                              </Label>
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-          <CardFooter className="flex justify-end">
-            <Button type="submit">
-              Next <ArrowRight />
-            </Button>
-          </CardFooter>
-        </form>
-      </Form>
+                        name="name"
+                        render={({ field }) => (
+                        <FormItem>
+                            <Label>Full Name</Label>
+                            <FormControl>
+                            <Input placeholder="John Doe" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="dob"
+                        render={({ field }) => (
+                        <FormItem>
+                            <Label>Date of Birth</Label>
+                            <FormControl>
+                            <Input type="date" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                    <FormField
+                        control={form.control}
+                        name="alcoholUsage"
+                        render={({ field }) => (
+                        <FormItem>
+                            <Label>Alcohol Usage</Label>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                                <SelectTrigger>
+                                <SelectValue placeholder="Select usage level" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="none">None</SelectItem>
+                                <SelectItem value="moderate">Moderate</SelectItem>
+                                <SelectItem value="heavy">Heavy</SelectItem>
+                            </SelectContent>
+                            </Select>
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="isSmoker"
+                        render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-start space-x-3 space-y-0 rounded-md border p-4 h-full">
+                            <FormControl>
+                            <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                            />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                            <Label>Smoker</Label>
+                            <FormDescription>
+                                Check if the patient is a smoker.
+                            </FormDescription>
+                            </div>
+                        </FormItem>
+                        )}
+                    />
+                    </div>
+
+                    <FormField
+                    control={form.control}
+                    name="chronicDiseases"
+                    render={() => (
+                        <FormItem>
+                        <div className="mb-4">
+                            <Label className="text-base">Chronic Diseases</Label>
+                            <FormDescription>
+                            Select any pre-existing chronic diseases.
+                            </FormDescription>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {CHRONIC_DISEASES.map((disease) => (
+                            <FormField
+                                key={disease}
+                                control={form.control}
+                                name="chronicDiseases"
+                                render={({ field }) => {
+                                return (
+                                    <FormItem
+                                    key={disease}
+                                    className="flex flex-row items-start space-x-3 space-y-0"
+                                    >
+                                    <FormControl>
+                                        <Checkbox
+                                        checked={field.value?.includes(disease)}
+                                        onCheckedChange={(checked) => {
+                                            return checked
+                                            ? field.onChange([
+                                                ...field.value,
+                                                disease,
+                                                ])
+                                            : field.onChange(
+                                                field.value?.filter(
+                                                    (value) => value !== disease
+                                                )
+                                                );
+                                        }}
+                                        />
+                                    </FormControl>
+                                    <Label className="font-normal">
+                                        {disease}
+                                    </Label>
+                                    </FormItem>
+                                );
+                                }}
+                            />
+                            ))}
+                        </div>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                    <Button type="submit">
+                    Next <ArrowRight />
+                    </Button>
+                </CardFooter>
+                </form>
+            </Form>
+        </TabsContent>
+        <TabsContent value="find-patient">
+             <CardContent className="space-y-6 pt-6">
+                <div className="space-y-2">
+                <Label htmlFor="medical-id">Patient Medical ID</Label>
+                <Input id="medical-id" value={searchId} onChange={(e) => { setSearchId(e.target.value); setSearchError(""); }} placeholder="Enter Medical ID" />
+                </div>
+                {searchError && <p className="text-sm text-destructive">{searchError}</p>}
+            </CardContent>
+            <CardFooter className="flex justify-end">
+                <Button onClick={handleSearch}>Find Patient</Button>
+            </CardFooter>
+        </TabsContent>
+      </Tabs>
     </Card>
   );
 }
@@ -541,6 +593,8 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientIn
         <CardHeader>
           <CardTitle>AI-Powered Drug Suggestions</CardTitle>
           <CardDescription>
+            Patient: {patientInfo.name} | Medical ID: <span className="font-mono text-xs p-1 bg-muted rounded">{patientInfo.medicalId}</span>
+            <br />
             Based on the provided information, here are some potential medication suggestions.
           </CardDescription>
         </CardHeader>
@@ -600,14 +654,14 @@ function DrugCard({ suggestion, stockInfo, patientInfo, diagnosis, shortDiagnosi
     if (stockInfo.isNarcotic) {
         setNarcoticModalOpen(true);
     } else {
-        dispenseDrug(stockInfo.id, quantity, patientInfo.name, diagnosis || 'AI-assisted diagnosis', patientInfo.chronicDiseases, shortDiagnosis);
+        dispenseDrug(stockInfo.id, quantity, patientInfo, diagnosis || 'AI-assisted diagnosis', shortDiagnosis);
         toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed.`, className: "bg-accent text-accent-foreground" });
     }
   }, [stockInfo, quantity, toast, dispenseDrug, patientInfo, diagnosis, shortDiagnosis]);
 
   const onNarcoticApproved = useCallback(() => {
       if (!stockInfo) return;
-      dispenseDrug(stockInfo.id, quantity, patientInfo.name, diagnosis || 'AI-assisted diagnosis', patientInfo.chronicDiseases, shortDiagnosis);
+      dispenseDrug(stockInfo.id, quantity, patientInfo, diagnosis || 'AI-assisted diagnosis', shortDiagnosis);
       toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed with approval.`, className: "bg-accent text-accent-foreground" });
       setNarcoticModalOpen(false);
   }, [stockInfo, dispenseDrug, quantity, patientInfo, diagnosis, shortDiagnosis, toast]);
