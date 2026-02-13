@@ -8,8 +8,8 @@ import MainLayout from '@/components/main-layout';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'MediAssistant',
-  description: 'AI-Powered Medical Assistant',
+  title: 'SailWell',
+  description: 'Your AI-Powered Health Companion',
 };
 
 export default function RootLayout({

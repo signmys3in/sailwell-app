@@ -1,5 +1,5 @@
 import MainNav from "@/components/main-nav";
-import { Stethoscope } from "lucide-react";
+import { Sailboat } from "lucide-react";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,8 +8,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <aside className="fixed inset-y-0 left-0 z-10 hidden w-60 flex-col border-r bg-card sm:flex">
           <div className="flex h-16 items-center border-b px-6">
             <a href="/" className="flex items-center gap-2 font-semibold">
-              <Stethoscope className="h-6 w-6 text-primary" />
-              <span className="">MediAssistant</span>
+              <Sailboat className="h-6 w-6 text-primary" />
+              <span className="">SailWell</span>
             </a>
           </div>
           <div className="flex-1 overflow-auto py-2">

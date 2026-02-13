@@ -152,8 +152,8 @@ export default function MediAssistantPage() {
   return (
     <div className="flex flex-col h-full">
       <header className="mb-6">
-        <h1 className="text-4xl font-bold tracking-tighter">MediAssistant</h1>
-        <p className="text-muted-foreground">Your AI-Powered Drug Suggestion Tool</p>
+        <h1 className="text-4xl font-bold tracking-tighter">SailWell</h1>
+        <p className="text-muted-foreground">Your AI-Powered Health Companion</p>
       </header>
       <div className="w-full mb-6">
         <Progress value={currentProgress} className="h-2" />
