@@ -51,7 +51,7 @@ const links = [
       },
       {
         href: "/reports/patient-list",
-        label: "Patient List",
+        label: "Crew List",
         icon: Users,
       },
     ]

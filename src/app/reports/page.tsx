@@ -18,7 +18,7 @@ import { ArrowUpDown } from "lucide-react";
 import type { DispenseLog } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 
-type SortableKeys = 'patientName' | 'timestamp';
+type SortableKeys = 'crewName' | 'timestamp';
 
 export default function ReportsPage() {
   const { dispenseLog } = useContext(AppContext);
@@ -30,7 +30,7 @@ export default function ReportsPage() {
 
     if (filterTerm) {
       sortableLog = sortableLog.filter(log =>
-        log.patientName.toLowerCase().includes(filterTerm.toLowerCase()) ||
+        log.crewName.toLowerCase().includes(filterTerm.toLowerCase()) ||
         log.medicalId.includes(filterTerm)
       );
     }
@@ -69,7 +69,7 @@ export default function ReportsPage() {
       />
        <div className="mb-4">
         <Input
-            placeholder="Filter by patient name or medical ID..."
+            placeholder="Filter by crew name or medical ID..."
             value={filterTerm}
             onChange={(e) => setFilterTerm(e.target.value)}
             className="max-w-sm"
@@ -81,8 +81,8 @@ export default function ReportsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>
-                 <Button variant="ghost" onClick={() => requestSort('patientName')}>
-                  Patient Name
+                 <Button variant="ghost" onClick={() => requestSort('crewName')}>
+                  Crew Name
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
@@ -102,7 +102,7 @@ export default function ReportsPage() {
             {filteredAndSortedLog.length > 0 ? (
               filteredAndSortedLog.map((log) => (
                 <TableRow key={log.id}>
-                  <TableCell className="font-medium">{log.patientName}</TableCell>
+                  <TableCell className="font-medium">{log.crewName}</TableCell>
                   <TableCell className="font-mono text-xs">{log.medicalId}</TableCell>
                   <TableCell className="font-medium">{log.drugName}</TableCell>
                   <TableCell>{log.quantity}</TableCell>

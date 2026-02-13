@@ -61,7 +61,7 @@ import {
 
 import { getDrugSuggestions } from "@/app/actions";
 import { CHRONIC_DISEASES, COUNTRY_DRUG_NAMES, ALLERGY_TYPES } from "@/lib/data";
-import type { DrugSuggestion, DrugStock as DrugStockType, PatientInfo } from "@/lib/types";
+import type { DrugSuggestion, DrugStock as DrugStockType, CrewInfo } from "@/lib/types";
 import { AppContext } from "@/contexts/app-context";
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, ArrowLeft, ArrowRight, Bot, Loader2, Pill, Redo, ShieldCheck } from "lucide-react";
@@ -72,7 +72,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 
 // Schemas
-const patientInfoFormSchema = z.object({
+const crewInfoFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   dob: z.string().refine((val) => !isNaN(Date.parse(val)), "Invalid date of birth."),
   alcoholUsage: z.enum(["none", "moderate", "heavy"]),
@@ -95,13 +95,13 @@ const symptomsSchema = z.object({
 });
 
 
-type PatientInfoForm = z.infer<typeof patientInfoFormSchema>;
+type CrewInfoForm = z.infer<typeof crewInfoFormSchema>;
 type SymptomsInfo = z.infer<typeof symptomsSchema>;
 
 // Main Component
 export default function MediAssistantPage() {
   const [step, setStep] = useState(1);
-  const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null);
+  const [crewInfo, setCrewInfo] = useState<CrewInfo | null>(null);
   const [selectedBodyParts, setSelectedBodyParts] = useState<BodyPart[]>([]);
   const [suggestions, setSuggestions] = useState<DrugSuggestion[]>([]);
   const [diagnosis, setDiagnosis] = useState<string | null>(null);
@@ -109,11 +109,11 @@ export default function MediAssistantPage() {
   const [severity, setSeverity] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const { addDrugsToStock, addPatient, findPatient } = useContext(AppContext);
+  const { addDrugsToStock, addCrewMember, findCrewMember } = useContext(AppContext);
 
   const startOver = useCallback(() => {
     setStep(1);
-    setPatientInfo(null);
+    setCrewInfo(null);
     setSelectedBodyParts([]);
     setSuggestions([]);
     setError(null);
@@ -122,19 +122,19 @@ export default function MediAssistantPage() {
     setShortDiagnosis(null);
   }, []);
 
-  const onPatientInfoSubmit = useCallback((values: PatientInfo) => {
-    addPatient(values);
-    setPatientInfo(values);
+  const onCrewInfoSubmit = useCallback((values: CrewInfo) => {
+    addCrewMember(values);
+    setCrewInfo(values);
     setStep(2);
-  }, [addPatient]);
+  }, [addCrewMember]);
 
-  const onPatientLookup = useCallback((medicalId: string) => {
-    const foundPatient = findPatient(medicalId);
-    if(foundPatient) {
-      setPatientInfo(foundPatient);
+  const onCrewLookup = useCallback((medicalId: string) => {
+    const foundCrewMember = findCrewMember(medicalId);
+    if(foundCrewMember) {
+      setCrewInfo(foundCrewMember);
       setStep(2);
     }
-  }, [findPatient]);
+  }, [findCrewMember]);
 
   const onBodyPartSelectionSubmit = useCallback((parts: BodyPart[]) => {
     setSelectedBodyParts(parts);
@@ -142,11 +142,11 @@ export default function MediAssistantPage() {
   }, []);
 
   const onSymptomsSubmit = useCallback((values: SymptomsInfo) => {
-    if (!patientInfo) return;
+    if (!crewInfo) return;
     const input = {
       symptoms: values.symptoms,
-      chronicDiseases: patientInfo.chronicDiseases,
-      allergies: patientInfo.allergies,
+      chronicDiseases: crewInfo.chronicDiseases,
+      allergies: crewInfo.allergies,
       temperature: values.temperature,
       bloodPressure: values.bloodPressure,
       heartRate: values.heartRate,
@@ -172,7 +172,7 @@ export default function MediAssistantPage() {
         setShortDiagnosis(result.shortDiagnosis || null);
       }
     });
-  }, [patientInfo, addDrugsToStock]);
+  }, [crewInfo, addDrugsToStock]);
 
   const currentProgress = (step / 4) * 100;
 
@@ -187,7 +187,7 @@ export default function MediAssistantPage() {
       </div>
 
       <div className="flex-grow">
-        {step === 1 && <PatientInfoStep onSubmit={onPatientInfoSubmit} onPatientLookup={onPatientLookup} />}
+        {step === 1 && <CrewInfoStep onSubmit={onCrewInfoSubmit} onCrewLookup={onCrewLookup} />}
         {step === 2 && (
           <BodyPartSelectionStep
             initialSelectedParts={selectedBodyParts}
@@ -200,16 +200,16 @@ export default function MediAssistantPage() {
             onSubmit={onSymptomsSubmit}
             onBack={() => setStep(2)}
             initialSelectedParts={selectedBodyParts}
-            patientInfo={patientInfo}
+            crewInfo={crewInfo}
           />
         )}
-        {step === 4 && patientInfo && (
+        {step === 4 && crewInfo && (
           <SuggestionsStep
             suggestions={suggestions}
             isLoading={isPending}
             error={error}
             onStartOver={startOver}
-            patientInfo={patientInfo}
+            crewInfo={crewInfo}
             diagnosis={diagnosis}
             severity={severity}
             shortDiagnosis={shortDiagnosis}
@@ -220,10 +220,10 @@ export default function MediAssistantPage() {
   );
 }
 
-// Step 1: Patient Info
-function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: PatientInfo) => void; onPatientLookup: (medicalId: string) => void; }) {
-  const form = useForm<PatientInfoForm>({
-    resolver: zodResolver(patientInfoFormSchema),
+// Step 1: Crew Member Info
+function CrewInfoStep({ onSubmit, onCrewLookup }: { onSubmit: (values: CrewInfo) => void; onCrewLookup: (medicalId: string) => void; }) {
+  const form = useForm<CrewInfoForm>({
+    resolver: zodResolver(crewInfoFormSchema),
     defaultValues: {
       name: "",
       dob: "",
@@ -235,11 +235,11 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
     },
   });
 
-  const { findPatient } = useContext(AppContext);
+  const { findCrewMember } = useContext(AppContext);
   const [searchId, setSearchId] = useState("");
   const [searchError, setSearchError] = useState("");
   const [medicalId, setMedicalId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("new-patient");
+  const [activeTab, setActiveTab] = useState("new-crew-member");
   const [isAllergyDialogOpen, setAllergyDialogOpen] = useState(false);
 
   const { watch, formState, getValues, reset, setValue } = form;
@@ -251,7 +251,7 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
 
   useEffect(() => {
     const { name, dob } = getValues();
-    if (activeTab === "new-patient" && name && name.length >= 2 && dob && !formState.errors.dob && !medicalId) {
+    if (activeTab === "new-crew-member" && name && name.length >= 2 && dob && !formState.errors.dob && !medicalId) {
       setMedicalId(Math.floor(1000 + Math.random() * 9000).toString());
     }
   }, [nameValue, dobValue, formState.errors.dob, medicalId, getValues, activeTab]);
@@ -272,13 +272,13 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
       setAllergyDialogOpen(false);
   };
 
-  const handleNewPatientSubmit = (values: PatientInfoForm) => {
+  const handleNewCrewMemberSubmit = (values: CrewInfoForm) => {
     const idToSubmit = medicalId || Math.floor(1000 + Math.random() * 9000).toString();
     if (!medicalId) {
       setMedicalId(idToSubmit);
     }
-    const { hasAllergies, ...patientData } = values;
-    onSubmit({ ...patientData, medicalId: idToSubmit });
+    const { hasAllergies, ...crewMemberData } = values;
+    onSubmit({ ...crewMemberData, medicalId: idToSubmit });
   };
 
   const handleSearch = useCallback(() => {
@@ -286,39 +286,39 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
         setSearchError("Please enter a Medical ID.");
         return;
     }
-    const patient = findPatient(searchId);
-    if (patient) {
-      const { medicalId: foundMedicalId, ...formData } = patient;
+    const crewMember = findCrewMember(searchId);
+    if (crewMember) {
+      const { medicalId: foundMedicalId, ...formData } = crewMember;
       reset({
         ...formData,
         hasAllergies: !!(formData.allergies && formData.allergies.length > 0)
       });
       setMedicalId(foundMedicalId);
-      setActiveTab("new-patient");
+      setActiveTab("new-crew-member");
       setSearchId("");
       setSearchError("");
     } else {
-      setSearchError("Patient with this Medical ID not found.");
+      setSearchError("Crew member with this Medical ID not found.");
     }
-  }, [searchId, findPatient, reset]);
+  }, [searchId, findCrewMember, reset]);
 
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Patient Medical ID</CardTitle>
+        <CardTitle>Crew Member Medical ID</CardTitle>
         <CardDescription>
-          Create a new patient record or find an existing one using their medical ID.
+          Create a new crew member record or find an existing one using their medical ID.
         </CardDescription>
       </CardHeader>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="new-patient">New Patient</TabsTrigger>
-            <TabsTrigger value="find-patient">Find by Medical ID</TabsTrigger>
+            <TabsTrigger value="new-crew-member">New Crew Member</TabsTrigger>
+            <TabsTrigger value="find-crew-member">Find by Medical ID</TabsTrigger>
         </TabsList>
-        <TabsContent value="new-patient">
+        <TabsContent value="new-crew-member">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleNewPatientSubmit)}>
+                <form onSubmit={form.handleSubmit(handleNewCrewMemberSubmit)}>
                 <CardContent className="space-y-6 pt-6">
                     <div className="grid md:grid-cols-2 gap-6">
                     <FormField
@@ -357,7 +357,7 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
                           className="font-mono bg-muted"
                         />
                         <FormDescription>
-                          This unique ID will be used to identify the patient in the future.
+                          This unique ID will be used to identify the crew member in the future.
                         </FormDescription>
                       </div>
                     )}
@@ -398,7 +398,7 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
                             <div className="space-y-1 leading-none">
                             <Label>Smoker</Label>
                             <FormDescription>
-                                Check if the patient is a smoker.
+                                Check if the crew member is a smoker.
                             </FormDescription>
                             </div>
                         </FormItem>
@@ -507,16 +507,16 @@ function PatientInfoStep({ onSubmit, onPatientLookup }: { onSubmit: (values: Pat
                 selectedAllergies={getValues('allergies') || []}
             />
         </TabsContent>
-        <TabsContent value="find-patient">
+        <TabsContent value="find-crew-member">
              <CardContent className="space-y-6 pt-6">
                 <div className="space-y-2">
-                <Label htmlFor="medical-id">Patient Medical ID</Label>
+                <Label htmlFor="medical-id">Crew Member Medical ID</Label>
                 <Input id="medical-id" value={searchId} onChange={(e) => { setSearchId(e.target.value); setSearchError(""); }} placeholder="Enter Medical ID" />
                 </div>
                 {searchError && <p className="text-sm text-destructive">{searchError}</p>}
             </CardContent>
             <CardFooter className="flex justify-end">
-                <Button onClick={handleSearch}>Find Patient</Button>
+                <Button onClick={handleSearch}>Find Crew Member</Button>
             </CardFooter>
         </TabsContent>
       </Tabs>
@@ -551,7 +551,7 @@ function BodyPartSelectionStep({
       <CardHeader>
         <CardTitle>Pain Area Selection</CardTitle>
         <CardDescription>
-          Click on the body parts where the patient is experiencing pain. You can
+          Click on the body parts where the crew member is experiencing pain. You can
           select multiple areas.
         </CardDescription>
       </CardHeader>
@@ -585,12 +585,12 @@ function SymptomsStep({
   onSubmit,
   onBack,
   initialSelectedParts,
-  patientInfo,
+  crewInfo,
 }: {
   onSubmit: (values: SymptomsInfo) => void;
   onBack: () => void;
   initialSelectedParts: BodyPart[];
-  patientInfo: PatientInfo | null;
+  crewInfo: CrewInfo | null;
 }) {
   const form = useForm<SymptomsInfo>({
     resolver: zodResolver(symptomsSchema),
@@ -612,20 +612,20 @@ function SymptomsStep({
       initialSymptoms += '. ';
     }
     
-    if(patientInfo?.allergies && patientInfo.allergies.length > 0) {
-        const allergyText = `Patient has known allergies to: ${patientInfo.allergies.join(', ')}. `;
+    if(crewInfo?.allergies && crewInfo.allergies.length > 0) {
+        const allergyText = `Crew member has known allergies to: ${crewInfo.allergies.join(', ')}. `;
         initialSymptoms += allergyText;
     }
     
     form.setValue('symptoms', initialSymptoms);
-  }, [initialSelectedParts, patientInfo, form]);
+  }, [initialSelectedParts, crewInfo, form]);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Symptoms & Vital Signs</CardTitle>
         <CardDescription>
-          Describe the patient's symptoms and provide vital signs.
+          Describe the crew member's symptoms and provide vital signs.
         </CardDescription>
       </CardHeader>
       <Form {...form}>
@@ -645,7 +645,7 @@ function SymptomsStep({
                     />
                   </FormControl>
                   <FormDescription>
-                    Describe the patient's symptoms in detail. You can add more information to what was pre-filled from the body diagram and allergy selection.
+                    Describe the crew member's symptoms in detail. You can add more information to what was pre-filled from the body diagram and allergy selection.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -715,7 +715,7 @@ function SymptomsStep({
 }
 
 // Step 4: Suggestions
-function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientInfo, diagnosis, severity, shortDiagnosis }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, patientInfo: PatientInfo, diagnosis: string | null, severity: string | null, shortDiagnosis: string | null }) {
+function SuggestionsStep({ suggestions, isLoading, error, onStartOver, crewInfo, diagnosis, severity, shortDiagnosis }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, crewInfo: CrewInfo, diagnosis: string | null, severity: string | null, shortDiagnosis: string | null }) {
   const { drugStock } = useContext(AppContext);
   const [isDiagnosisModalOpen, setDiagnosisModalOpen] = useState(false);
 
@@ -730,7 +730,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientIn
       <div className="flex flex-col items-center justify-center h-full text-center">
         <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
         <h2 className="text-2xl font-semibold">Generating Suggestions...</h2>
-        <p className="text-muted-foreground">Our AI is analyzing the patient's data. Please wait.</p>
+        <p className="text-muted-foreground">Our AI is analyzing the crew member's data. Please wait.</p>
       </div>
     );
   }
@@ -756,7 +756,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientIn
         <CardHeader>
           <CardTitle>AI-Powered Drug Suggestions</CardTitle>
           <CardDescription>
-            Patient: {patientInfo.name} | Medical ID: <span className="font-mono text-xs p-1 bg-muted rounded">{patientInfo.medicalId}</span>
+            Crew Member: {crewInfo.name} | Medical ID: <span className="font-mono text-xs p-1 bg-muted rounded">{crewInfo.medicalId}</span>
             <br />
             Based on the provided information, here are some potential medication suggestions.
           </CardDescription>
@@ -766,7 +766,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientIn
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {suggestions.map((suggestion) => {
                 const stockInfo = drugStock.find(d => d.name.toLowerCase() === suggestion.drugName.toLowerCase());
-                return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} patientInfo={patientInfo} diagnosis={diagnosis} shortDiagnosis={shortDiagnosis} />;
+                return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} crewInfo={crewInfo} diagnosis={diagnosis} shortDiagnosis={shortDiagnosis} />;
               })}
             </div>
           ) : (
@@ -787,7 +787,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, patientIn
 }
 
 // Drug Card Component
-function DrugCard({ suggestion, stockInfo, patientInfo, diagnosis, shortDiagnosis }: { suggestion: DrugSuggestion, stockInfo: DrugStockType | undefined, patientInfo: PatientInfo, diagnosis: string | null, shortDiagnosis: string | null }) {
+function DrugCard({ suggestion, stockInfo, crewInfo, diagnosis, shortDiagnosis }: { suggestion: DrugSuggestion, stockInfo: DrugStockType | undefined, crewInfo: CrewInfo, diagnosis: string | null, shortDiagnosis: string | null }) {
   const { dispenseDrug } = useContext(AppContext);
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
@@ -817,17 +817,17 @@ function DrugCard({ suggestion, stockInfo, patientInfo, diagnosis, shortDiagnosi
     if (stockInfo.isNarcotic) {
         setNarcoticModalOpen(true);
     } else {
-        dispenseDrug(stockInfo.id, quantity, patientInfo, diagnosis || 'AI-assisted diagnosis', shortDiagnosis);
+        dispenseDrug(stockInfo.id, quantity, crewInfo, diagnosis || 'AI-assisted diagnosis', shortDiagnosis);
         toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed.`, className: "bg-accent text-accent-foreground" });
     }
-  }, [stockInfo, quantity, toast, dispenseDrug, patientInfo, diagnosis, shortDiagnosis]);
+  }, [stockInfo, quantity, toast, dispenseDrug, crewInfo, diagnosis, shortDiagnosis]);
 
   const onNarcoticApproved = useCallback(() => {
       if (!stockInfo) return;
-      dispenseDrug(stockInfo.id, quantity, patientInfo, diagnosis || 'AI-assisted diagnosis', shortDiagnosis);
+      dispenseDrug(stockInfo.id, quantity, crewInfo, diagnosis || 'AI-assisted diagnosis', shortDiagnosis);
       toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed with approval.`, className: "bg-accent text-accent-foreground" });
       setNarcoticModalOpen(false);
-  }, [stockInfo, dispenseDrug, quantity, patientInfo, diagnosis, shortDiagnosis, toast]);
+  }, [stockInfo, dispenseDrug, quantity, crewInfo, diagnosis, shortDiagnosis, toast]);
 
   return (
     <Card className="flex flex-col">

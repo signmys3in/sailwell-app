@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useState, ReactNode, useCallback } from "react";
-import type { DrugStock, DispenseLog, PatientInfo } from "@/lib/types";
+import type { DrugStock, DispenseLog, CrewInfo } from "@/lib/types";
 
 // Hardcoded initial stock for demonstration
 const INITIAL_DRUG_STOCK: DrugStock[] = [
@@ -56,33 +56,33 @@ const INITIAL_DRUG_STOCK: DrugStock[] = [
 interface AppContextType {
   drugStock: DrugStock[];
   dispenseLog: DispenseLog[];
-  patients: PatientInfo[];
-  dispenseDrug: (drugId: string, quantity: number, patientInfo: PatientInfo, diagnosis: string, shortDiagnosis?: string | null) => void;
+  crewMembers: CrewInfo[];
+  dispenseDrug: (drugId: string, quantity: number, crewInfo: CrewInfo, diagnosis: string, shortDiagnosis?: string | null) => void;
   refillStock: (drugId: string, quantity: number) => void;
   addDrugsToStock: (drugs: { name: string, isNarcotic: boolean }[]) => void;
   addNewDrug: (drug: { name: string, quantity: number, isNarcotic: boolean, expiryDate: Date }) => void;
   updateExpiryDate: (drugId: string, newDate: Date) => void;
-  addPatient: (patient: PatientInfo) => void;
-  findPatient: (medicalId: string) => PatientInfo | undefined;
+  addCrewMember: (crewMember: CrewInfo) => void;
+  findCrewMember: (medicalId: string) => CrewInfo | undefined;
 }
 
 export const AppContext = createContext<AppContextType>({
   drugStock: [],
   dispenseLog: [],
-  patients: [],
+  crewMembers: [],
   dispenseDrug: () => {},
   refillStock: () => {},
   addDrugsToStock: () => {},
   addNewDrug: () => {},
   updateExpiryDate: () => {},
-  addPatient: () => {},
-  findPatient: () => undefined,
+  addCrewMember: () => {},
+  findCrewMember: () => undefined,
 });
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [drugStock, setDrugStock] = useState<DrugStock[]>(INITIAL_DRUG_STOCK);
   const [dispenseLog, setDispenseLog] = useState<DispenseLog[]>([]);
-  const [patients, setPatients] = useState<PatientInfo[]>([]);
+  const [crewMembers, setCrewMembers] = useState<CrewInfo[]>([]);
 
   const addDrugsToStock = useCallback((drugs: { name: string, isNarcotic: boolean }[]) => {
     setDrugStock((prevStock) => {
@@ -129,23 +129,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
-  const addPatient = useCallback((patient: PatientInfo) => {
-    setPatients(prev => {
-        const existingPatientIndex = prev.findIndex(p => p.medicalId === patient.medicalId);
-        if (existingPatientIndex > -1) {
-            const newPatients = [...prev];
-            newPatients[existingPatientIndex] = patient;
-            return newPatients;
+  const addCrewMember = useCallback((crewMember: CrewInfo) => {
+    setCrewMembers(prev => {
+        const existingCrewMemberIndex = prev.findIndex(p => p.medicalId === crewMember.medicalId);
+        if (existingCrewMemberIndex > -1) {
+            const newCrewMembers = [...prev];
+            newCrewMembers[existingCrewMemberIndex] = crewMember;
+            return newCrewMembers;
         }
-        return [...prev, patient];
+        return [...prev, crewMember];
     });
   }, []);
 
-  const findPatient = useCallback((medicalId: string) => {
-    return patients.find(p => p.medicalId === medicalId);
-  }, [patients]);
+  const findCrewMember = useCallback((medicalId: string) => {
+    return crewMembers.find(p => p.medicalId === medicalId);
+  }, [crewMembers]);
 
-  const dispenseDrug = useCallback((drugId: string, quantity: number, patientInfo: PatientInfo, diagnosis: string, shortDiagnosis?: string | null) => {
+  const dispenseDrug = useCallback((drugId: string, quantity: number, crewInfo: CrewInfo, diagnosis: string, shortDiagnosis?: string | null) => {
     setDrugStock((prevStock) =>
       prevStock.map((drug) =>
         drug.id === drugId ? { ...drug, stock: drug.stock - quantity } : drug
@@ -155,13 +155,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         ...prevLog,
         {
             id: new Date().toISOString(),
-            patientName: patientInfo.name,
-            medicalId: patientInfo.medicalId,
+            crewName: crewInfo.name,
+            medicalId: crewInfo.medicalId,
             drugName: drugId,
             quantity: quantity,
             timestamp: new Date(),
             diagnosis: diagnosis,
-            diseases: patientInfo.chronicDiseases || [],
+            diseases: crewInfo.chronicDiseases || [],
             shortDiagnosis: shortDiagnosis || (diagnosis ? diagnosis.split("(")[0].trim() : ""),
         }
     ]);
@@ -184,7 +184,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AppContext.Provider value={{ drugStock, dispenseLog, patients, dispenseDrug, refillStock, addDrugsToStock, addNewDrug, updateExpiryDate, addPatient, findPatient }}>
+    <AppContext.Provider value={{ drugStock, dispenseLog, crewMembers, dispenseDrug, refillStock, addDrugsToStock, addNewDrug, updateExpiryDate, addCrewMember, findCrewMember }}>
       {children}
     </AppContext.Provider>
   );

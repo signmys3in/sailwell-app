@@ -1,4 +1,4 @@
-export type PatientInfo = {
+export type CrewInfo = {
   medicalId: string;
   name: string;
   dob: string;
@@ -32,7 +32,7 @@ export type DrugStock = {
 
 export type DispenseLog = {
     id: string;
-    patientName: string;
+    crewName: string;
     medicalId: string;
     drugName: string;
     quantity: number;

@@ -25,7 +25,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import type { DrugStock, PatientInfo } from "@/lib/types";
+import type { DrugStock, CrewInfo } from "@/lib/types";
 
 export default function NarcoticsPage() {
     const { drugStock } = useContext(AppContext);
@@ -93,22 +93,22 @@ function DispenseNarcoticDialog({ drug, open, onOpenChange }: { drug: DrugStock,
     const { dispenseDrug } = useContext(AppContext);
     const { toast } = useToast();
     const [password, setPassword] = useState("");
-    const [patientName, setPatientName] = useState("");
+    const [crewName, setCrewName] = useState("");
     const [diagnosis, setDiagnosis] = useState("");
     const [quantity, setQuantity] = useState(1);
     const [error, setError] = useState("");
 
     const resetForm = useCallback(() => {
         setPassword("");
-        setPatientName("");
+        setCrewName("");
         setDiagnosis("");
         setQuantity(1);
         setError("");
     }, []);
 
     const handleVerifyAndDispense = useCallback(() => {
-        if (!patientName || !diagnosis || quantity <= 0) {
-            setError("Please fill in all patient and quantity fields.");
+        if (!crewName || !diagnosis || quantity <= 0) {
+            setError("Please fill in all crew member and quantity fields.");
             return;
         }
 
@@ -118,8 +118,8 @@ function DispenseNarcoticDialog({ drug, open, onOpenChange }: { drug: DrugStock,
                 return;
             }
 
-            const patientForLog: PatientInfo = {
-                name: patientName,
+            const crewMemberForLog: CrewInfo = {
+                name: crewName,
                 medicalId: Math.floor(1000 + Math.random() * 9000).toString(),
                 dob: "",
                 alcoholUsage: "none",
@@ -127,11 +127,11 @@ function DispenseNarcoticDialog({ drug, open, onOpenChange }: { drug: DrugStock,
                 chronicDiseases: [],
             };
 
-            dispenseDrug(drug.id, quantity, patientForLog, diagnosis, null);
+            dispenseDrug(drug.id, quantity, crewMemberForLog, diagnosis, null);
             toast({
                 variant: "default",
                 title: "Dispensed",
-                description: `${quantity} x ${drug.name} dispensed to ${patientName} with approval.`,
+                description: `${quantity} x ${drug.name} dispensed to ${crewName} with approval.`,
                 className: "bg-accent text-accent-foreground"
             });
             onOpenChange(false);
@@ -139,7 +139,7 @@ function DispenseNarcoticDialog({ drug, open, onOpenChange }: { drug: DrugStock,
         } else {
             setError("Invalid password. Approval denied.");
         }
-    }, [patientName, diagnosis, quantity, password, drug, dispenseDrug, toast, onOpenChange, resetForm]);
+    }, [crewName, diagnosis, quantity, password, drug, dispenseDrug, toast, onOpenChange, resetForm]);
 
     const handleOpenChange = useCallback((isOpen: boolean) => {
         if (!isOpen) {
@@ -154,13 +154,13 @@ function DispenseNarcoticDialog({ drug, open, onOpenChange }: { drug: DrugStock,
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2"><ShieldCheck className="text-destructive" /> Narcotic Dispensing Approval</DialogTitle>
                     <DialogDescription>
-                        Dispensing of "{drug.name}" requires master approval. Please enter patient details and password.
+                        Dispensing of "{drug.name}" requires master approval. Please enter crew member details and password.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-2">
                     <div className="space-y-2">
-                        <Label htmlFor="patient-name">Patient Name</Label>
-                        <Input id="patient-name" value={patientName} onChange={e => setPatientName(e.target.value)} placeholder="John Doe" />
+                        <Label htmlFor="crew-name">Crew Name</Label>
+                        <Input id="crew-name" value={crewName} onChange={e => setCrewName(e.target.value)} placeholder="John Doe" />
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="diagnosis">Diagnosis</Label>

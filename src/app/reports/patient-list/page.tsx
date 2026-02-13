@@ -14,30 +14,30 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function PatientListPage() {
-  const { patients } = useContext(AppContext);
+export default function CrewListPage() {
+  const { crewMembers } = useContext(AppContext);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredPatients = useMemo(() => {
+  const filteredCrewMembers = useMemo(() => {
     if (!searchTerm) {
-      return patients;
+      return crewMembers;
     }
-    return patients.filter(
-      (patient) =>
-        patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        patient.medicalId.includes(searchTerm)
+    return crewMembers.filter(
+      (crewMember) =>
+        crewMember.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        crewMember.medicalId.includes(searchTerm)
     );
-  }, [patients, searchTerm]);
+  }, [crewMembers, searchTerm]);
 
   return (
     <div>
       <PageHeader
-        title="Patient List"
-        description="A searchable list of all registered patients."
+        title="Crew List"
+        description="A searchable list of all registered crew members."
       />
       <Card>
         <CardHeader>
-          <CardTitle>All Patients</CardTitle>
+          <CardTitle>All Crew Members</CardTitle>
           <div className="mt-4">
             <Input
               placeholder="Search by name or medical ID..."
@@ -52,22 +52,22 @@ export default function PatientListPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Patient Name</TableHead>
+                  <TableHead>Crew Name</TableHead>
                   <TableHead>Medical ID</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPatients.length > 0 ? (
-                  filteredPatients.map((patient) => (
-                    <TableRow key={patient.medicalId}>
-                      <TableCell className="font-medium">{patient.name}</TableCell>
-                      <TableCell className="font-mono text-xs">{patient.medicalId}</TableCell>
+                {filteredCrewMembers.length > 0 ? (
+                  filteredCrewMembers.map((crewMember) => (
+                    <TableRow key={crewMember.medicalId}>
+                      <TableCell className="font-medium">{crewMember.name}</TableCell>
+                      <TableCell className="font-mono text-xs">{crewMember.medicalId}</TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
                     <TableCell colSpan={2} className="h-24 text-center">
-                      No patients found.
+                      No crew members found.
                     </TableCell>
                   </TableRow>
                 )}
