@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useMemo } from "react";
+import { useContext, useMemo, useState } from "react";
 import { AppContext } from "@/contexts/app-context";
 import {
   Table,
@@ -13,14 +13,43 @@ import {
 } from "@/components/ui/table";
 import PageHeader from "@/components/page-header";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown } from "lucide-react";
+import type { DispenseLog } from "@/lib/types";
+
+type SortableKeys = 'patientName' | 'timestamp';
 
 export default function ReportsPage() {
   const { dispenseLog } = useContext(AppContext);
+  const [sortConfig, setSortConfig] = useState<{ key: SortableKeys; direction: 'asc' | 'desc' }>({ key: 'timestamp', direction: 'desc' });
 
-  const sortedLog = useMemo(() => 
-    [...dispenseLog].sort((a,b) => b.timestamp.getTime() - a.timestamp.getTime()),
-    [dispenseLog]
-  );
+  const sortedLog = useMemo(() => {
+    const sortableLog = [...dispenseLog];
+    if (sortConfig.key) {
+      sortableLog.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+
+        let comparison = 0;
+        if (aValue > bValue) {
+          comparison = 1;
+        } else if (aValue < bValue) {
+          comparison = -1;
+        }
+
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      });
+    }
+    return sortableLog;
+  }, [dispenseLog, sortConfig]);
+
+  const requestSort = (key: SortableKeys) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
 
   return (
     <div>
@@ -30,15 +59,25 @@ export default function ReportsPage() {
       />
       <div className="overflow-hidden rounded-lg border">
         <Table>
-          <TableCaption>A log of all drug dispensing activities.</TableCaption>
+          <TableCaption>A log of all drug dispensing activities. Click a column header to sort.</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>Patient Name</TableHead>
+              <TableHead>
+                 <Button variant="ghost" onClick={() => requestSort('patientName')}>
+                  Patient Name
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </TableHead>
               <TableHead>Medical ID</TableHead>
               <TableHead>Drug Name</TableHead>
               <TableHead>Quantity</TableHead>
               <TableHead>Diagnosis</TableHead>
-              <TableHead className="text-right">Timestamp</TableHead>
+              <TableHead className="text-right">
+                <Button variant="ghost" onClick={() => requestSort('timestamp')}>
+                    Timestamp
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
