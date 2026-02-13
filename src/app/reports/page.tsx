@@ -25,7 +25,7 @@ export default function ReportsPage() {
   return (
     <div>
       <PageHeader
-        title="Reporting & Analytics"
+        title="Dispensing and Diagnoses"
         description="Review dispensing activities and diagnoses."
       />
       <div className="overflow-hidden rounded-lg border">
