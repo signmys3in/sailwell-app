@@ -14,8 +14,10 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
 } from "@/components/ui/chart";
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
+import { PieChart, Pie } from "recharts";
 import type { ChartConfig } from "@/components/ui/chart";
 
 export default function DiseaseTrendsPage() {
@@ -36,12 +38,18 @@ export default function DiseaseTrendsPage() {
   }, [dispenseLog]);
 
 
-  const chartConfig: ChartConfig = {
-    count: {
-      label: "Diagnoses",
-      color: "hsl(var(--primary))",
-    },
-  };
+  const chartConfig: ChartConfig = useMemo(() => {
+    const config: ChartConfig = {
+      count: {
+        label: "Cases",
+      },
+    };
+    chartData.forEach((item) => {
+        config[item.name] = { label: item.name };
+    });
+    return config;
+  }, [chartData]);
+
 
   return (
     <div>
@@ -53,31 +61,59 @@ export default function DiseaseTrendsPage() {
         <CardHeader>
           <CardTitle>Diagnosed Diseases Frequency</CardTitle>
           <CardDescription>
-            This chart shows the number of times each disease has been diagnosed.
+            This pie chart shows the distribution of diagnosed diseases.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex justify-center">
           {chartData.length > 0 ? (
-            <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
-              <BarChart accessibilityLayer data={chartData} margin={{ bottom: 70 }}>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="name"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                  interval={0}
-                  angle={-45}
-                  textAnchor="end"
-                  height={100}
-                />
-                <YAxis allowDecimals={false} />
+            <ChartContainer config={chartConfig} className="min-h-[300px] w-full max-w-sm">
+              <PieChart accessibilityLayer>
                 <ChartTooltip
                   cursor={false}
                   content={<ChartTooltipContent hideLabel />}
                 />
-                <Bar dataKey="count" fill="var(--color-count)" radius={4} />
-              </BarChart>
+                <Pie
+                  data={chartData}
+                  dataKey="count"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  labelLine={false}
+                  label={({
+                    cx,
+                    cy,
+                    midAngle,
+                    innerRadius,
+                    outerRadius,
+                    percent,
+                  }) => {
+                    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+                    const x = cx + (radius + 15) * Math.cos(-midAngle * Math.PI / 180);
+                    const y = cy + (radius + 15) * Math.sin(-midAngle * Math.PI / 180);
+                    
+                    if (percent < 0.05) return null;
+
+                    return (
+                      <text
+                        x={x}
+                        y={y}
+                        className="fill-foreground text-xs"
+                        textAnchor={x > cx ? "start" : "end"}
+                        dominantBaseline="central"
+                      >
+                        {`${(percent * 100).toFixed(0)}%`}
+                      </text>
+                    );
+                  }}
+                />
+                 <ChartLegend
+                    content={<ChartLegendContent nameKey="name" />}
+                    verticalAlign="bottom"
+                    align="center"
+                    wrapperStyle={{ paddingTop: 20 }}
+                />
+              </PieChart>
             </ChartContainer>
           ) : (
             <div className="text-center py-12">
