@@ -9,7 +9,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <div className="flex h-16 items-center border-b px-6">
             <a href="/" className="flex items-center gap-2 font-semibold">
               <Image
-                src="/logo.svg"
+                src="/logo.png"
                 alt="SailWell Logo"
                 width={120}
                 height={30}
