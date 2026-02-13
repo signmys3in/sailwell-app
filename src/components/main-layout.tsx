@@ -1,3 +1,4 @@
+import { Sailboat } from "lucide-react";
 import MainNav from "@/components/main-nav";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -7,12 +8,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <aside className="fixed inset-y-0 left-0 z-10 hidden w-60 flex-col border-r bg-card sm:flex">
           <div className="flex h-20 items-center border-b px-6">
             <a href="/" className="flex items-center gap-3 font-semibold">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://sailwell.org/wp-content/uploads/2023/07/cropped-cropped-SailWell-Logo-Final-config-files.png"
-                alt="SailWell Logo"
-                className="h-16 w-16"
-              />
+              <Sailboat className="h-12 w-12 text-primary" />
               <span className="text-3xl font-bold">SailWell</span>
             </a>
           </div>
