@@ -96,7 +96,7 @@ export default function MainNav() {
                             variant: isActive ? "secondary" : "ghost",
                             size: "sm",
                           }),
-                          "justify-start",
+                          "justify-start whitespace-normal h-auto",
                           isActive &&
                             "text-secondary-foreground"
                         )}
@@ -123,7 +123,7 @@ export default function MainNav() {
                 variant: isActive ? "default" : "ghost",
                 size: "default",
               }),
-              "justify-start my-1",
+              "justify-start my-1 whitespace-normal h-auto",
               isActive &&
                 "text-primary-foreground"
             )}
