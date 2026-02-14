@@ -1,13 +1,6 @@
-import type {NextConfig} from 'next';
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   /* config options here */
-  experimental: {
-    allowedDevOrigins: [
-      'https://6000-firebase-studio-1770863036760.cluster-ikslh4rdsnbqsvu5nw3v4dqjj2.cloudworkstations.dev',
-      'https://9000-firebase-studio-1770863036760.cluster-ikslh4rdsnbqsvu5nw3v4dqjj2.cloudworkstations.dev',
-    ],
-  },
   images: {
     remotePatterns: [
       {
@@ -32,4 +25,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
