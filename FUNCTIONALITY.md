@@ -21,7 +21,7 @@ The central feature of the application is a multi-step wizard that guides the us
 -   **Step 3: Symptoms & Vital Signs:**
     -   A form is provided to input detailed information about the crew member's condition.
     -   **Symptom Description:** A text area for a detailed description of symptoms. This field is automatically pre-populated based on the selections from the body diagram and the specified allergies to ensure context is carried forward.
-    -   **Mandatory Vital Signs:** Input fields for Temperature (°C), Blood Pressure (mmHg), and Heart Rate (bpm) are required.
+    -   **Mandatory Vital Signs:** Input fields for Temperature (°C), Blood Pressure (mmHg), Heart Rate (bpm), and Oxygen Level (%) are required.
     -   **Mandatory Consciousness Level:** A dropdown menu requires the user to select the patient's level of consciousness from "Alert," "Responds to Voice," "Responds to Pain," or "Unresponsive."
 
 -   **Step 4: AI Analysis & Suggestions:**
@@ -85,22 +85,31 @@ The central feature of the application is a multi-step wizard that guides the us
 -   Displays crew name, medical ID, drug name, quantity, diagnosis, and a precise timestamp for each entry.
 -   **Filtering:** Users can filter the entire log by crew name or medical ID to isolate a specific individual's history.
 -   **Sorting:** The data can be sorted by "Crew Name" or "Timestamp" by clicking the respective column headers.
+-   **Export:** The filtered and sorted view can be exported to a PDF document.
 
 ### 2. Disease Trends Report (`/reports/disease-trends`)
 
--   Presents an interactive pie chart that visualizes the frequency of different diagnoses recorded across the ship.
--   The chart uses the "short diagnosis" provided by the AI for clear, aggregated analytics.
--   This provides an at-a-glance overview of the most common health issues affecting the crew.
+-   **Severity Breakdown:** At the top of the page, displays a summary of total cases categorized by severity:
+    -   **Red:** "Requires immediate medical attention"
+    -   **Orange:** "Needs close monitoring"
+    -   **Green:** "Needs medication"
+-   **Frequency Chart:** Presents an interactive pie chart that visualizes the frequency of different diagnoses recorded across the ship. The chart uses the "short diagnosis" provided by the AI for clear, aggregated analytics.
+-   **Export:** The entire report can be exported to a PDF. The PDF includes:
+    -   The severity breakdown section.
+    -   A detailed, de-duplicated table showing each unique diagnosis per crew member.
+    -   An image of the pie chart.
+    -   A color-coded legend connecting the chart colors to their respective diagnoses.
 
 ### 3. Low Stock Report (`/reports/low-stock`)
 
 -   Automatically lists all medications in the inventory with stock levels below 50% capacity.
 -   The report shows the drug name, exact stock count vs. max stock, and a progress bar for quick visual assessment.
--   This report helps the crew proactively manage inventory and reorder necessary supplies.
+-   **Export:** This report can be exported to a PDF.
 
 ### 4. Crew List (`/reports/patient-list`)
 
 -   A simple, searchable list of all registered crew members, showing their full name and unique medical ID.
+-   **Export:** This list can be exported to a PDF.
 
 ---
 
