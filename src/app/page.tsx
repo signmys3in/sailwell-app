@@ -76,9 +76,20 @@ const crewInfoFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   dob: z.string()
     .min(1, { message: "Date of birth is required."})
-    .refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val) && !isNaN(Date.parse(val)), {
-      message: "Please enter a valid date.",
-    })
+    .refine((val) => {
+        // Should be in 'YYYY-MM-DD' format
+        const parts = val.split('-');
+        if (parts.length !== 3) return false;
+        
+        const year = parts[0];
+        // The year part must be exactly 4 digits
+        if (year.length !== 4) return false;
+        
+        // Ensure it's a valid date that can be parsed
+        if (isNaN(Date.parse(val))) return false;
+
+        return true;
+    }, { message: "Please enter a valid date with a 4-digit year (YYYY-MM-DD)." })
     .refine((val) => new Date(val) < new Date(), {
       message: "Date of birth cannot be in the future.",
     })
