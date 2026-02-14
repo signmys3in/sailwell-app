@@ -4,4 +4,4 @@ config();
 
 import '@/ai/flows/ai-powered-drug-recommendation';
 import '@/ai/flows/is-narcotic-check';
-import '@/ai/flows/ada-health-integration';
+// import '@/ai/flows/ada-health-integration';
