@@ -196,3 +196,35 @@ Firebase App Hosting automatically creates persistent "Preview Channels" for you
     git push origin main
     ```
 5.  **Go Live**: The push to `main` triggers the GitHub Action, which automatically deploys the new version to your live production URL. Your users will now see the changes.
+
+---
+
+## Step 6 (Optional): Adding a Custom Domain
+
+Once your app is live, you'll likely want to connect it to your own custom domain (e.g., `www.sailwell-app.com`). This process **does not change your deployment workflow** but is configured directly in the Firebase Console.
+
+1.  **Buy a Domain**: If you don't already own one, purchase a domain name from a registrar like Google Domains, Namecheap, GoDaddy, etc.
+
+2.  **Go to Firebase Hosting**:
+    *   Open your project in the [Firebase Console](https://console.firebase.google.com/).
+    *   In the left-hand menu, go to **Build > App Hosting**.
+    *   You'll see your backend listed. Click on its **"Dashboard"**. This will take you to the Firebase Hosting details page.
+
+3.  **Add Custom Domain**:
+    *   Click the **"Add custom domain"** button.
+    *   Enter the domain name you want to use (e.g., `www.your-domain.com`). It's generally recommended to start with the `www.` version. Firebase will also handle the root domain (e.g., `your-domain.com`).
+
+4.  **Verify Ownership**:
+    *   Firebase needs to prove you own the domain. It will give you a `TXT` record that you must add to your domain's DNS settings at your domain registrar. This can take some time to propagate (from a few minutes to several hours).
+
+5.  **Point Your Domain to Firebase**:
+    *   Once verified, Firebase will provide you with one or more `A` records (IP addresses).
+    *   Go back to your domain registrar's DNS settings and add these `A` records. This tells the internet to send traffic for your domain to Firebase's servers.
+
+6.  **Wait for Provisioning**:
+    *   After you add the `A` records, Firebase will automatically provision an SSL certificate for your domain. This ensures your site is secure (HTTPS). This process can also take a few hours.
+    *   Once complete, your status in the Firebase Hosting dashboard will show as "Connected."
+
+**Impact on Deployment**:
+
+None! Your existing GitHub Actions workflow remains the same. When you push to your `main` branch, the deployment will automatically go live on **both** your original `.web.app` URL and your new custom domain. The `dev` branch preview URLs are also unaffected.
