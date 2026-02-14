@@ -123,7 +123,6 @@ export default function MediAssistantPage() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const { addDrugsToStock, addCrewMember, findCrewMember } = useContext(AppContext);
-  const [recommendationSummary, setRecommendationSummary] = useState<string | null>(null);
 
 
   const startOver = useCallback(() => {
@@ -135,7 +134,6 @@ export default function MediAssistantPage() {
     setDiagnosis(null);
     setSeverity(null);
     setShortDiagnosis(null);
-    setRecommendationSummary(null);
   }, []);
 
   const onCrewInfoSubmit = useCallback((values: CrewInfo) => {
@@ -177,16 +175,14 @@ export default function MediAssistantPage() {
         setDiagnosis(null);
         setSeverity(null);
         setShortDiagnosis(null);
-        setRecommendationSummary(null);
-      } else if (result.suggestions) {
-        if (result.suggestions.length > 0) {
-          addDrugsToStock(result.suggestions.map(s => ({ name: s.drugName, isNarcotic: s.isNarcotic })));
+      } else if (result.drugSuggestions) {
+        if (result.drugSuggestions.length > 0) {
+          addDrugsToStock(result.drugSuggestions.map(s => ({ name: s.drugName, isNarcotic: s.isNarcotic })));
         }
-        setSuggestions(result.suggestions);
+        setSuggestions(result.drugSuggestions);
         setDiagnosis(result.diagnosis || "No diagnosis provided.");
         setSeverity(result.severity || null);
         setShortDiagnosis(result.shortDiagnosis || null);
-        setRecommendationSummary(result.recommendationSummary || null);
       }
     });
   }, [crewInfo, addDrugsToStock]);
@@ -230,7 +226,6 @@ export default function MediAssistantPage() {
             diagnosis={diagnosis}
             severity={severity}
             shortDiagnosis={shortDiagnosis}
-            recommendationSummary={recommendationSummary}
           />
         )}
       </div>
@@ -739,7 +734,7 @@ function SymptomsStep({
 }
 
 // Step 4: Suggestions
-function SuggestionsStep({ suggestions, isLoading, error, onStartOver, crewInfo, diagnosis, severity, shortDiagnosis, recommendationSummary }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, crewInfo: CrewInfo, diagnosis: string | null, severity: string | null, shortDiagnosis: string | null, recommendationSummary: string | null }) {
+function SuggestionsStep({ suggestions, isLoading, error, onStartOver, crewInfo, diagnosis, severity, shortDiagnosis }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, crewInfo: CrewInfo, diagnosis: string | null, severity: string | null, shortDiagnosis: string | null }) {
   const { drugStock } = useContext(AppContext);
   const [isDiagnosisModalOpen, setDiagnosisModalOpen] = useState(false);
 
@@ -786,15 +781,6 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, crewInfo,
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {recommendationSummary && (
-            <Alert className="mb-6 bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/50 dark:border-blue-700 dark:text-blue-300">
-                <Bot className="h-4 w-4 !text-blue-600 dark:!text-blue-400" />
-                <AlertTitle className="font-semibold">Recommendation Summary</AlertTitle>
-                <AlertDescription>
-                    {recommendationSummary}
-                </AlertDescription>
-            </Alert>
-          )}
           {suggestions.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {suggestions.map((suggestion) => {
