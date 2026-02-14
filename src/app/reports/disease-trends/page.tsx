@@ -86,49 +86,46 @@ export default function DiseaseTrendsPage() {
     const svg = chartElement.querySelector("svg");
     if (!svg) return;
 
-    // The key fix: We need to inline the CSS variables into the SVG itself
-    // so that when it's rendered to a canvas, it knows what colors to use.
-    const style = document.createElement('style');
-    const computedStyle = getComputedStyle(document.documentElement);
-
-    // We define all the CSS variables that the chart uses for its colors.
-    const cssVars = `
-      :root {
-        --chart-1: ${computedStyle.getPropertyValue('--chart-1').trim()};
-        --chart-2: ${computedStyle.getPropertyValue('--chart-2').trim()};
-        --chart-3: ${computedStyle.getPropertyValue('--chart-3').trim()};
-        --chart-4: ${computedStyle.getPropertyValue('--chart-4').trim()};
-        --chart-5: ${computedStyle.getPropertyValue('--chart-5').trim()};
-        --foreground: ${computedStyle.getPropertyValue('--foreground').trim()};
-        --muted-foreground: ${computedStyle.getPropertyValue('--muted-foreground').trim()};
-      }
-    `;
-    style.innerHTML = cssVars;
-
     const svgClone = svg.cloneNode(true) as SVGElement;
     
-    // Prepending the style block to the cloned SVG.
-    svgClone.insertBefore(style, svgClone.firstChild);
+    // Get all elements from the original SVG and the clone
+    const originalElements = svg.querySelectorAll('*');
+    const clonedElements = svgClone.querySelectorAll('*');
 
-    // The rest of the function remains the same, but now it operates on the modified SVG clone.
+    // Apply computed styles from original elements to the clone's attributes
+    originalElements.forEach((originalEl, index) => {
+        const clonedEl = clonedElements[index];
+        if (!clonedEl) return;
+        const style = getComputedStyle(originalEl);
+        
+        const fill = style.getPropertyValue('fill');
+        const stroke = style.getPropertyValue('stroke');
+
+        if (fill && fill !== 'none') {
+            clonedEl.setAttribute('fill', fill);
+        }
+        if (stroke && stroke !== 'none') {
+            clonedEl.setAttribute('stroke', stroke);
+        }
+    });
+
     const svgData = new XMLSerializer().serializeToString(svgClone);
     const img = new Image();
-    // Use btoa(unescape(encodeURIComponent(svgData))) to handle special characters
+    
+    // This encoding method is a robust way to handle special characters in the SVG string.
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
     
     img.onload = () => {
         const canvas = document.createElement("canvas");
         const svgSize = svg.getBoundingClientRect();
-        // Add padding to avoid clipping
         canvas.width = svgSize.width + 40;
         canvas.height = svgSize.height + 40;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        // Fill background with white
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 20, 20); // Draw with padding
+        ctx.drawImage(img, 20, 20);
 
         const imgData = canvas.toDataURL("image/png");
 
