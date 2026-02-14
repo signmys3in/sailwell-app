@@ -612,6 +612,11 @@ function SymptomsStep({
       initialSymptoms += '. ';
     }
     
+    if(crewInfo?.chronicDiseases && crewInfo.chronicDiseases.length > 0) {
+      const diseaseText = `Patient has a history of: ${crewInfo.chronicDiseases.join(', ')}. `;
+      initialSymptoms += diseaseText;
+    }
+
     if(crewInfo?.allergies && crewInfo.allergies.length > 0) {
         const allergyText = `Crew member has known allergies to: ${crewInfo.allergies.join(', ')}. `;
         initialSymptoms += allergyText;
@@ -1018,3 +1023,5 @@ function AllergySelectionDialog({ open, onOpenChange, onSave, selectedAllergies 
         </Dialog>
     );
 }
+
+    
