@@ -33,6 +33,7 @@ import { FileDown, AlertTriangle, Pill } from "lucide-react";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { format } from "date-fns";
+import type { DispenseLog } from "@/lib/types";
 
 const COLORS = [
   "hsl(var(--chart-1))",
@@ -75,32 +76,70 @@ const SEVERITY_DEFINITIONS = {
     },
 };
 
+type SeverityKey = keyof typeof SEVERITY_DEFINITIONS;
+
 export default function DiseaseTrendsPage() {
   const { dispenseLog } = useContext(AppContext);
   const chartRef = useRef<HTMLDivElement | null>(null);
 
-  const chartData = useMemo(() => {
-    const diagnosisCounts = dispenseLog.reduce((acc, log) => {
-      if (log.diagnosis && log.diagnosis !== 'AI-assisted diagnosis' && log.diagnosis !== 'No diagnosis provided.') {
-        const mainDiagnosis = log.shortDiagnosis || log.diagnosis.split("(")[0].trim();
-        acc[mainDiagnosis] = (acc[mainDiagnosis] || 0) + 1;
+  const { severityCounts, chartData, uniqueDiagnosisLog } = useMemo(() => {
+    const uniqueCases = new Map<string, {
+        severity: SeverityKey | null;
+        shortDiagnosis: string | null;
+        crewName: string;
+        medicalId: string;
+        diagnosis: string;
+    }>();
+
+    dispenseLog.forEach((log: DispenseLog) => {
+      // Use the full diagnosis text from the AI as part of the key to identify a unique diagnostic event.
+      const caseKey = `${log.medicalId}-${log.diagnosis}`;
+      if (!uniqueCases.has(caseKey)) {
+        uniqueCases.set(caseKey, {
+          severity: log.severity || null,
+          shortDiagnosis: log.shortDiagnosis || null,
+          crewName: log.crewName,
+          medicalId: log.medicalId,
+          diagnosis: log.diagnosis,
+        });
       }
-      return acc;
-    }, {} as Record<string, number>);
+    });
 
-    return Object.entries(diagnosisCounts)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count);
-  }, [dispenseLog]);
+    const severityCountsResult: Record<SeverityKey, number> = { red: 0, orange: 0, green: 0 };
+    const diagnosisCounts: Record<string, number> = {};
+    const uniqueDiagnosisLogResult: { diagnosis: string, crewName: string, medicalId: string }[] = [];
 
-  const severityCounts = useMemo(() => {
-    const counts: Record<keyof typeof SEVERITY_DEFINITIONS, number> = { red: 0, orange: 0, green: 0 };
-    dispenseLog.forEach(log => {
-        if (log.severity && counts.hasOwnProperty(log.severity)) {
-            counts[log.severity]++;
+    uniqueCases.forEach(caseData => {
+        // Count for severity breakdown
+        if (caseData.severity && severityCountsResult.hasOwnProperty(caseData.severity)) {
+            severityCountsResult[caseData.severity]++;
+        }
+
+        // Filter out cases not from the main diagnosis flow for the chart and table
+        if (caseData.diagnosis && caseData.diagnosis !== 'AI-assisted diagnosis' && caseData.diagnosis !== 'No diagnosis provided.') {
+            const shortDiagnosis = caseData.shortDiagnosis || caseData.diagnosis.split("(")[0].trim();
+            
+            // Count for pie chart
+            if(shortDiagnosis) {
+                diagnosisCounts[shortDiagnosis] = (diagnosisCounts[shortDiagnosis] || 0) + 1;
+            }
+
+            // Add to unique diagnosis log for the table
+            uniqueDiagnosisLogResult.push({
+                diagnosis: shortDiagnosis,
+                crewName: caseData.crewName,
+                medicalId: caseData.medicalId
+            });
         }
     });
-    return counts;
+    
+    const chartDataResult = Object.entries(diagnosisCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    uniqueDiagnosisLogResult.sort((a,b) => a.crewName.localeCompare(b.crewName));
+
+    return { severityCounts: severityCountsResult, chartData: chartDataResult, uniqueDiagnosisLog: uniqueDiagnosisLogResult };
   }, [dispenseLog]);
 
   const reportingPeriod = useMemo(() => {
@@ -115,26 +154,6 @@ export default function DiseaseTrendsPage() {
     }
     return `From ${format(minDate, "PPP")} to ${format(maxDate, "PPP")}`;
   }, [dispenseLog]);
-
-  const uniqueDiagnosisLog = useMemo(() => {
-    const uniqueEntries = new Map<string, { diagnosis: string, crewName: string, medicalId: string }>();
-    const detailedLog = dispenseLog.filter(log => log.diagnosis && log.diagnosis !== 'AI-assisted diagnosis' && log.diagnosis !== 'No diagnosis provided.');
-
-    detailedLog.forEach(log => {
-        const diagnosis = log.shortDiagnosis || log.diagnosis.split("(")[0].trim();
-        const key = `${log.crewName}-${log.medicalId}-${diagnosis}`;
-        if (!uniqueEntries.has(key)) {
-            uniqueEntries.set(key, {
-                diagnosis,
-                crewName: log.crewName,
-                medicalId: log.medicalId,
-            });
-        }
-    });
-
-    return Array.from(uniqueEntries.values()).sort((a,b) => a.crewName.localeCompare(b.crewName));
-  }, [dispenseLog]);
-
 
   const chartConfig: ChartConfig = useMemo(() => {
     const config: ChartConfig = {
@@ -231,7 +250,7 @@ export default function DiseaseTrendsPage() {
         const boxHeight = 25;
 
         severityKeys.forEach((key, index) => {
-            const severity = SEVERITY_DEFINITIONS[key];
+            const severity = SEVERITY_DEFINITIONS[key as SeverityKey];
             const x = 14 + index * (boxWidth + 4);
 
             const [bgR, bgG, bgB] = severity.pdfColors.bg;
@@ -247,7 +266,7 @@ export default function DiseaseTrendsPage() {
 
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
-            doc.text(String(severityCounts[key]), x + boxWidth / 2, startY + 18, { align: 'center' });
+            doc.text(String(severityCounts[key as SeverityKey]), x + boxWidth / 2, startY + 18, { align: 'center' });
         });
         startY += boxHeight + 15;
         doc.setTextColor(0,0,0); // Reset text color
@@ -315,8 +334,8 @@ export default function DiseaseTrendsPage() {
        <div className="mb-8">
             <h2 className="text-2xl font-semibold tracking-tight mb-4">Severity Breakdown</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {(Object.keys(severityCounts) as Array<keyof typeof SEVERITY_DEFINITIONS>).map((key) => {
-                    const severity = SEVERITY_DEFINITIONS[key as keyof typeof SEVERITY_DEFINITIONS];
+                {(Object.keys(severityCounts) as Array<SeverityKey>).map((key) => {
+                    const severity = SEVERITY_DEFINITIONS[key];
                     const Icon = severity.icon;
                     return (
                         <Card key={key} className={severity.cardClass}>
@@ -446,3 +465,5 @@ export default function DiseaseTrendsPage() {
     </div>
   );
 }
+
+    
