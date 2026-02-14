@@ -15,16 +15,50 @@ Before you begin, ensure you have the following installed and set up:
 
 ---
 
-## Step 1: Set Up Your Project Locally
+## Step 1: Download the Project to Your Local Computer
 
-First, you need to have the application code on your local computer.
+Before you can deploy, you must have the application's code on your own machine.
 
-1.  **Download the Code**: Download the entire project from this development environment to your local machine.
-2.  **Open in Terminal**: Navigate into the root directory of the project in your terminal.
-3.  **Install Dependencies**: Run the following command to install all the necessary packages for the application:
+### **How to Download Your Project**
+
+1.  **Look for the Download Icon**: The primary way to download your project is by using the **download button** in the user interface.
+    *   It is typically located at the **top of the file explorer panel** on the left side of your screen.
+    *   The icon usually looks like a **cloud with a downward-pointing arrow (☁️ ⬇️)** or an arrow pointing into a tray.
+
+2.  **Save the `.zip` File**: Clicking the download button will bundle your entire project into a single `.zip` file. Your browser will ask you where to save it. Choose a familiar location like your `Downloads` folder or `Desktop`.
+
+3.  **Extract the Project**:
+    *   **On Windows**: Right-click the `.zip` file and choose **"Extract All..."**.
+    *   **On macOS**: Double-click the `.zip` file.
+    *   This will create a folder containing all your project files. This is your local project directory.
+
+### **Troubleshooting: If You Cannot Find the Download Icon**
+
+If the download icon isn't visible, try these alternative methods common in web-based IDEs:
+
+*   **Use the Command Palette**:
+    1.  Press `Ctrl+Shift+P` (on Windows/Linux) or `Cmd+Shift+P` (on macOS) to open the command palette.
+    2.  A search bar will appear at the top of the screen. Type "**Download**", "**Export**", or "**Export to zip**".
+    3.  If an option appears, select it and follow the prompts to download your project.
+
+*   **Check the Main Menu**:
+    1.  Look for a "File", "Project", or main menu icon (often represented by three horizontal lines ☰).
+    2.  Click on it and look for an option like "**Download Project**", "**Export as ZIP**", or a similar command.
+
+Once you have the code downloaded and extracted, you can proceed to the next steps.
+
+### **Next Steps After Downloading**
+
+1.  **Open in Terminal**: Open your computer's terminal (like `PowerShell` on Windows or `Terminal` on macOS) and navigate into the newly extracted project folder.
+    ```bash
+    # Example:
+    cd Downloads/sailwell-app
+    ```
+2.  **Install Dependencies**: Run the following command to install all the necessary packages for the application:
     ```bash
     npm install
     ```
+---
 
 ## Step 2: Set Up Your Git Repository and Connect to GitHub
 
