@@ -77,7 +77,7 @@ export default function StockPage() {
     addNewDrug({
         name: drugName,
         quantity: quantity,
-        isNarcotic: isNarcotic,
+        isNarcotic: isNarcotic || false,
         expiryDate,
     });
 
