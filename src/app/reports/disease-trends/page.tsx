@@ -86,6 +86,16 @@ export default function DiseaseTrendsPage() {
     const svg = chartElement.querySelector("svg");
     if (!svg) return;
 
+    const getRgbFromCssVar = (cssVar: string) => {
+        const tempEl = document.createElement("div");
+        tempEl.style.color = cssVar;
+        document.body.appendChild(tempEl);
+        const computedColor = getComputedStyle(tempEl).color;
+        document.body.removeChild(tempEl);
+        return computedColor;
+    };
+
+
     const svgClone = svg.cloneNode(true) as SVGElement;
     
     const originalElements = svg.querySelectorAll('*');
@@ -140,9 +150,9 @@ export default function DiseaseTrendsPage() {
         doc.setFontSize(12);
 
         const tableColumn = ["Diagnosis", "Crew Name", "Medical ID"];
-        const detailedLog = dispenseLog.filter(log => log.diagnosis && log.diagnosis !== 'AI-assisted diagnosis' && log.diagnosis !== 'No diagnosis provided.');
         
         const uniqueEntries = new Map<string, { diagnosis: string, crewName: string, medicalId: string }>();
+        const detailedLog = dispenseLog.filter(log => log.diagnosis && log.diagnosis !== 'AI-assisted diagnosis' && log.diagnosis !== 'No diagnosis provided.');
 
         detailedLog.forEach(log => {
             const diagnosis = log.shortDiagnosis || log.diagnosis.split("(")[0].trim();
@@ -173,7 +183,28 @@ export default function DiseaseTrendsPage() {
         const pdfWidth = doc.internal.pageSize.getWidth();
         const pdfHeight = (imgProps.height * (pdfWidth - 28)) / imgProps.width;
         
-        doc.addImage(imgData, 'PNG', 14, tableEndY + 10, pdfWidth - 28, pdfHeight);
+        const chartStartY = tableEndY + 10;
+        doc.addImage(imgData, 'PNG', 14, chartStartY, pdfWidth - 28, pdfHeight);
+
+        const legendStartY = chartStartY + pdfHeight + 10;
+        doc.setFontSize(9);
+        
+        chartData.forEach((item, index) => {
+            const colorCss = chartConfig[item.name]?.color || COLORS[index % COLORS.length];
+            const resolvedColor = getRgbFromCssVar(colorCss);
+            const match = /rgb\((\d+), (\d+), (\d+)\)/.exec(resolvedColor);
+
+            if (match) {
+                const [, r, g, b] = match.map(Number);
+                doc.setFillColor(r, g, b);
+            } else {
+                doc.setFillColor(0, 0, 0); // Fallback to black
+            }
+            
+            const yPos = legendStartY + (index * 6);
+            doc.rect(14, yPos, 4, 4, 'F');
+            doc.text(item.name, 20, yPos + 3.5);
+        });
         
         doc.save("disease-trends-report.pdf");
     }
