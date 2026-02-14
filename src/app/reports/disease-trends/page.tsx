@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useContext, useMemo, useRef } from "react";
@@ -10,6 +11,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   ChartContainer,
   ChartTooltip,
@@ -105,6 +114,25 @@ export default function DiseaseTrendsPage() {
       return format(minDate, "PPP");
     }
     return `From ${format(minDate, "PPP")} to ${format(maxDate, "PPP")}`;
+  }, [dispenseLog]);
+
+  const uniqueDiagnosisLog = useMemo(() => {
+    const uniqueEntries = new Map<string, { diagnosis: string, crewName: string, medicalId: string }>();
+    const detailedLog = dispenseLog.filter(log => log.diagnosis && log.diagnosis !== 'AI-assisted diagnosis' && log.diagnosis !== 'No diagnosis provided.');
+
+    detailedLog.forEach(log => {
+        const diagnosis = log.shortDiagnosis || log.diagnosis.split("(")[0].trim();
+        const key = `${log.crewName}-${log.medicalId}-${diagnosis}`;
+        if (!uniqueEntries.has(key)) {
+            uniqueEntries.set(key, {
+                diagnosis,
+                crewName: log.crewName,
+                medicalId: log.medicalId,
+            });
+        }
+    });
+
+    return Array.from(uniqueEntries.values()).sort((a,b) => a.crewName.localeCompare(b.crewName));
   }, [dispenseLog]);
 
 
@@ -224,27 +252,12 @@ export default function DiseaseTrendsPage() {
         startY += boxHeight + 15;
         doc.setTextColor(0,0,0); // Reset text color
 
-        const tableColumn = ["Diagnosis", "Crew Name", "Medical ID"];
+        const tableColumn = ["Crew Name", "Medical ID", "Diagnosis"];
         
-        const uniqueEntries = new Map<string, { diagnosis: string, crewName: string, medicalId: string }>();
-        const detailedLog = dispenseLog.filter(log => log.diagnosis && log.diagnosis !== 'AI-assisted diagnosis' && log.diagnosis !== 'No diagnosis provided.');
-
-        detailedLog.forEach(log => {
-            const diagnosis = log.shortDiagnosis || log.diagnosis.split("(")[0].trim();
-            const key = `${log.crewName}-${log.medicalId}-${diagnosis}`;
-            if (!uniqueEntries.has(key)) {
-                uniqueEntries.set(key, {
-                    diagnosis,
-                    crewName: log.crewName,
-                    medicalId: log.medicalId,
-                });
-            }
-        });
-
-        const tableRows: (string | number)[][] = Array.from(uniqueEntries.values()).map(entry => [
-            entry.diagnosis,
+        const tableRows: (string | number)[][] = uniqueDiagnosisLog.map(entry => [
             entry.crewName,
             entry.medicalId,
+            entry.diagnosis,
         ]);
 
         (doc as any).autoTable({
@@ -321,7 +334,46 @@ export default function DiseaseTrendsPage() {
             </div>
        </div>
 
-      <Card>
+        <Card className="mt-8">
+            <CardHeader>
+                <CardTitle>Unique Diagnoses per Crew Member</CardTitle>
+                <CardDescription>
+                    A de-duplicated list showing each diagnosis recorded for each crew member.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="overflow-hidden rounded-lg border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Crew Name</TableHead>
+                                <TableHead>Medical ID</TableHead>
+                                <TableHead>Diagnosis</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {uniqueDiagnosisLog.length > 0 ? (
+                                uniqueDiagnosisLog.map((log, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell className="font-medium">{log.crewName}</TableCell>
+                                        <TableCell className="font-mono text-xs">{log.medicalId}</TableCell>
+                                        <TableCell>{log.diagnosis}</TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={3} className="h-24 text-center">
+                                        No diagnosis data available.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            </CardContent>
+        </Card>
+
+      <Card className="mt-8">
         <CardHeader>
           <CardTitle>Diagnosed Diseases Frequency</CardTitle>
           <CardDescription>
