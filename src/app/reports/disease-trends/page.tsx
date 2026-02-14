@@ -139,8 +139,13 @@ export default function DiseaseTrendsPage() {
         doc.text(`Reporting Period: ${reportingPeriod}`, 14, 22);
         doc.setFontSize(12);
 
-        const tableColumn = ["Diagnosis", "Number of Cases"];
-        const tableRows: (string | number)[][] = chartData.map(item => [item.name, item.count]);
+        const tableColumn = ["Diagnosis", "Crew Name", "Medical ID"];
+        const detailedLog = dispenseLog.filter(log => log.diagnosis && log.diagnosis !== 'AI-assisted diagnosis' && log.diagnosis !== 'No diagnosis provided.');
+        const tableRows: (string | number)[][] = detailedLog.map(log => [
+            log.shortDiagnosis || log.diagnosis.split("(")[0].trim(),
+            log.crewName,
+            log.medicalId,
+        ]);
 
         (doc as any).autoTable({
             head: [tableColumn],
