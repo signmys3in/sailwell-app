@@ -24,6 +24,9 @@ const AIPoweredDrugRecommendationInputSchema = z.object({
   temperature: z.string().describe("Patient's body temperature."),
   bloodPressure: z.string().describe("Patient's blood pressure."),
   heartRate: z.string().describe("Patient's heart rate."),
+  oxygenLevel: z
+    .string()
+    .describe("Patient's blood oxygen saturation level (SpO2)."),
   consciousnessLevel: z
     .enum(['Alert', 'Responds to Voice', 'Responds to Pain', 'Unresponsive'])
     .describe("Patient's level of consciousness."),
@@ -75,7 +78,13 @@ export type AIPoweredDrugRecommendationOutput = z.infer<
 export async function aiPoweredDrugRecommendation(
   input: AIPoweredDrugRecommendationInput
 ): Promise<AIPoweredDrugRecommendationOutput> {
-  return aiPoweredDrugRecommendationFlow(input);
+  const result = await aiPoweredDrugRecommendationFlow(input);
+  if (!result) {
+    throw new Error(
+      'The AI model failed to return a valid response. Please try the request again.'
+    );
+  }
+  return result;
 }
 
 const prompt = ai.definePrompt({
@@ -94,6 +103,7 @@ Patient Symptoms: {{{symptoms}}}
 Patient's Temperature: {{{temperature}}}
 Patient's Blood Pressure: {{{bloodPressure}}}
 Patient's Heart Rate: {{{heartRate}}}
+Patient's Oxygen Level: {{{oxygenLevel}}}
 Patient's Level of Consciousness: {{{consciousnessLevel}}}
 
 Patient's Chronic Diseases:
@@ -124,6 +134,6 @@ const aiPoweredDrugRecommendationFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    return output;
   }
 );

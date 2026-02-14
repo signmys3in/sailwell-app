@@ -74,20 +74,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 // Schemas
 const crewInfoFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
-  dob: z.string()
-    .min(1, { message: "Date of birth is required."})
-    .refine((val) => !isNaN(Date.parse(val)), {
-      message: "Please enter a valid date in YYYY-MM-DD format.",
-    })
-    .refine((val) => new Date(val) < new Date(), {
-      message: "Date of birth cannot be in the future.",
-    })
-    .refine(
-      (val) => new Date(val).getFullYear() > new Date().getFullYear() - 120,
-      {
-        message: "Please enter a realistic birth year (not more than 120 years ago).",
-      }
-    ),
+  dob: z.string().min(1, "Date of birth is required"),
   alcoholUsage: z.enum(["none", "moderate", "heavy"]),
   isSmoker: z.boolean().default(false),
   chronicDiseases: z.array(z.string()),
@@ -102,6 +89,7 @@ const symptomsSchema = z.object({
   temperature: z.string().min(1, "Temperature is required."),
   bloodPressure: z.string().min(1, "Blood pressure is required."),
   heartRate: z.string().min(1, "Heart rate is required."),
+  oxygenLevel: z.string().min(1, "Oxygen level is required."),
   consciousnessLevel: z.enum(CONSCIOUSNESS_LEVELS, {
     required_error: "You need to select a consciousness level.",
   }),
@@ -164,6 +152,7 @@ export default function MediAssistantPage() {
       temperature: values.temperature,
       bloodPressure: values.bloodPressure,
       heartRate: values.heartRate,
+      oxygenLevel: values.oxygenLevel,
       consciousnessLevel: values.consciousnessLevel,
     };
 
@@ -172,9 +161,6 @@ export default function MediAssistantPage() {
       const result = await getDrugSuggestions(input);
       if (result.error) {
         setError(result.error);
-        setDiagnosis(null);
-        setSeverity(null);
-        setShortDiagnosis(null);
       } else if (result.drugSuggestions) {
         if (result.drugSuggestions.length > 0) {
           addDrugsToStock(result.drugSuggestions.map(s => ({ name: s.drugName, isNarcotic: s.isNarcotic })));
@@ -613,6 +599,7 @@ function SymptomsStep({
       temperature: "",
       bloodPressure: "",
       heartRate: "",
+      oxygenLevel: "",
       consciousnessLevel: "Alert",
     },
   });
@@ -672,7 +659,7 @@ function SymptomsStep({
             />
             <div className="space-y-4">
                 <Label className="text-base">Vital Signs & Consciousness (Required)</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <FormField control={form.control} name="temperature" render={({ field }) => (
                         <FormItem>
                             <Label className="text-sm font-normal">Temp (°C)</Label>
@@ -691,6 +678,13 @@ function SymptomsStep({
                         <FormItem>
                             <Label className="text-sm font-normal">HR (bpm)</Label>
                             <FormControl><Input placeholder="70" {...field} /></FormControl>
+                             <FormMessage />
+                        </FormItem>
+                    )}/>
+                    <FormField control={form.control} name="oxygenLevel" render={({ field }) => (
+                        <FormItem>
+                            <Label className="text-sm font-normal">O₂ Level (%)</Label>
+                            <FormControl><Input placeholder="98" {...field} /></FormControl>
                              <FormMessage />
                         </FormItem>
                     )}/>
