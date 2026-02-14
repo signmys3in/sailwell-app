@@ -92,12 +92,12 @@ export default function DiseaseTrendsPage() {
     }>();
 
     dispenseLog.forEach((log: DispenseLog) => {
-      // Use the full diagnosis text from the AI as part of the key to identify a unique diagnostic event.
+      // Use the medical ID and full diagnosis text to identify a unique diagnostic event for a crew member.
       const caseKey = `${log.medicalId}-${log.diagnosis}`;
       if (!uniqueCases.has(caseKey)) {
         uniqueCases.set(caseKey, {
           severity: log.severity || null,
-          shortDiagnosis: log.shortDiagnosis || null,
+          shortDiagnosis: log.shortDiagnosis || log.diagnosis.split("(")[0].trim(),
           crewName: log.crewName,
           medicalId: log.medicalId,
           diagnosis: log.diagnosis,
@@ -116,17 +116,13 @@ export default function DiseaseTrendsPage() {
         }
 
         // Filter out cases not from the main diagnosis flow for the chart and table
-        if (caseData.diagnosis && caseData.diagnosis !== 'AI-assisted diagnosis' && caseData.diagnosis !== 'No diagnosis provided.') {
-            const shortDiagnosis = caseData.shortDiagnosis || caseData.diagnosis.split("(")[0].trim();
-            
+        if (caseData.diagnosis && caseData.diagnosis !== 'AI-assisted diagnosis' && caseData.diagnosis !== 'No diagnosis provided.' && caseData.shortDiagnosis) {
             // Count for pie chart
-            if(shortDiagnosis) {
-                diagnosisCounts[shortDiagnosis] = (diagnosisCounts[shortDiagnosis] || 0) + 1;
-            }
+            diagnosisCounts[caseData.shortDiagnosis] = (diagnosisCounts[caseData.shortDiagnosis] || 0) + 1;
 
             // Add to unique diagnosis log for the table
             uniqueDiagnosisLogResult.push({
-                diagnosis: shortDiagnosis,
+                diagnosis: caseData.shortDiagnosis,
                 crewName: caseData.crewName,
                 medicalId: caseData.medicalId
             });
