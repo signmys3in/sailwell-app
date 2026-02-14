@@ -76,11 +76,6 @@ const crewInfoFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   dob: z.string()
     .min(1, { message: "Date of birth is required."})
-    // First, and most importantly, check the year length.
-    .refine((val) => val.split('-')[0].length === 4, {
-        message: "The year must be exactly 4 digits." 
-    })
-    // Then check if it's a valid date that can be parsed
     .refine((val) => !isNaN(Date.parse(val)), {
       message: "Please enter a valid date in YYYY-MM-DD format.",
     })
@@ -270,6 +265,7 @@ function CrewInfoStep({ onSubmit, onCrewLookup }: { onSubmit: (values: CrewInfo)
   const dobValue = watch("dob");
   const hasAllergies = watch('hasAllergies');
   const selectedAllergies = watch('allergies') || [];
+  const today = new Date().toISOString().split("T")[0];
 
 
   useEffect(() => {
@@ -364,7 +360,7 @@ function CrewInfoStep({ onSubmit, onCrewLookup }: { onSubmit: (values: CrewInfo)
                         <FormItem>
                             <Label>Date of Birth</Label>
                             <FormControl>
-                            <Input type="date" {...field} />
+                            <Input type="date" max={today} {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
