@@ -613,7 +613,7 @@ function SymptomsStep({
     }
     
     if(crewInfo?.chronicDiseases && crewInfo.chronicDiseases.length > 0) {
-      const diseaseText = `Patient has a history of: ${crewInfo.chronicDiseases.join(', ')}. `;
+      const diseaseText = `Crew member has a history of: ${crewInfo.chronicDiseases.join(', ')}. `;
       initialSymptoms += diseaseText;
     }
 
@@ -1023,5 +1023,3 @@ function AllergySelectionDialog({ open, onOpenChange, onSave, selectedAllergies 
         </Dialog>
     );
 }
-
-    
