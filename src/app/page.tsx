@@ -64,7 +64,7 @@ import { CHRONIC_DISEASES, COUNTRY_DRUG_NAMES, ALLERGY_TYPES } from "@/lib/data"
 import type { DrugSuggestion, DrugStock as DrugStockType, CrewInfo } from "@/lib/types";
 import { AppContext } from "@/contexts/app-context";
 import { useToast } from "@/hooks/use-toast";
-import { AlertTriangle, ArrowLeft, ArrowRight, Bot, Loader2, Pill, Redo, ShieldCheck } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, Bot, Loader2, Pill, Redo, ShieldCheck, Copy } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import InteractiveBodyDiagram, { BodyPart, BODY_PARTS } from "@/components/interactive-body-diagram";
 import { Badge } from "@/components/ui/badge";
@@ -245,6 +245,7 @@ function CrewInfoStep({ onSubmit, onCrewLookup }: { onSubmit: (values: CrewInfo)
   });
 
   const { findCrewMember } = useContext(AppContext);
+  const { toast } = useToast();
   const [searchId, setSearchId] = useState("");
   const [searchError, setSearchError] = useState("");
   const [medicalId, setMedicalId] = useState<string | null>(null);
@@ -311,6 +312,17 @@ function CrewInfoStep({ onSubmit, onCrewLookup }: { onSubmit: (values: CrewInfo)
       setSearchError("Crew member with this Medical ID not found.");
     }
   }, [searchId, findCrewMember, reset]);
+  
+  const handleCopy = useCallback(() => {
+    if (medicalId) {
+        navigator.clipboard.writeText(medicalId);
+        toast({
+            title: "Copied!",
+            description: `Medical ID ${medicalId} copied to clipboard.`,
+            className: "bg-accent text-accent-foreground",
+        });
+    }
+  }, [medicalId, toast]);
 
 
   return (
@@ -359,17 +371,33 @@ function CrewInfoStep({ onSubmit, onCrewLookup }: { onSubmit: (values: CrewInfo)
                     />
                     </div>
                     {medicalId && (
-                      <div className="space-y-2">
-                        <Label>Generated Medical ID</Label>
-                        <Input
-                          readOnly
-                          value={medicalId}
-                          className="font-mono bg-muted"
-                        />
-                        <FormDescription>
-                          This unique ID will be used to identify the crew member in the future.
-                        </FormDescription>
-                      </div>
+                        <div className="rounded-lg border bg-muted/50 p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <Label className="text-base font-semibold">Generated Medical ID</Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        This unique ID will be used to identify the crew member in the future.
+                                    </p>
+                                </div>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <button
+                                                type="button"
+                                                onClick={handleCopy}
+                                                className="flex items-center gap-3 rounded-md bg-background px-4 py-2 text-primary shadow-sm transition-colors hover:bg-accent"
+                                            >
+                                                <span className="text-2xl font-bold font-mono tracking-widest">{medicalId}</span>
+                                                <Copy className="h-5 w-5 text-muted-foreground" />
+                                            </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Copy to Clipboard</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
+                        </div>
                     )}
 
                     <div className="grid md:grid-cols-2 gap-6">
