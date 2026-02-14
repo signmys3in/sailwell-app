@@ -86,7 +86,32 @@ export default function DiseaseTrendsPage() {
     const svg = chartElement.querySelector("svg");
     if (!svg) return;
 
-    const svgData = new XMLSerializer().serializeToString(svg);
+    // The key fix: We need to inline the CSS variables into the SVG itself
+    // so that when it's rendered to a canvas, it knows what colors to use.
+    const style = document.createElement('style');
+    const computedStyle = getComputedStyle(document.documentElement);
+
+    // We define all the CSS variables that the chart uses for its colors.
+    const cssVars = `
+      :root {
+        --chart-1: ${computedStyle.getPropertyValue('--chart-1').trim()};
+        --chart-2: ${computedStyle.getPropertyValue('--chart-2').trim()};
+        --chart-3: ${computedStyle.getPropertyValue('--chart-3').trim()};
+        --chart-4: ${computedStyle.getPropertyValue('--chart-4').trim()};
+        --chart-5: ${computedStyle.getPropertyValue('--chart-5').trim()};
+        --foreground: ${computedStyle.getPropertyValue('--foreground').trim()};
+        --muted-foreground: ${computedStyle.getPropertyValue('--muted-foreground').trim()};
+      }
+    `;
+    style.innerHTML = cssVars;
+
+    const svgClone = svg.cloneNode(true) as SVGElement;
+    
+    // Prepending the style block to the cloned SVG.
+    svgClone.insertBefore(style, svgClone.firstChild);
+
+    // The rest of the function remains the same, but now it operates on the modified SVG clone.
+    const svgData = new XMLSerializer().serializeToString(svgClone);
     const img = new Image();
     // Use btoa(unescape(encodeURIComponent(svgData))) to handle special characters
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
@@ -185,7 +210,8 @@ export default function DiseaseTrendsPage() {
                       <text
                         x={x}
                         y={y}
-                        className="fill-foreground text-xs"
+                        fill="hsl(var(--foreground))"
+                        className="text-xs"
                         textAnchor={x > cx ? "start" : "end"}
                         dominantBaseline="central"
                       >
