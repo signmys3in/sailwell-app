@@ -19,6 +19,7 @@ export type DrugSuggestion = {
   reasoning: string;
   dosage?: string;
   isNarcotic: boolean;
+  category: "Mandatory" | "Alternative" | "Optional";
 };
 
 export type DrugStock = {

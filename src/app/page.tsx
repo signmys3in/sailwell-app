@@ -769,6 +769,10 @@ function SymptomsStep({
 function SuggestionsStep({ suggestions, isLoading, error, onStartOver, crewInfo, diagnosis, severity, shortDiagnosis }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, crewInfo: CrewInfo, diagnosis: string | null, severity: 'red' | 'orange' | 'green' | null, shortDiagnosis: string | null }) {
   const { drugStock } = useContext(AppContext);
   const [isDiagnosisModalOpen, setDiagnosisModalOpen] = useState(false);
+  
+  const mandatoryDrugs = useMemo(() => suggestions.filter(s => s.category === 'Mandatory'), [suggestions]);
+  const alternativeDrugs = useMemo(() => suggestions.filter(s => s.category === 'Alternative'), [suggestions]);
+  const optionalDrugs = useMemo(() => suggestions.filter(s => s.category === 'Optional'), [suggestions]);
 
   useEffect(() => {
     if (!isLoading && diagnosis) {
@@ -807,18 +811,52 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, crewInfo,
         <CardHeader>
           <CardTitle>AI-Powered Drug Suggestions</CardTitle>
           <CardDescription>
-            The suggestions below are ordered by recommendation priority. This is not a substitute for professional medical advice.
+            The suggestions below are categorized by priority. This is not a substitute for professional medical advice.
             <br />
             Crew Member: {crewInfo.name} | Medical ID: <span className="font-mono text-xs p-1 bg-muted rounded">{crewInfo.medicalId}</span>
           </CardDescription>
         </CardHeader>
         <CardContent>
           {suggestions.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {suggestions.map((suggestion) => {
-                const stockInfo = drugStock.find(d => d.name.toLowerCase() === suggestion.drugName.toLowerCase());
-                return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} crewInfo={crewInfo} diagnosis={diagnosis} shortDiagnosis={shortDiagnosis} severity={severity} />;
-              })}
+            <div className="space-y-8">
+              {mandatoryDrugs.length > 0 && (
+                <section>
+                  <h2 className="text-xl font-bold tracking-tight mb-2">Mandatory Medications</h2>
+                  <p className="text-muted-foreground mb-4">These medications are considered essential for treatment.</p>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {mandatoryDrugs.map((suggestion) => {
+                      const stockInfo = drugStock.find(d => d.name.toLowerCase() === suggestion.drugName.toLowerCase());
+                      return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} crewInfo={crewInfo} diagnosis={diagnosis} shortDiagnosis={shortDiagnosis} severity={severity} />;
+                    })}
+                  </div>
+                </section>
+              )}
+
+              {alternativeDrugs.length > 0 && (
+                <section>
+                  <h2 className="text-xl font-bold tracking-tight mb-2">Alternative Options</h2>
+                  <p className="text-muted-foreground mb-4">Consider these if the mandatory medications are not available or suitable.</p>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {alternativeDrugs.map((suggestion) => {
+                      const stockInfo = drugStock.find(d => d.name.toLowerCase() === suggestion.drugName.toLowerCase());
+                      return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} crewInfo={crewInfo} diagnosis={diagnosis} shortDiagnosis={shortDiagnosis} severity={severity} />;
+                    })}
+                  </div>
+                </section>
+              )}
+
+              {optionalDrugs.length > 0 && (
+                <section>
+                  <h2 className="text-xl font-bold tracking-tight mb-2">Optional for Symptom Relief</h2>
+                  <p className="text-muted-foreground mb-4">These can help manage symptoms but may not be essential for core treatment.</p>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {optionalDrugs.map((suggestion) => {
+                      const stockInfo = drugStock.find(d => d.name.toLowerCase() === suggestion.drugName.toLowerCase());
+                      return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} crewInfo={crewInfo} diagnosis={diagnosis} shortDiagnosis={shortDiagnosis} severity={severity} />;
+                    })}
+                  </div>
+                </section>
+              )}
             </div>
           ) : (
             <div className="text-center py-12">
