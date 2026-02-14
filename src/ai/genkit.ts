@@ -1,12 +1,12 @@
 'use server';
-import {genkit, GenkitPlugin} from 'genkit';
+import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/google-genai';
 import {config} from 'dotenv';
 
 // Load environment variables from .env file for local development.
 config();
 
-const plugins: GenkitPlugin[] = [];
+const plugins: any[] = [];
 
 // Only initialize the googleAI plugin if the API key is available.
 // This prevents a crash on startup in production environments where the key might not be set.
