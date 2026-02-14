@@ -1,5 +1,5 @@
 # SailWell Application Functionality
-*Version: 1.0 (Last Updated: 2024-08-01)*
+*Version: 1.0 (Last Updated: 2024-07-26)*
 
 This document provides a detailed breakdown of the features and capabilities of the SailWell application. The application is an AI-powered medical assistant designed for maritime environments.
 
