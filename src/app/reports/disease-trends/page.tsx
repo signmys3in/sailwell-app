@@ -88,11 +88,9 @@ export default function DiseaseTrendsPage() {
 
     const svgClone = svg.cloneNode(true) as SVGElement;
     
-    // Get all elements from the original SVG and the clone
     const originalElements = svg.querySelectorAll('*');
     const clonedElements = svgClone.querySelectorAll('*');
 
-    // Apply computed styles from original elements to the clone's attributes
     originalElements.forEach((originalEl, index) => {
         const clonedEl = clonedElements[index];
         if (!clonedEl) return;
@@ -100,6 +98,9 @@ export default function DiseaseTrendsPage() {
         
         const fill = style.getPropertyValue('fill');
         const stroke = style.getPropertyValue('stroke');
+        const textAnchor = style.getPropertyValue('text-anchor');
+        const dominantBaseline = style.getPropertyValue('dominant-baseline');
+        const className = originalEl.getAttribute('class');
 
         if (fill && fill !== 'none') {
             clonedEl.setAttribute('fill', fill);
@@ -107,12 +108,15 @@ export default function DiseaseTrendsPage() {
         if (stroke && stroke !== 'none') {
             clonedEl.setAttribute('stroke', stroke);
         }
+        // These attributes are sometimes missed but important for text positioning
+        if (textAnchor) clonedEl.setAttribute('text-anchor', textAnchor);
+        if (dominantBaseline) clonedEl.setAttribute('dominant-baseline', dominantBaseline);
+        if (className) clonedEl.setAttribute('class', className);
     });
 
     const svgData = new XMLSerializer().serializeToString(svgClone);
     const img = new Image();
     
-    // This encoding method is a robust way to handle special characters in the SVG string.
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
     
     img.onload = () => {
@@ -135,19 +139,21 @@ export default function DiseaseTrendsPage() {
         doc.text(`Reporting Period: ${reportingPeriod}`, 14, 22);
         doc.setFontSize(12);
 
-        const imgProps= doc.getImageProperties(imgData);
-        const pdfWidth = doc.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * (pdfWidth - 28)) / imgProps.width;
-        doc.addImage(imgData, 'PNG', 14, 30, pdfWidth - 28, pdfHeight);
-
         const tableColumn = ["Diagnosis", "Number of Cases"];
         const tableRows: (string | number)[][] = chartData.map(item => [item.name, item.count]);
 
         (doc as any).autoTable({
             head: [tableColumn],
             body: tableRows,
-            startY: pdfHeight + 40,
+            startY: 30,
         });
+
+        const tableEndY = (doc as any).lastAutoTable.finalY;
+        const imgProps= doc.getImageProperties(imgData);
+        const pdfWidth = doc.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * (pdfWidth - 28)) / imgProps.width;
+        
+        doc.addImage(imgData, 'PNG', 14, tableEndY + 10, pdfWidth - 28, pdfHeight);
         
         doc.save("disease-trends-report.pdf");
     }
