@@ -74,13 +74,23 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 // Schemas
 const crewInfoFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
-  dob: z.string().min(1, "Date of birth is required"),
+  dob: z.string().refine((dob) => {
+    const year = dob.split('-')[0];
+    return year.length === 4;
+  }, {
+    message: "The year must be exactly 4 digits."
+  }).refine((dob) => new Date(dob).toString() !== 'Invalid Date', {
+    message: 'Please enter a valid date.'
+  }).refine((dob) => new Date(dob) < new Date(), {
+    message: 'Date of birth cannot be in the future.'
+  }),
   alcoholUsage: z.enum(["none", "moderate", "heavy"]),
   isSmoker: z.boolean().default(false),
   chronicDiseases: z.array(z.string()),
   hasAllergies: z.boolean().default(false),
   allergies: z.array(z.string()).optional(),
 });
+
 
 const CONSCIOUSNESS_LEVELS = ["Alert", "Responds to Voice", "Responds to Pain", "Unresponsive"] as const;
 
@@ -107,7 +117,7 @@ export default function MediAssistantPage() {
   const [suggestions, setSuggestions] = useState<DrugSuggestion[]>([]);
   const [diagnosis, setDiagnosis] = useState<string | null>(null);
   const [shortDiagnosis, setShortDiagnosis] = useState<string | null>(null);
-  const [severity, setSeverity] = useState<string | null>(null);
+  const [severity, setSeverity] = useState<'red' | 'orange' | 'green' | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const { addDrugsToStock, addCrewMember, findCrewMember } = useContext(AppContext);
@@ -728,7 +738,7 @@ function SymptomsStep({
 }
 
 // Step 4: Suggestions
-function SuggestionsStep({ suggestions, isLoading, error, onStartOver, crewInfo, diagnosis, severity, shortDiagnosis }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, crewInfo: CrewInfo, diagnosis: string | null, severity: string | null, shortDiagnosis: string | null }) {
+function SuggestionsStep({ suggestions, isLoading, error, onStartOver, crewInfo, diagnosis, severity, shortDiagnosis }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, crewInfo: CrewInfo, diagnosis: string | null, severity: 'red' | 'orange' | 'green' | null, shortDiagnosis: string | null }) {
   const { drugStock } = useContext(AppContext);
   const [isDiagnosisModalOpen, setDiagnosisModalOpen] = useState(false);
 
@@ -779,7 +789,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, crewInfo,
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {suggestions.map((suggestion) => {
                 const stockInfo = drugStock.find(d => d.name.toLowerCase() === suggestion.drugName.toLowerCase());
-                return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} crewInfo={crewInfo} diagnosis={diagnosis} shortDiagnosis={shortDiagnosis} />;
+                return <DrugCard key={suggestion.drugName} suggestion={suggestion} stockInfo={stockInfo} crewInfo={crewInfo} diagnosis={diagnosis} shortDiagnosis={shortDiagnosis} severity={severity} />;
               })}
             </div>
           ) : (
@@ -800,7 +810,7 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, crewInfo,
 }
 
 // Drug Card Component
-function DrugCard({ suggestion, stockInfo, crewInfo, diagnosis, shortDiagnosis }: { suggestion: DrugSuggestion, stockInfo: DrugStockType | undefined, crewInfo: CrewInfo, diagnosis: string | null, shortDiagnosis: string | null }) {
+function DrugCard({ suggestion, stockInfo, crewInfo, diagnosis, shortDiagnosis, severity }: { suggestion: DrugSuggestion, stockInfo: DrugStockType | undefined, crewInfo: CrewInfo, diagnosis: string | null, shortDiagnosis: string | null, severity: 'red' | 'orange' | 'green' | null }) {
   const { dispenseDrug } = useContext(AppContext);
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
@@ -830,17 +840,17 @@ function DrugCard({ suggestion, stockInfo, crewInfo, diagnosis, shortDiagnosis }
     if (stockInfo.isNarcotic) {
         setNarcoticModalOpen(true);
     } else {
-        dispenseDrug(stockInfo.id, quantity, crewInfo, diagnosis || 'AI-assisted diagnosis', shortDiagnosis);
+        dispenseDrug(stockInfo.id, quantity, crewInfo, diagnosis || 'AI-assisted diagnosis', shortDiagnosis, severity);
         toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed.`, className: "bg-accent text-accent-foreground" });
     }
-  }, [stockInfo, quantity, toast, dispenseDrug, crewInfo, diagnosis, shortDiagnosis]);
+  }, [stockInfo, quantity, toast, dispenseDrug, crewInfo, diagnosis, shortDiagnosis, severity]);
 
   const onNarcoticApproved = useCallback(() => {
       if (!stockInfo) return;
-      dispenseDrug(stockInfo.id, quantity, crewInfo, diagnosis || 'AI-assisted diagnosis', shortDiagnosis);
+      dispenseDrug(stockInfo.id, quantity, crewInfo, diagnosis || 'AI-assisted diagnosis', shortDiagnosis, severity);
       toast({ variant: "default", title: "Dispensed", description: `${quantity} x ${stockInfo.name} dispensed with approval.`, className: "bg-accent text-accent-foreground" });
       setNarcoticModalOpen(false);
-  }, [stockInfo, dispenseDrug, quantity, crewInfo, diagnosis, shortDiagnosis, toast]);
+  }, [stockInfo, dispenseDrug, quantity, crewInfo, diagnosis, shortDiagnosis, severity, toast]);
 
   return (
     <Card className="flex flex-col">

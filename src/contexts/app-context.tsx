@@ -57,7 +57,7 @@ interface AppContextType {
   drugStock: DrugStock[];
   dispenseLog: DispenseLog[];
   crewMembers: CrewInfo[];
-  dispenseDrug: (drugId: string, quantity: number, crewInfo: CrewInfo, diagnosis: string, shortDiagnosis?: string | null) => void;
+  dispenseDrug: (drugId: string, quantity: number, crewInfo: CrewInfo, diagnosis: string, shortDiagnosis: string | null, severity: 'red' | 'orange' | 'green' | null) => void;
   refillStock: (drugId: string, quantity: number) => void;
   addDrugsToStock: (drugs: { name: string, isNarcotic: boolean }[]) => void;
   addNewDrug: (drug: { name: string, quantity: number, isNarcotic: boolean, expiryDate: Date }) => void;
@@ -145,7 +145,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return crewMembers.find(p => p.medicalId === medicalId);
   }, [crewMembers]);
 
-  const dispenseDrug = useCallback((drugId: string, quantity: number, crewInfo: CrewInfo, diagnosis: string, shortDiagnosis?: string | null) => {
+  const dispenseDrug = useCallback((drugId: string, quantity: number, crewInfo: CrewInfo, diagnosis: string, shortDiagnosis: string | null, severity: 'red' | 'orange' | 'green' | null) => {
     setDrugStock((prevStock) =>
       prevStock.map((drug) =>
         drug.id === drugId ? { ...drug, stock: drug.stock - quantity } : drug
@@ -163,6 +163,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             diagnosis: diagnosis,
             diseases: crewInfo.chronicDiseases || [],
             shortDiagnosis: shortDiagnosis || (diagnosis ? diagnosis.split("(")[0].trim() : ""),
+            severity: severity,
         }
     ]);
   }, []);

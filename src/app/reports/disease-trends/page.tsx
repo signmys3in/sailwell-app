@@ -20,7 +20,7 @@ import {
 import { PieChart, Pie, Cell } from "recharts";
 import type { ChartConfig } from "@/components/ui/chart";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { FileDown, AlertTriangle, Pill } from "lucide-react";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { format } from "date-fns";
@@ -32,6 +32,39 @@ const COLORS = [
   "hsl(var(--chart-4))",
   "hsl(var(--chart-5))",
 ];
+
+const SEVERITY_DEFINITIONS = {
+    red: {
+      label: "Requires immediate medical attention",
+      icon: AlertTriangle,
+      cardClass: "bg-red-50 text-red-900 dark:bg-red-950/50 dark:text-red-200 border-red-200 dark:border-red-800",
+      iconClass: "text-red-500 dark:text-red-400",
+      pdfColors: {
+        bg: [254, 242, 242],
+        text: [127, 29, 29],
+      }
+    },
+    orange: {
+      label: "Needs close monitoring",
+      icon: AlertTriangle,
+      cardClass: "bg-orange-50 text-orange-900 dark:bg-orange-950/50 dark:text-orange-200 border-orange-200 dark:border-orange-800",
+      iconClass: "text-orange-500 dark:text-orange-400",
+       pdfColors: {
+        bg: [255, 247, 237],
+        text: [124, 45, 18],
+      }
+    },
+    green: {
+      label: "Needs medication",
+      icon: Pill,
+      cardClass: "bg-green-50 text-green-900 dark:bg-green-950/50 dark:text-green-200 border-green-200 dark:border-green-800",
+      iconClass: "text-green-500 dark:text-green-400",
+      pdfColors: {
+        bg: [240, 253, 244],
+        text: [21, 128, 61],
+      }
+    },
+};
 
 export default function DiseaseTrendsPage() {
   const { dispenseLog } = useContext(AppContext);
@@ -49,6 +82,16 @@ export default function DiseaseTrendsPage() {
     return Object.entries(diagnosisCounts)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
+  }, [dispenseLog]);
+
+  const severityCounts = useMemo(() => {
+    const counts: Record<keyof typeof SEVERITY_DEFINITIONS, number> = { red: 0, orange: 0, green: 0 };
+    dispenseLog.forEach(log => {
+        if (log.severity && counts.hasOwnProperty(log.severity)) {
+            counts[log.severity]++;
+        }
+    });
+    return counts;
   }, [dispenseLog]);
 
   const reportingPeriod = useMemo(() => {
@@ -147,7 +190,39 @@ export default function DiseaseTrendsPage() {
         doc.text("Disease Trends Report", 14, 15);
         doc.setFontSize(10);
         doc.text(`Reporting Period: ${reportingPeriod}`, 14, 22);
+        
+        let startY = 30;
+
+        // Severity Section
         doc.setFontSize(12);
+        doc.text("Severity Breakdown", 14, startY);
+        startY += 8;
+
+        const severityKeys = Object.keys(severityCounts) as Array<keyof typeof SEVERITY_DEFINITIONS>;
+        const boxWidth = (doc.internal.pageSize.getWidth() - 28 - ((severityKeys.length - 1) * 4)) / severityKeys.length;
+        const boxHeight = 25;
+
+        severityKeys.forEach((key, index) => {
+            const severity = SEVERITY_DEFINITIONS[key];
+            const x = 14 + index * (boxWidth + 4);
+
+            const [bgR, bgG, bgB] = severity.pdfColors.bg;
+            doc.setFillColor(bgR, bgG, bgB);
+            doc.rect(x, startY, boxWidth, boxHeight, 'F');
+            
+            const [textR, textG, textB] = severity.pdfColors.text;
+            doc.setTextColor(textR, textG, textB);
+
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.text(severity.label, x + boxWidth / 2, startY + 7, { align: 'center', maxWidth: boxWidth - 6 });
+
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text(String(severityCounts[key]), x + boxWidth / 2, startY + 18, { align: 'center' });
+        });
+        startY += boxHeight + 15;
+        doc.setTextColor(0,0,0); // Reset text color
 
         const tableColumn = ["Diagnosis", "Crew Name", "Medical ID"];
         
@@ -175,7 +250,7 @@ export default function DiseaseTrendsPage() {
         (doc as any).autoTable({
             head: [tableColumn],
             body: tableRows,
-            startY: 30,
+            startY: startY,
         });
 
         const tableEndY = (doc as any).lastAutoTable.finalY;
@@ -218,11 +293,34 @@ export default function DiseaseTrendsPage() {
             title="Disease Trends"
             description="A visual representation of diagnosed diseases."
         />
-        <Button onClick={handleExportPDF} variant="outline" disabled={chartData.length === 0}>
+        <Button onClick={handleExportPDF} variant="outline" disabled={dispenseLog.length === 0}>
             <FileDown className="mr-2 h-4 w-4" />
             Export to PDF
         </Button>
       </div>
+
+       <div className="mb-8">
+            <h2 className="text-2xl font-semibold tracking-tight mb-4">Severity Breakdown</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {(Object.keys(severityCounts) as Array<keyof typeof SEVERITY_DEFINITIONS>).map((key) => {
+                    const severity = SEVERITY_DEFINITIONS[key as keyof typeof SEVERITY_DEFINITIONS];
+                    const Icon = severity.icon;
+                    return (
+                        <Card key={key} className={severity.cardClass}>
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <CardTitle className="text-sm font-medium">{severity.label}</CardTitle>
+                                <Icon className={`h-5 w-5 ${severity.iconClass}`} />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{severityCounts[key]}</div>
+                                <p className="text-xs opacity-80">Total Cases</p>
+                            </CardContent>
+                        </Card>
+                    )
+                })}
+            </div>
+       </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Diagnosed Diseases Frequency</CardTitle>

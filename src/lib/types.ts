@@ -40,4 +40,5 @@ export type DispenseLog = {
     diagnosis: string;
     diseases: string[];
     shortDiagnosis?: string;
+    severity?: 'red' | 'orange' | 'green' | null;
 }

@@ -127,7 +127,7 @@ function DispenseNarcoticDialog({ drug, open, onOpenChange }: { drug: DrugStock,
                 chronicDiseases: [],
             };
 
-            dispenseDrug(drug.id, quantity, crewMemberForLog, diagnosis, null);
+            dispenseDrug(drug.id, quantity, crewMemberForLog, diagnosis, null, null);
             toast({
                 variant: "default",
                 title: "Dispensed",
