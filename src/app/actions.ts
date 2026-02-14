@@ -9,8 +9,8 @@ export async function getDrugSuggestions(input: AIPoweredDrugRecommendationInput
     const result = await aiPoweredDrugRecommendation(input);
     return { suggestions: result.drugSuggestions, diagnosis: result.diagnosis, severity: result.severity, shortDiagnosis: result.shortDiagnosis };
   } catch (e: any) {
-    console.error(e);
-    return { error: "Failed to get suggestions from AI. " + e.message };
+    // In production, we don't want to expose detailed error messages to the client.
+    return { error: "An unexpected error occurred while getting suggestions." };
   }
 }
 
@@ -19,7 +19,7 @@ export async function checkNarcoticStatus(drugName: string) {
     const result = await isDrugNarcotic({ drugName });
     return { isNarcotic: result.isNarcotic };
   } catch (e: any) {
-    console.error(e);
-    return { error: "Failed to check narcotic status from AI. " + e.message, isNarcotic: false };
+    // In production, we don't want to expose detailed error messages to the client.
+    return { error: "An unexpected error occurred while checking narcotic status.", isNarcotic: false };
   }
 }
