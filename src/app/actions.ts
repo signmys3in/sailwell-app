@@ -19,7 +19,7 @@ export async function getDrugSuggestions(input: AIPoweredDrugRecommendationInput
     return result;
   } catch (e: any) {
     // In production, we don't want to expose detailed error messages to the client.
-    return { error: "An unexpected error occurred while getting suggestions." };
+    return { error: e.message || "An unexpected error occurred while getting suggestions." };
   }
 }
 

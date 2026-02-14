@@ -78,13 +78,7 @@ export type AIPoweredDrugRecommendationOutput = z.infer<
 export async function aiPoweredDrugRecommendation(
   input: AIPoweredDrugRecommendationInput
 ): Promise<AIPoweredDrugRecommendationOutput> {
-  const result = await aiPoweredDrugRecommendationFlow(input);
-  if (!result) {
-    throw new Error(
-      'The AI model failed to return a valid response. Please try the request again.'
-    );
-  }
-  return result;
+  return aiPoweredDrugRecommendationFlow(input);
 }
 
 const prompt = ai.definePrompt({
@@ -134,6 +128,11 @@ const aiPoweredDrugRecommendationFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
+    if (!output) {
+      throw new Error(
+        'The AI model failed to return a valid response. Please try again.'
+      );
+    }
     return output;
   }
 );
