@@ -19,6 +19,10 @@ import {
 } from "@/components/ui/chart";
 import { PieChart, Pie, Cell } from "recharts";
 import type { ChartConfig } from "@/components/ui/chart";
+import { Button } from "@/components/ui/button";
+import { FileDown } from "lucide-react";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const COLORS = [
   "hsl(var(--chart-1))",
@@ -60,14 +64,36 @@ export default function DiseaseTrendsPage() {
     });
     return config;
   }, [chartData]);
+  
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Disease Trends Report", 14, 15);
+
+    const tableColumn = ["Diagnosis", "Number of Cases"];
+    const tableRows: (string | number)[][] = chartData.map(item => [item.name, item.count]);
+
+    (doc as any).autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 20,
+    });
+    
+    doc.save("disease-trends-report.pdf");
+  };
 
 
   return (
     <div>
-      <PageHeader
-        title="Disease Trends"
-        description="A visual representation of diagnosed diseases."
-      />
+      <div className="flex justify-between items-center mb-8">
+        <PageHeader
+            title="Disease Trends"
+            description="A visual representation of diagnosed diseases."
+        />
+        <Button onClick={handleExportPDF} variant="outline">
+            <FileDown className="mr-2 h-4 w-4" />
+            Export to PDF
+        </Button>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Diagnosed Diseases Frequency</CardTitle>

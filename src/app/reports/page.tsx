@@ -14,9 +14,11 @@ import {
 import PageHeader from "@/components/page-header";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, FileDown } from "lucide-react";
 import type { DispenseLog } from "@/lib/types";
 import { Input } from "@/components/ui/input";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 type SortableKeys = 'crewName' | 'timestamp';
 
@@ -60,6 +62,34 @@ export default function ReportsPage() {
     }
     setSortConfig({ key, direction });
   };
+  
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Dispensing and Diagnoses Report", 14, 15);
+    
+    const tableColumn = ["Crew Name", "Medical ID", "Drug Name", "Quantity", "Diagnosis", "Timestamp"];
+    const tableRows: (string | number)[][] = [];
+
+    filteredAndSortedLog.forEach(log => {
+      const logData = [
+        log.crewName,
+        log.medicalId,
+        log.drugName,
+        log.quantity,
+        log.diagnosis,
+        format(log.timestamp, "yyyy-MM-dd HH:mm:ss"),
+      ];
+      tableRows.push(logData);
+    });
+
+    (doc as any).autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 20,
+    });
+
+    doc.save("dispensing-diagnoses-report.pdf");
+  };
 
   return (
     <div>
@@ -67,14 +97,18 @@ export default function ReportsPage() {
         title="Dispensing and Diagnoses"
         description="Review, filter, and sort dispensing activities and diagnoses."
       />
-       <div className="mb-4">
-        <Input
-            placeholder="Filter by crew name or medical ID..."
-            value={filterTerm}
-            onChange={(e) => setFilterTerm(e.target.value)}
-            className="max-w-sm"
-        />
-      </div>
+       <div className="flex justify-between items-center mb-4">
+            <Input
+                placeholder="Filter by crew name or medical ID..."
+                value={filterTerm}
+                onChange={(e) => setFilterTerm(e.target.value)}
+                className="max-w-sm"
+            />
+            <Button onClick={handleExportPDF} variant="outline">
+                <FileDown className="mr-2 h-4 w-4" />
+                Export to PDF
+            </Button>
+       </div>
       <div className="overflow-hidden rounded-lg border">
         <Table>
           <TableCaption>A log of all drug dispensing activities. Click a column header to sort.</TableCaption>

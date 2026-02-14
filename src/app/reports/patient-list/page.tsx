@@ -13,6 +13,10 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { FileDown } from "lucide-react";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export default function CrewListPage() {
   const { crewMembers } = useContext(AppContext);
@@ -29,6 +33,30 @@ export default function CrewListPage() {
     );
   }, [crewMembers, searchTerm]);
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Crew List Report", 14, 15);
+    
+    const tableColumn = ["Crew Name", "Medical ID"];
+    const tableRows: (string | number)[][] = [];
+
+    filteredCrewMembers.forEach(crew => {
+      const crewData = [
+        crew.name,
+        crew.medicalId,
+      ];
+      tableRows.push(crewData);
+    });
+
+    (doc as any).autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 20,
+    });
+
+    doc.save("crew-list-report.pdf");
+  };
+
   return (
     <div>
       <PageHeader
@@ -37,7 +65,13 @@ export default function CrewListPage() {
       />
       <Card>
         <CardHeader>
-          <CardTitle>All Crew Members</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>All Crew Members</CardTitle>
+            <Button onClick={handleExportPDF} variant="outline">
+                  <FileDown className="mr-2 h-4 w-4" />
+                  Export to PDF
+            </Button>
+          </div>
           <div className="mt-4">
             <Input
               placeholder="Search by name or medical ID..."

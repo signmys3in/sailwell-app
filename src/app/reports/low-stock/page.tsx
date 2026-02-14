@@ -13,7 +13,10 @@ import {
 } from "@/components/ui/table";
 import PageHeader from "@/components/page-header";
 import { Progress } from "@/components/ui/progress";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, FileDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export default function LowStockReportPage() {
   const { drugStock } = useContext(AppContext);
@@ -24,13 +27,45 @@ export default function LowStockReportPage() {
       .sort((a, b) => (a.stock / a.maxStock) - (b.stock / b.maxStock)),
     [drugStock]
   );
+  
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Low Stock Report", 14, 15);
+    
+    const tableColumn = ["Drug Name", "Current / Max Stock", "Stock Level"];
+    const tableRows: (string | number)[][] = [];
+
+    lowStockDrugs.forEach(drug => {
+      const stockLevel = Math.round((drug.stock / drug.maxStock) * 100);
+      const drugData = [
+        drug.name,
+        `${drug.stock} / ${drug.maxStock}`,
+        `${stockLevel}%`,
+      ];
+      tableRows.push(drugData);
+    });
+
+    (doc as any).autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 20,
+    });
+
+    doc.save("low-stock-report.pdf");
+  };
 
   return (
     <div>
-      <PageHeader
-        title="Low Stock Report"
-        description="List of medications with stock below 50% capacity."
-      />
+        <div className="flex justify-between items-center mb-8">
+            <PageHeader
+                title="Low Stock Report"
+                description="List of medications with stock below 50% capacity."
+            />
+            <Button onClick={handleExportPDF} variant="outline">
+                <FileDown className="mr-2 h-4 w-4" />
+                Export to PDF
+            </Button>
+        </div>
       <div className="overflow-hidden rounded-lg border">
         <Table>
           <TableCaption>Medications that need to be replenished.</TableCaption>
