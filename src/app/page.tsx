@@ -74,7 +74,20 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 // Schemas
 const crewInfoFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
-  dob: z.string().refine((val) => !isNaN(Date.parse(val)), "Invalid date of birth."),
+  dob: z.string()
+    .min(1, { message: "Date of birth is required."})
+    .refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val) && !isNaN(Date.parse(val)), {
+      message: "Please enter a valid date.",
+    })
+    .refine((val) => new Date(val) < new Date(), {
+      message: "Date of birth cannot be in the future.",
+    })
+    .refine(
+      (val) => new Date(val).getFullYear() > new Date().getFullYear() - 120,
+      {
+        message: "Please enter a realistic birth year (not more than 120 years ago).",
+      }
+    ),
   alcoholUsage: z.enum(["none", "moderate", "heavy"]),
   isSmoker: z.boolean().default(false),
   chronicDiseases: z.array(z.string()),
@@ -110,6 +123,8 @@ export default function MediAssistantPage() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const { addDrugsToStock, addCrewMember, findCrewMember } = useContext(AppContext);
+  const [recommendationSummary, setRecommendationSummary] = useState<string | null>(null);
+
 
   const startOver = useCallback(() => {
     setStep(1);
@@ -120,6 +135,7 @@ export default function MediAssistantPage() {
     setDiagnosis(null);
     setSeverity(null);
     setShortDiagnosis(null);
+    setRecommendationSummary(null);
   }, []);
 
   const onCrewInfoSubmit = useCallback((values: CrewInfo) => {
@@ -161,15 +177,16 @@ export default function MediAssistantPage() {
         setDiagnosis(null);
         setSeverity(null);
         setShortDiagnosis(null);
-      } else {
-        const newSuggestions = result.suggestions || [];
-        if (newSuggestions.length > 0) {
-          addDrugsToStock(newSuggestions.map(s => ({ name: s.drugName, isNarcotic: s.isNarcotic })));
+        setRecommendationSummary(null);
+      } else if (result.suggestions) {
+        if (result.suggestions.length > 0) {
+          addDrugsToStock(result.suggestions.map(s => ({ name: s.drugName, isNarcotic: s.isNarcotic })));
         }
-        setSuggestions(newSuggestions);
+        setSuggestions(result.suggestions);
         setDiagnosis(result.diagnosis || "No diagnosis provided.");
         setSeverity(result.severity || null);
         setShortDiagnosis(result.shortDiagnosis || null);
+        setRecommendationSummary(result.recommendationSummary || null);
       }
     });
   }, [crewInfo, addDrugsToStock]);
@@ -213,6 +230,7 @@ export default function MediAssistantPage() {
             diagnosis={diagnosis}
             severity={severity}
             shortDiagnosis={shortDiagnosis}
+            recommendationSummary={recommendationSummary}
           />
         )}
       </div>
@@ -720,7 +738,7 @@ function SymptomsStep({
 }
 
 // Step 4: Suggestions
-function SuggestionsStep({ suggestions, isLoading, error, onStartOver, crewInfo, diagnosis, severity, shortDiagnosis }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, crewInfo: CrewInfo, diagnosis: string | null, severity: string | null, shortDiagnosis: string | null }) {
+function SuggestionsStep({ suggestions, isLoading, error, onStartOver, crewInfo, diagnosis, severity, shortDiagnosis, recommendationSummary }: { suggestions: DrugSuggestion[], isLoading: boolean, error: string | null, onStartOver: () => void, crewInfo: CrewInfo, diagnosis: string | null, severity: string | null, shortDiagnosis: string | null, recommendationSummary: string | null }) {
   const { drugStock } = useContext(AppContext);
   const [isDiagnosisModalOpen, setDiagnosisModalOpen] = useState(false);
 
@@ -761,12 +779,21 @@ function SuggestionsStep({ suggestions, isLoading, error, onStartOver, crewInfo,
         <CardHeader>
           <CardTitle>AI-Powered Drug Suggestions</CardTitle>
           <CardDescription>
-            Crew Member: {crewInfo.name} | Medical ID: <span className="font-mono text-xs p-1 bg-muted rounded">{crewInfo.medicalId}</span>
+            The suggestions below are ordered by recommendation priority. This is not a substitute for professional medical advice.
             <br />
-            Based on the provided information, here are some potential medication suggestions.
+            Crew Member: {crewInfo.name} | Medical ID: <span className="font-mono text-xs p-1 bg-muted rounded">{crewInfo.medicalId}</span>
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {recommendationSummary && (
+            <Alert className="mb-6 bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/50 dark:border-blue-700 dark:text-blue-300">
+                <Bot className="h-4 w-4 !text-blue-600 dark:!text-blue-400" />
+                <AlertTitle className="font-semibold">Recommendation Summary</AlertTitle>
+                <AlertDescription>
+                    {recommendationSummary}
+                </AlertDescription>
+            </Alert>
+          )}
           {suggestions.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {suggestions.map((suggestion) => {
