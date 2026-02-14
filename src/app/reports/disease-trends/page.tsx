@@ -141,10 +141,25 @@ export default function DiseaseTrendsPage() {
 
         const tableColumn = ["Diagnosis", "Crew Name", "Medical ID"];
         const detailedLog = dispenseLog.filter(log => log.diagnosis && log.diagnosis !== 'AI-assisted diagnosis' && log.diagnosis !== 'No diagnosis provided.');
-        const tableRows: (string | number)[][] = detailedLog.map(log => [
-            log.shortDiagnosis || log.diagnosis.split("(")[0].trim(),
-            log.crewName,
-            log.medicalId,
+        
+        const uniqueEntries = new Map<string, { diagnosis: string, crewName: string, medicalId: string }>();
+
+        detailedLog.forEach(log => {
+            const diagnosis = log.shortDiagnosis || log.diagnosis.split("(")[0].trim();
+            const key = `${log.crewName}-${log.medicalId}-${diagnosis}`;
+            if (!uniqueEntries.has(key)) {
+                uniqueEntries.set(key, {
+                    diagnosis,
+                    crewName: log.crewName,
+                    medicalId: log.medicalId,
+                });
+            }
+        });
+
+        const tableRows: (string | number)[][] = Array.from(uniqueEntries.values()).map(entry => [
+            entry.diagnosis,
+            entry.crewName,
+            entry.medicalId,
         ]);
 
         (doc as any).autoTable({
