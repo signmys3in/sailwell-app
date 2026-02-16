@@ -23,6 +23,13 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    serverComponentsExternalPackages: [
+      '@opentelemetry/sdk-node',
+      '@opentelemetry/instrumentation-http',
+      'require-in-the-middle',
+    ],
+  },
 };
 
 module.exports = nextConfig;
