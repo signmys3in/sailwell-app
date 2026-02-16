@@ -7,9 +7,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <div className="flex flex-1">
         <aside className="fixed inset-y-0 left-0 z-10 hidden w-64 flex-col border-r bg-sidebar sm:flex">
           <div className="border-b p-4">
-            <a href="/" className="flex items-center gap-2">
-              <Image src="/logo.png" alt="SailWell Logo" width={40} height={40} />
-              <span className="text-2xl font-bold tracking-tight text-sidebar-foreground">SailWell</span>
+            <a href="/" className="flex items-center justify-center gap-2">
+              <Image src="/logo.png" alt="SailWell Logo" width={120} height={120} />
             </a>
           </div>
           <div className="flex-1 overflow-auto py-2">
