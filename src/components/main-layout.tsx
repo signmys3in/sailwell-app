@@ -1,3 +1,4 @@
+import Image from "next/image";
 import MainNav from "@/components/main-nav";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -7,6 +8,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         <aside className="fixed inset-y-0 left-0 z-10 hidden w-64 flex-col border-r bg-sidebar sm:flex">
           <div className="border-b p-4">
             <a href="/" className="flex items-center gap-2">
+              <Image src="/logo.png" alt="SailWell Logo" width={40} height={40} />
               <span className="text-2xl font-bold tracking-tight text-sidebar-foreground">SailWell</span>
             </a>
           </div>
